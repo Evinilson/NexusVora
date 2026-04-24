@@ -9,3 +9,10 @@ Route::get('/', function () {
 Route::get('/servicos', function () {
     return view('services');
 })->name('services');
+Route::get('/termos-servico', function () {
+    return view('termos');
+})->name('termos');
+
+Route::get('/politica-privacidade', function () {
+    return view('privacidade');
+})->name('privacidade');

@@ -1,3 +1,102 @@
+@once
+<style>
+    /* ── GLOBAL FOOTER STYLES ── */
+    footer {
+        background: var(--navy2);
+        border-top: 1px solid var(--navy-border);
+        padding: 64px 5vw 40px;
+    }
+
+    .footer-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .footer-top {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 48px;
+        padding-bottom: 48px;
+        border-bottom: 1px solid var(--navy-border);
+    }
+
+    .footer-brand p {
+        max-width: 280px;
+        margin-top: 16px;
+        font-size: 0.875rem;
+        line-height: 1.7;
+        color: var(--text-muted);
+    }
+
+    .footer-col h5 {
+        margin-bottom: 18px;
+        color: #fff;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .footer-col ul {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        list-style: none;
+    }
+
+    .footer-col ul a {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        text-decoration: none;
+        transition: color .2s ease;
+    }
+
+    .footer-col ul a:hover {
+        color: var(--cyan);
+    }
+
+    .footer-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-top: 32px;
+    }
+
+    .footer-bottom p {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .footer-bottom a {
+        text-decoration: none;
+        color: inherit;
+        transition: color .2s ease;
+    }
+
+    .footer-bottom a:hover {
+        color: var(--cyan);
+    }
+
+    /* ── LOGO STYLES (Shared) ── */
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; }
+    .nav-logo-text span:first-child { color: #DCEBFF; transition: color 0.3s ease; }
+    .nav-logo-text span:last-child { color: var(--cyan); }
+
+    @media (max-width: 900px) {
+        .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+        .footer-top { grid-template-columns: 1fr; }
+        .footer-bottom { align-items: flex-start; flex-direction: column; }
+    }
+</style>
+@endonce
+
 @php
     $homeUrl = route('home');
     $servicesUrl = route('services');
@@ -75,7 +174,7 @@
 
         <div class="footer-bottom">
             <p>© 2026 NexusVora. Todos os direitos reservados.</p>
-            <p>Política de Privacidade · Termos de Serviço</p>
+            <p><a href="{{ route('privacidade') }}">Política de Privacidade</a> · <a href="{{ route('termos') }}">Termos de Serviço</a></p>
         </div>
     </div>
 </footer>

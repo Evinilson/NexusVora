@@ -7,6 +7,32 @@
 
 @once
 <style>
+    /* ── GLOBAL HEADER STYLES ── */
+    nav {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 5vw; height: 72px;
+        background: rgba(10, 15, 46, 0.85);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--navy-border);
+        transition: background 0.3s ease;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo svg { width: 36px; height: 36px; }
+    .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; }
+    .nav-logo-text span:first-child { color: #DCEBFF; transition: color 0.3s ease; }
+    .nav-logo-text span:last-child { color: var(--cyan); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-cta {
+        background: var(--grad); color: #fff;
+        font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.875rem;
+        padding: 10px 22px; border-radius: 8px; text-decoration: none;
+        transition: opacity .2s, transform .2s;
+    }
+    .nav-cta:hover { opacity: .88; transform: translateY(-1px); }
+
     /* ── Hamburger button ── */
     .nav-hamburger {
         display: none;

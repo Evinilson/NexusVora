@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
@@ -50,92 +50,6 @@
             color: inherit;
         }
 
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 5vw;
-            height: 72px;
-            background: rgba(10, 15, 46, 0.85);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid var(--navy-border);
-            transition: background 0.3s ease;
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-
-        .nav-logo svg {
-            width: 36px;
-            height: 36px;
-        }
-
-        .nav-logo-text {
-            font-family: "Plus Jakarta Sans", sans-serif;
-            font-size: 1.3rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-
-        .nav-logo-text span:first-child {
-            color: #1a2464;
-        }
-
-        .nav-logo-text span:last-child {
-            color: var(--cyan);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: #fff;
-        }
-
-        .nav-cta,
-        .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--grad);
-            color: #fff;
-            font-family: "Plus Jakarta Sans", sans-serif;
-            font-weight: 700;
-            text-decoration: none;
-            transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .nav-cta {
-            padding: 10px 22px;
-            border-radius: 8px;
-            font-size: 0.875rem;
-        }
-
-        .nav-cta:hover,
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
 
         .hero {
             position: relative;
@@ -231,12 +145,18 @@
         .btn-primary {
             padding: 16px 32px;
             border-radius: 10px;
-            font-size: 1rem;
+            background: var(--grad);
+            color: #fff;
+            font-family: "Plus Jakarta Sans", sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
             box-shadow: 0 8px 32px rgba(74, 108, 247, 0.35);
         }
 
         .btn-primary:hover {
             box-shadow: 0 12px 40px rgba(74, 108, 247, 0.45);
+            transform: translateY(-2px);
         }
 
         .btn-ghost {
@@ -984,67 +904,6 @@
             justify-content: center;
         }
 
-        footer {
-            padding: 64px 5vw 40px;
-            border-top: 1px solid var(--navy-border);
-        }
-
-        .footer-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .footer-top {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 48px;
-            padding-bottom: 48px;
-            border-bottom: 1px solid var(--navy-border);
-        }
-
-        .footer-brand p {
-            max-width: 280px;
-            margin-top: 16px;
-            font-size: 0.875rem;
-            line-height: 1.7;
-        }
-
-        .footer-col h5 {
-            margin-bottom: 18px;
-            font-size: 0.85rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .footer-col ul {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            list-style: none;
-        }
-
-        .footer-col ul a {
-            font-size: 0.875rem;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .footer-col ul a:hover {
-            color: var(--cyan);
-        }
-
-        .footer-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding-top: 32px;
-        }
-
-        .footer-bottom p {
-            font-size: 0.8rem;
-        }
 
         .reveal {
             opacity: 0;
@@ -1182,6 +1041,10 @@
                 align-items: flex-start;
                 flex-direction: column;
             }
+
+            .footer-bottom a {
+                margin-top: 5px;
+            }
         }
     </style>
 </head>
@@ -1318,6 +1181,7 @@
             </div>
 
             <div class="services-grid">
+                <!-- 01 Web -->
                 <article class="service-card reveal">
                     <div class="service-icon" style="background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2);">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round">
@@ -1326,14 +1190,15 @@
                         </svg>
                     </div>
                     <h3>Desenvolvimento Web</h3>
-                    <p>Sites e landing pages rápidos, seguros e otimizados para conversão, que representam a sua marca 24/7.</p>
-                    <a href="{{ route('services') }}#web" class="service-link">Saber mais
+                    <p>Sites, lojas online e plataformas profissionais — rápidos, seguros e otimizados para converter visitantes em clientes.</p>
+                    <a href="{{ route('services') }}#web" class="service-link">Ver serviço
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
                 </article>
 
+                <!-- 02 Redes Sociais -->
                 <article class="service-card reveal">
                     <div class="service-icon" style="background: rgba(74, 108, 247, 0.1); border: 1px solid rgba(74, 108, 247, 0.2);">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round">
@@ -1344,71 +1209,80 @@
                         </svg>
                     </div>
                     <h3>Gestão de Redes Sociais</h3>
-                    <p>Conteúdo estratégico, design e gestão de comunidade que constrói marca e gera engagement real.</p>
-                    <a href="{{ route('services') }}#social" class="service-link">Saber mais
+                    <p>Estratégia editorial, criativos de alto nível e gestão diária para marcas que querem crescer no digital.</p>
+                    <a href="{{ route('services') }}#social" class="service-link">Ver serviço
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
                 </article>
 
+                <!-- 03 Tráfego -->
                 <article class="service-card reveal">
                     <div class="service-icon" style="background: rgba(139, 63, 219, 0.1); border: 1px solid rgba(139, 63, 219, 0.2);">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8B3FDB" stroke-width="1.8" stroke-linecap="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 8v4l3 3"/>
-                            <path d="M8 3.5C9.2 3 10.6 2.5 12 2.5"/>
-                        </svg>
-                    </div>
-                    <h3>Google Ads</h3>
-                    <p>Campanhas de pesquisa e display com segmentação precisa, para que o seu anúncio apareça a quem quer comprar.</p>
-                    <a href="{{ route('services') }}#google" class="service-link">Saber mais
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                            <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </a>
-                </article>
-
-                <article class="service-card reveal">
-                    <div class="service-icon" style="background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round">
-                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
-                        </svg>
-                    </div>
-                    <h3>Meta Ads</h3>
-                    <p>Facebook e Instagram Ads que encontram o seu cliente ideal, desde awareness até conversão direta.</p>
-                    <a href="{{ route('services') }}#meta" class="service-link">Saber mais
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                            <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </a>
-                </article>
-
-                <article class="service-card reveal">
-                    <div class="service-icon" style="background: rgba(74, 108, 247, 0.1); border: 1px solid rgba(74, 108, 247, 0.2);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round">
                             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                         </svg>
                     </div>
-                    <h3>SEO</h3>
-                    <p>Posicionamento orgânico duradouro nos motores de busca, com mais visibilidade, mais tráfego e mais clientes.</p>
-                    <a href="{{ route('services') }}#seo" class="service-link">Saber mais
+                    <h3>Tráfego, Leads & Conversões</h3>
+                    <p>Google Ads, Meta Ads e SEO — os três pilares do tráfego pago e orgânico, integrados numa estratégia única.</p>
+                    <a href="{{ route('services') }}#trafego" class="service-link">Ver serviço
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
                 </article>
 
+                <!-- 04 NexusAI -->
+                <article class="service-card reveal" style="background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(74, 108, 247, 0.05)); border-color: rgba(0, 212, 255, 0.2);">
+                    <div class="service-icon" style="background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.2);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round">
+                            <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="19" cy="5" r="3" fill="#00D4FF" opacity=".3"/><circle cx="19" cy="5" r="1.5" fill="#00D4FF"/>
+                        </svg>
+                    </div>
+                    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:100px;padding:3px 10px;font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:12px;">
+                        <span style="width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:pulse 2s infinite;"></span>Produto Premium
+                    </div>
+                    <h3>NexusAI — Automação Inteligente</h3>
+                    <p>Chatbots com IA, automação de processos e integrações — o seu negócio a trabalhar enquanto dorme.</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;">
+                        <span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; color: var(--text-muted);">Chatbots IA</span>
+                        <span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; color: var(--text-muted);">Automação</span>
+                        <span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; color: var(--text-muted);">Integrações</span>
+                    </div>
+                    <a href="{{ route('services') }}#nexusai" class="service-link" style="margin-top: 16px;">Descobrir NexusAI
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </article>
+
+                <!-- 05 Marca & Estratégia -->
+                <article class="service-card reveal">
+                    <div class="service-icon" style="background: rgba(74, 108, 247, 0.1); border: 1px solid rgba(74, 108, 247, 0.2);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <h3>Marca & Estratégia Digital</h3>
+                    <p>Identidade visual, posicionamento e estratégia integrada — cada canal a potenciar o outro para resultados consistentes.</p>
+                    <a href="{{ route('services') }}#marca" class="service-link">Ver serviço
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
+                </article>
+
+                <!-- 06 Estratégia Digital 360 -->
                 <article class="service-card reveal" style="background: linear-gradient(135deg, rgba(74, 108, 247, 0.12), rgba(139, 63, 219, 0.08)); border-color: rgba(74, 108, 247, 0.25);">
                     <div class="service-icon" style="background: rgba(74, 108, 247, 0.15); border: 1px solid rgba(74, 108, 247, 0.3);">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round">
-                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                            <path d="M2 17l10 5 10-5"/>
-                            <path d="M2 12l10 5 10-5"/>
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 2v20M2 12h20M12 12l7.07-7.07M12 12l-7.07 7.07M12 12l7.07 7.07M12 12L4.93 4.93"/>
                         </svg>
                     </div>
                     <h3>Estratégia Digital 360°</h3>
-                    <p>Não vendemos serviços isolados. Criamos estratégias integradas onde cada canal potencia o outro.</p>
+                    <p>Uma abordagem integrada combinando todos os canais para maximizar o retorno e a autoridade da sua marca.</p>
                     <a href="#cta-final" class="service-link">Falar com especialista
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1720,82 +1594,7 @@
         </div>
     </section>
 
-    <footer>
-        <div class="footer-inner">
-            <div class="footer-top">
-                <div class="footer-brand">
-                    <a href="#" class="nav-logo">
-                        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 30px; height: 30px;">
-                            <defs>
-                                <linearGradient id="ng2" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
-                                    <stop offset="0%" stop-color="#00D4FF"/>
-                                    <stop offset="50%" stop-color="#4A6CF7"/>
-                                    <stop offset="100%" stop-color="#8B3FDB"/>
-                                </linearGradient>
-                            </defs>
-                            <circle cx="30" cy="30" r="7" stroke="url(#ng2)" stroke-width="2.5" fill="none"/>
-                            <circle cx="30" cy="30" r="3" fill="url(#ng2)"/>
-                            <line x1="30" y1="23" x2="30" y2="10" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="30" cy="8" r="3" fill="url(#ng2)"/>
-                            <line x1="30" y1="37" x2="30" y2="50" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="30" cy="52" r="3" fill="url(#ng2)"/>
-                            <line x1="23" y1="30" x2="10" y2="30" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="8" cy="30" r="3" fill="url(#ng2)"/>
-                            <line x1="37" y1="30" x2="50" y2="30" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="52" cy="30" r="3" fill="url(#ng2)"/>
-                            <line x1="25" y1="25" x2="16" y2="16" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="13.5" cy="13.5" r="3" fill="url(#ng2)"/>
-                            <line x1="35" y1="35" x2="44" y2="44" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="46.5" cy="46.5" r="3" fill="url(#ng2)"/>
-                            <line x1="35" y1="25" x2="44" y2="16" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="46.5" cy="13.5" r="3" fill="url(#ng2)"/>
-                            <line x1="25" y1="35" x2="16" y2="44" stroke="url(#ng2)" stroke-width="2" stroke-linecap="round"/>
-                            <circle cx="13.5" cy="46.5" r="3" fill="url(#ng2)"/>
-                        </svg>
-                        <span class="nav-logo-text"><span>Nexus</span><span>Vora</span></span>
-                    </a>
-                    <p>Agência de marketing digital full-service focada em PMEs e concessionários automóveis da região do Porto, Gaia e Maia.</p>
-                </div>
-
-                <div class="footer-col">
-                    <h5>Serviços</h5>
-                    <ul>
-                        <li><a href="{{ route('services') }}#web">Desenvolvimento Web</a></li>
-                        <li><a href="{{ route('services') }}#social">Redes Sociais</a></li>
-                        <li><a href="{{ route('services') }}#google">Google Ads</a></li>
-                        <li><a href="{{ route('services') }}#meta">Meta Ads</a></li>
-                        <li><a href="{{ route('services') }}#seo">SEO</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h5>Empresa</h5>
-                    <ul>
-                        <li><a href="#porquenos">Sobre Nós</a></li>
-                        <li><a href="#portfolio">Portfólio</a></li>
-                        <li><a href="#portfolio">Casos de Sucesso</a></li>
-                        <li><a href="#cta-final">Contacto</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h5>Contacto</h5>
-                    <ul>
-                        <li><a href="#cta-final">Porto / Gaia / Maia</a></li>
-                        <li><a href="mailto:geral@nexusvora.pt">geral@nexusvora.pt</a></li>
-                        <li><a href="tel:+351220000000">+351 220 000 000</a></li>
-                        <li><a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></li>
-                        <li><a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <p>© 2026 NexusVora. Todos os direitos reservados.</p>
-                <p>Política de Privacidade · Termos de Serviço</p>
-            </div>
-        </div>
-    </footer>
+    @include('partials.site-footer')
 
     <script>
         const navElement = document.querySelector("nav");
@@ -1924,7 +1723,7 @@
 
         window.addEventListener("scroll", () => {
             navElement.style.background = window.scrollY > 50
-                ? "rgba(6, 11, 32, 0.95)"
+                ? "rgba(10, 15, 46, 0.96)"
                 : "rgba(10, 15, 46, 0.85)";
         });
 
