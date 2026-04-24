@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusVora — Agência de Marketing Digital | Porto</title>
+    <title>NexusVora — Agência Full-Service | Web, Marketing Digital e IA</title>
     <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none"%3E%3Cdefs%3E%3ClinearGradient id="ng" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse"%3E%3Cstop offset="0%25" stop-color="%2300D4FF"/%3E%3Cstop offset="50%25" stop-color="%234A6CF7"/%3E%3Cstop offset="100%25" stop-color="%238B3FDB"/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx="30" cy="30" r="7" stroke="url(%23ng)" stroke-width="2.5" fill="none"/%3E%3Ccircle cx="30" cy="30" r="3" fill="url(%23ng)"/%3E%3Cline x1="30" y1="23" x2="30" y2="10" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="30" cy="8" r="3" fill="url(%23ng)"/%3E%3Cline x1="30" y1="37" x2="30" y2="50" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="30" cy="52" r="3" fill="url(%23ng)"/%3E%3Cline x1="23" y1="30" x2="10" y2="30" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="8" cy="30" r="3" fill="url(%23ng)"/%3E%3Cline x1="37" y1="30" x2="50" y2="30" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="52" cy="30" r="3" fill="url(%23ng)"/%3E%3Cline x1="25" y1="25" x2="16" y2="16" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="13.5" cy="13.5" r="3" fill="url(%23ng)"/%3E%3Cline x1="35" y1="35" x2="44" y2="44" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="46.5" cy="46.5" r="3" fill="url(%23ng)"/%3E%3Cline x1="35" y1="25" x2="44" y2="16" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="46.5" cy="13.5" r="3" fill="url(%23ng)"/%3E%3Cline x1="25" y1="35" x2="16" y2="44" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="13.5" cy="46.5" r="3" fill="url(%23ng)"/%3E%3C/svg%3E'>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,42 +158,13 @@
             align-items: center;
         }
 
-        .hero-bg {
+        .hero-canvas {
             position: absolute;
             inset: 0;
             z-index: 0;
-            background: var(--navy-2);
-        }
-
-        .hero-bg::before {
-            content: "";
-            position: absolute;
-            top: -200px;
-            right: -100px;
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(74, 108, 247, 0.18) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .hero-bg::after {
-            content: "";
-            position: absolute;
-            bottom: -150px;
-            left: 10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .hero-grid {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-            background-size: 40px 40px;
-            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
         .hero-badge {
@@ -594,6 +565,54 @@
         #depoimentos,
         footer {
             background: var(--navy-2);
+        }
+
+        #servicos {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #servicos .section-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: var(--navy-2);
+        }
+
+        .section-bg::before {
+            content: "";
+            position: absolute;
+            top: -200px;
+            right: -100px;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(74, 108, 247, 0.18) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .section-bg::after {
+            content: "";
+            position: absolute;
+            bottom: -150px;
+            left: 10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .section-grid {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+            background-size: 40px 40px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
         }
 
         .services-header {
@@ -1170,24 +1189,23 @@
     @include('partials.site-header')
 
     <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-grid"></div>
+        <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
 
         <div class="hero-inner">
             <div class="hero-content">
                 <div class="hero-badge">
                     <div class="hero-badge-dot"></div>
-                    Agência Full-Service · Porto / Gaia / Maia
+                    Agência Full-Service · Web · Ads · SEO · IA
                 </div>
 
                 <h1>
-                    O seu negócio merece<br>
-                    <span class="grad-text">crescer de verdade.</span>
+                    Transformamos o seu negócio numa<br>
+                    <span class="grad-text">máquina de crescimento digital.</span>
                 </h1>
 
                 <p>
-                    Somos a agência de marketing digital que transforma PMEs e concessionários da região do Porto em
-                    marcas que vendem, com estratégia, criatividade e resultados mensuráveis.
+                    Da identidade visual à automação com IA — desenvolvemos sites, gerimos campanhas e implementamos
+                    estratégias que geram resultados mensuráveis para PMEs e concessionários.
                 </p>
 
                 <div class="hero-actions">
@@ -1287,6 +1305,8 @@
     </section>
 
     <section id="servicos">
+        <div class="section-bg"></div>
+        <div class="section-grid"></div>
         <div class="section-inner">
             <div class="services-header">
                 <div>
@@ -1780,6 +1800,127 @@
     <script>
         const navElement = document.querySelector("nav");
         const revealElements = document.querySelectorAll(".reveal");
+        const heroCanvas = document.getElementById("hero-canvas");
+
+        if (heroCanvas) {
+            const ctx = heroCanvas.getContext("2d");
+            let particles = [];
+            const COUNT = 110;
+            const CONNECT_DIST = 140;
+            const SPEED = 0.28;
+
+            const heroWidth = () => heroCanvas.offsetWidth;
+            const heroHeight = () => heroCanvas.offsetHeight;
+
+            function resizeHeroCanvas() {
+                const ratio = window.devicePixelRatio || 1;
+                const width = heroWidth();
+                const height = heroHeight();
+
+                heroCanvas.width = Math.round(width * ratio);
+                heroCanvas.height = Math.round(height * ratio);
+                ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            }
+
+            function initHeroParticles() {
+                particles = [];
+
+                for (let i = 0; i < COUNT; i++) {
+                    particles.push({
+                        x: Math.random() * heroWidth(),
+                        y: Math.random() * heroHeight(),
+                        vx: (Math.random() - 0.5) * SPEED,
+                        vy: (Math.random() - 0.5) * SPEED,
+                        r: Math.random() * 2.4 + 1,
+                        alpha: Math.random() * 0.5 + 0.5,
+                        pulse: Math.random() * Math.PI * 2,
+                        pulseSpeed: Math.random() * 0.03 + 0.008,
+                        hue: Math.random() < 0.5 ? 190 + Math.random() * 20 : 250 + Math.random() * 30,
+                    });
+                }
+            }
+
+            function drawHeroCanvas() {
+                const width = heroWidth();
+                const height = heroHeight();
+
+                ctx.clearRect(0, 0, width, height);
+
+                const bg = ctx.createRadialGradient(width * 0.35, height * 0.55, 0, width * 0.5, height * 0.5, width * 0.9);
+                bg.addColorStop(0, "#071530");
+                bg.addColorStop(0.5, "#040d1e");
+                bg.addColorStop(1, "#020810");
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, width, height);
+
+                const glow = ctx.createRadialGradient(width * 0.15, height * 0.75, 0, width * 0.15, height * 0.75, width * 0.4);
+                glow.addColorStop(0, "rgba(0, 100, 140, 0.18)");
+                glow.addColorStop(1, "rgba(0, 0, 0, 0)");
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, width, height);
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const q = particles[j];
+                        const dx = p.x - q.x;
+                        const dy = p.y - q.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < CONNECT_DIST) {
+                            const fade = 1 - dist / CONNECT_DIST;
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(q.x, q.y);
+                            ctx.strokeStyle = `rgba(160, 180, 255, ${fade * 0.22})`;
+                            ctx.lineWidth = fade * 0.9;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.pulse += p.pulseSpeed;
+                    const radius = p.r * (1 + 0.25 * Math.sin(p.pulse));
+                    const alpha = p.alpha * (0.75 + 0.25 * Math.sin(p.pulse));
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0) p.x = width;
+                    if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height;
+                    if (p.y > height) p.y = 0;
+
+                    const particleGlow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 5);
+                    particleGlow.addColorStop(0, `hsla(${p.hue}, 90%, 75%, ${alpha * 0.6})`);
+                    particleGlow.addColorStop(0.4, `hsla(${p.hue}, 80%, 60%, ${alpha * 0.2})`);
+                    particleGlow.addColorStop(1, `hsla(${p.hue}, 80%, 50%, 0)`);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius * 5, 0, Math.PI * 2);
+                    ctx.fillStyle = particleGlow;
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, radius * 0.8, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${p.hue + 20}, 100%, 88%, ${alpha})`;
+                    ctx.fill();
+                }
+
+                window.requestAnimationFrame(drawHeroCanvas);
+            }
+
+            resizeHeroCanvas();
+            initHeroParticles();
+            drawHeroCanvas();
+
+            window.addEventListener("resize", () => {
+                resizeHeroCanvas();
+                initHeroParticles();
+            });
+        }
 
         window.addEventListener("scroll", () => {
             navElement.style.background = window.scrollY > 50

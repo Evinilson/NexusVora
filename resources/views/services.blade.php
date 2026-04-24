@@ -358,12 +358,134 @@
             transform: translateY(0);
         }
 
+        /* Web service expanded */
+        .service-subtitle {
+            color: var(--cyan);
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.55;
+            opacity: 0.88;
+            margin-bottom: 20px;
+        }
+
+        .web-extra-inner {
+            max-width: 1100px;
+            margin: 60px auto 0;
+        }
+
+        .web-areas-label {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        .web-areas-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .area-card {
+            flex: 0 0 calc(33.333% - 10px);
+            min-width: 0;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--navy-border);
+            border-radius: 14px;
+            padding: 22px 24px;
+            transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+        }
+
+        .area-card:hover {
+            border-color: rgba(0, 212, 255, 0.28);
+            background: rgba(0, 212, 255, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .area-card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+        }
+
+        .area-card h3 {
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .area-card p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            line-height: 1.65;
+        }
+
+        .web-bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 56px;
+        }
+
+        .approach-table {
+            border: 1px solid var(--navy-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .approach-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .approach-row:not(:last-child) {
+            border-bottom: 1px solid var(--navy-border);
+        }
+
+        .approach-row span {
+            padding: 13px 16px;
+            font-size: 0.83rem;
+            line-height: 1.5;
+            color: var(--text);
+        }
+
+        .approach-row span:first-child {
+            border-right: 1px solid var(--navy-border);
+        }
+
+        .approach-row span:last-child {
+            color: var(--text-muted);
+        }
+
+        .approach-header span {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.7rem !important;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-muted) !important;
+            background: rgba(255, 255, 255, 0.025);
+        }
+
         @media (max-width: 900px) {
             .service-inner { grid-template-columns: 1fr; gap: 40px; }
             .service-inner.reverse { direction: ltr; }
             .nav-links { display: none; }
             .results-grid { grid-template-columns: 1fr 1fr; }
             .footer-top { grid-template-columns: 1fr 1fr; }
+            .area-card { flex: 0 0 calc(50% - 7px); }
+            .web-bottom-grid { grid-template-columns: 1fr; gap: 40px; }
         }
 
         @media (max-width: 640px) {
@@ -381,6 +503,9 @@
             .results-grid { grid-template-columns: 1fr; }
             .footer-top { grid-template-columns: 1fr; }
             .footer-bottom { align-items: flex-start; flex-direction: column; }
+            .area-card { flex: 0 0 100%; }
+            .approach-row { grid-template-columns: 1fr; }
+            .approach-row span:first-child { border-right: none; border-bottom: 1px solid var(--navy-border); }
         }
     </style>
 </head>
@@ -414,18 +539,9 @@
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
             </div>
             <h2>Desenvolvimento<br>Web Profissional</h2>
-            <p class="service-desc">O seu site é o seu vendedor mais importante. Criamos sites e landing pages rápidos, seguros e otimizados para converter visitantes em clientes, com design que reflete a identidade da sua marca e uma experiência de utilizador que não deixa margem para dúvidas.</p>
-            <div class="included-title">O que está incluído</div>
-            <ul class="included-list">
-                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Design personalizado responsivo (mobile, tablet, desktop)</li>
-                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Velocidade de carregamento otimizada (Core Web Vitals)</li>
-                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Certificado SSL, hosting e domínio incluídos no primeiro ano</li>
-                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Formulários de contacto e integração com CRM</li>
-                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Painel de gestão de conteúdo fácil de usar (CMS)</li>
-                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Estrutura SEO-ready desde o primeiro dia</li>
-                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Formação e suporte técnico pós-lançamento</li>
-            </ul>
-            <a href="{{ route('home') }}#cta-final" class="btn-primary">Pedir proposta<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <p class="service-subtitle">Criação de sites, lojas online e plataformas digitais para empresas que querem crescer</p>
+            <p class="service-desc">O vosso site é o vosso melhor vendedor — capta leads, apresenta a marca e fecha negócios enquanto dormem. Na NexusVora criamos sites profissionais para PMEs e concessionários da região do Porto, Gaia e Maia: desde sites institucionais e lojas online até plataformas SaaS, sempre com SEO técnico integrado desde o primeiro dia e um único foco — aparecer no Google e converter visitantes em clientes.</p>
+            <a href="{{ route('home') }}#cta-final" class="btn-primary">Quero o meu site <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
         </div>
 
         <div class="service-visual reveal">
@@ -444,6 +560,102 @@
                     <div class="process-step"><div class="step-num">3</div><div class="step-text"><strong>Desenvolvimento</strong>Construção rápida, otimizada e com código limpo</div></div>
                     <div class="process-step"><div class="step-num">4</div><div class="step-text"><strong>Testes & lançamento</strong>QA completo, testes de velocidade e publicação</div></div>
                     <div class="process-step"><div class="step-num">5</div><div class="step-text"><strong>Suporte contínuo</strong>Atualizações, backups e manutenção mensal</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="web-extra-inner">
+        <p class="web-areas-label reveal">Áreas de Atuação</p>
+        <div class="web-areas-grid">
+            <div class="area-card reveal">
+                <div class="area-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M3 9l9-6 9 6"/><path d="M12 9v11"/></svg>
+                </div>
+                <h3>Sites Institucionais</h3>
+                <p>Design exclusivo, arquitetura SEO-optimizada e estrutura pensada para converter visitantes em contactos — sem templates genéricos.</p>
+            </div>
+            <div class="area-card reveal">
+                <div class="area-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <h3>Landing Pages</h3>
+                <p>Páginas de alta conversão para campanhas de Google Ads e Meta Ads, lançamentos de produto ou captação de leads qualificados.</p>
+            </div>
+            <div class="area-card reveal">
+                <div class="area-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                </div>
+                <h3>Lojas Online / E-commerce</h3>
+                <p>Lojas online prontas para vender, com gestão de stock, pagamentos integrados e experiência de compra otimizada para maximizar vendas.</p>
+            </div>
+            <div class="area-card reveal">
+                <div class="area-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
+                <h3>Sites para Concessionários</h3>
+                <p>Especialistas em sites para concessionários automóveis — fichas de viaturas, formulários de test drive, pesquisa de stock e integração com sistemas de gestão.</p>
+            </div>
+            <div class="area-card reveal">
+                <div class="area-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </div>
+                <h3>Portfólios e Blogs</h3>
+                <p>Sites para consultores, arquitetos e profissionais liberais — conteúdo que constrói autoridade no Google e atrai clientes de forma orgânica.</p>
+            </div>
+            <div class="area-card reveal">
+                <div class="area-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 7h.01M11 7h6"/></svg>
+                </div>
+                <h3>Plataformas e SaaS à Medida</h3>
+                <p>Desenvolvimento de aplicações web personalizadas — integrações, automatizações e sistemas internos para necessidades específicas de negócio.</p>
+            </div>
+            <div class="area-card reveal">
+                <div class="area-card-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                </div>
+                <h3>Redesign e Migração</h3>
+                <p>Site lento, desatualizado ou com má experiência mobile? Redesign com preservação total do histórico SEO e melhoria de Core Web Vitals — sem perder o posicionamento no Google.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="web-extra-inner web-bottom-grid">
+        <div class="web-included reveal">
+            <div class="included-title">O que está sempre incluído</div>
+            <ul class="included-list">
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Design 100% personalizado — sem templates genéricos</li>
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Site responsivo — mobile, tablet e desktop</li>
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>SEO técnico integrado desde o primeiro dia</li>
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Formulários de contacto e integração com CRM</li>
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>HTTPS (SSL), hosting de alta velocidade e domínio configurado</li>
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Manutenção mensal — atualizações, backups e segurança</li>
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Formação ao cliente para gestão autónoma do conteúdo</li>
+                <li><span class="check-icon" style="background:rgba(0,212,255,0.12);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Relatório de performance mensal (Google Analytics + Search Console)</li>
+            </ul>
+        </div>
+        <div class="web-approach reveal">
+            <div class="included-title">A nossa abordagem</div>
+            <div class="approach-table">
+                <div class="approach-row approach-header">
+                    <span>O seu perfil</span>
+                    <span>A nossa abordagem</span>
+                </div>
+                <div class="approach-row">
+                    <span>Quer autonomia na gestão</span>
+                    <span>CMS intuitivo, formação e suporte incluídos</span>
+                </div>
+                <div class="approach-row">
+                    <span>Precisa de funcionalidades específicas</span>
+                    <span>Desenvolvimento à medida</span>
+                </div>
+                <div class="approach-row">
+                    <span>Tem loja online</span>
+                    <span>Solução e-commerce otimizada para vender</span>
+                </div>
+                <div class="approach-row">
+                    <span>Já tem site mas precisa de melhorar</span>
+                    <span>Redesign com foco em conversão e SEO</span>
                 </div>
             </div>
         </div>
