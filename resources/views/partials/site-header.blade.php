@@ -218,7 +218,7 @@
 
     <ul class="nav-links">
         <li><a href="{{ $servicesUrl }}" @class(['active' => $isServices])>Serviços</a></li>
-        <li><a href="{{ $homeUrl }}#porquenos">Porquê Nós</a></li>
+        <li><a href="{{ route('sobre') }}">Sobre Nós</a></li>
         <li><a href="{{ $homeUrl }}#depoimentos">Clientes</a></li>
         <li><a href="{{ $homeUrl }}#portfolio">Portfólio</a></li>
     </ul>
@@ -237,7 +237,7 @@
     <div class="mobile-menu-inner">
         <ul class="mobile-nav-links">
             <li><a href="{{ $servicesUrl }}">Serviços</a></li>
-            <li><a href="{{ $homeUrl }}#porquenos">Porquê Nós</a></li>
+            <li><a href="{{ route('sobre') }}">Sobre Nós</a></li>
             <li><a href="{{ $homeUrl }}#depoimentos">Clientes</a></li>
             <li><a href="{{ $homeUrl }}#portfolio">Portfólio</a></li>
         </ul>

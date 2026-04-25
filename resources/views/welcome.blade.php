@@ -1315,7 +1315,7 @@
                             </div>
                             <div class="why-metric">
                                 <div class="why-metric-val">4.2×</div>
-                                <div class="why-metric-label">ROAS médio Meta Ads</div>
+                                <div class="why-metric-label">ROAS médio campanhas pagas</div>
                             </div>
                             <div class="why-metric">
                                 <div class="why-metric-val">72h</div>
@@ -1351,8 +1351,8 @@
                             </svg>
                         </div>
                         <div class="why-feature-body">
-                            <h4>Estratégia baseada em dados</h4>
-                            <p>Cada decisão é suportada por métricas reais. Os relatórios mensais são transparentes para que saiba sempre o retorno do investimento.</p>
+                            <h4>Estratégia integrada, baseada em dados</h4>
+                            <p>Cinco canais a trabalhar em conjunto — web, redes sociais, publicidade paga, SEO e IA. Cada decisão suportada por métricas reais e relatórios mensais transparentes.</p>
                         </div>
                     </div>
 
@@ -1372,12 +1372,12 @@
                     <div class="why-feature reveal">
                         <div class="why-feature-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>
                             </svg>
                         </div>
                         <div class="why-feature-body">
-                            <h4>Contratos flexíveis, sem amarras</h4>
-                            <p>Acreditamos em relações baseadas em resultados. Sem contratos longos forçados, ficam porque funcionamos.</p>
+                            <h4>IA e automação ao serviço do negócio</h4>
+                            <p>Sistemas inteligentes que qualificam leads e respondem a clientes 24/7 — para que o negócio cresça sem crescer a equipa operacional.</p>
                         </div>
                     </div>
                 </div>

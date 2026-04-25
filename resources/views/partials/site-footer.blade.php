@@ -144,16 +144,16 @@
                 <ul>
                     <li><a href="{{ $servicesUrl }}#web">Desenvolvimento Web</a></li>
                     <li><a href="{{ $servicesUrl }}#social">Redes Sociais</a></li>
-                    <li><a href="{{ $servicesUrl }}#google">Google Ads</a></li>
-                    <li><a href="{{ $servicesUrl }}#meta">Meta Ads</a></li>
-                    <li><a href="{{ $servicesUrl }}#seo">SEO</a></li>
+                    <li><a href="{{ $servicesUrl }}#trafego">Tráfego &amp; Leads</a></li>
+                    <li><a href="{{ $servicesUrl }}#nexusai">NexusAI</a></li>
+                    <li><a href="{{ $servicesUrl }}#marca">Marca &amp; Estratégia</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h5>Empresa</h5>
                 <ul>
-                    <li><a href="{{ $homeUrl }}#porquenos">Sobre Nós</a></li>
+                    <li><a href="{{ route('sobre') }}">Sobre Nós</a></li>
                     <li><a href="{{ $homeUrl }}#portfolio">Portfólio</a></li>
                     <li><a href="{{ $homeUrl }}#portfolio">Casos de Sucesso</a></li>
                     <li><a href="{{ $homeUrl }}#cta-final">Contacto</a></li>
