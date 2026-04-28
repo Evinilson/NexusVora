@@ -28,7 +28,7 @@
         color: var(--text-muted);
     }
 
-    .footer-col h5 {
+    .footer-col h2 {
         margin-bottom: 18px;
         color: #fff;
         font-family: 'Plus Jakarta Sans', sans-serif;
@@ -140,7 +140,7 @@
             </div>
 
             <div class="footer-col">
-                <h5>Serviços</h5>
+                <h2>Serviços</h2>
                 <ul>
                     <li><a href="{{ $servicesUrl }}#web">Desenvolvimento Web</a></li>
                     <li><a href="{{ $servicesUrl }}#social">Redes Sociais</a></li>
@@ -151,7 +151,7 @@
             </div>
 
             <div class="footer-col">
-                <h5>Empresa</h5>
+                <h2>Empresa</h2>
                 <ul>
                     <li><a href="{{ route('sobre') }}">Sobre Nós</a></li>
                     <li><a href="{{ $homeUrl }}#portfolio">Portfólio</a></li>
@@ -161,11 +161,11 @@
             </div>
 
             <div class="footer-col">
-                <h5>Contacto</h5>
+                <h2>Contacto</h2>
                 <ul>
-                    <li><a href="{{ $homeUrl }}#cta-final">Porto / Gaia / Maia</a></li>
-                    <li><a href="mailto:geral@nexusvora.pt">geral@nexusvora.pt</a></li>
-                    <li><a href="tel:+351220000000">+351 220 000 000</a></li>
+                    <li><a href="{{ $homeUrl }}#cta-final">Portugal</a></li>
+                    <li><a href="mailto:geral@nexusvora.com">geral@nexusvora.com</a></li>
+                    <li><a href="tel:+351932949284">+351 932 949 284</a></li>
                     <li><a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></li>
                     <li><a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a></li>
                 </ul>

@@ -17,6 +17,7 @@
         border-bottom: 1px solid var(--navy-border);
         transition: background 0.3s ease;
     }
+    nav.is-scrolled { background: rgba(10, 15, 46, 0.96); }
     .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .nav-logo svg { width: 36px; height: 36px; }
     .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; }
@@ -283,6 +284,22 @@
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") closeMenu();
         });
+
+        let ticking = false;
+
+        function syncNavBackground() {
+            hamburger.closest("nav").classList.toggle("is-scrolled", window.scrollY > 50);
+            ticking = false;
+        }
+
+        syncNavBackground();
+
+        window.addEventListener("scroll", () => {
+            if (!ticking) {
+                window.requestAnimationFrame(syncNavBackground);
+                ticking = true;
+            }
+        }, { passive: true });
     })();
 </script>
 @endonce

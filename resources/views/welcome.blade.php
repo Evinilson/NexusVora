@@ -1,13 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @include('partials.site-head')
     <title>NexusVora — Agência Full-Service | Web, Marketing Digital e IA</title>
-    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none"%3E%3Cdefs%3E%3ClinearGradient id="ng" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse"%3E%3Cstop offset="0%25" stop-color="%2300D4FF"/%3E%3Cstop offset="50%25" stop-color="%234A6CF7"/%3E%3Cstop offset="100%25" stop-color="%238B3FDB"/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx="30" cy="30" r="7" stroke="url(%23ng)" stroke-width="2.5" fill="none"/%3E%3Ccircle cx="30" cy="30" r="3" fill="url(%23ng)"/%3E%3Cline x1="30" y1="23" x2="30" y2="10" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="30" cy="8" r="3" fill="url(%23ng)"/%3E%3Cline x1="30" y1="37" x2="30" y2="50" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="30" cy="52" r="3" fill="url(%23ng)"/%3E%3Cline x1="23" y1="30" x2="10" y2="30" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="8" cy="30" r="3" fill="url(%23ng)"/%3E%3Cline x1="37" y1="30" x2="50" y2="30" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="52" cy="30" r="3" fill="url(%23ng)"/%3E%3Cline x1="25" y1="25" x2="16" y2="16" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="13.5" cy="13.5" r="3" fill="url(%23ng)"/%3E%3Cline x1="35" y1="35" x2="44" y2="44" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="46.5" cy="46.5" r="3" fill="url(%23ng)"/%3E%3Cline x1="35" y1="25" x2="44" y2="16" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="46.5" cy="13.5" r="3" fill="url(%23ng)"/%3E%3Cline x1="25" y1="35" x2="16" y2="44" stroke="url(%23ng)" stroke-width="2" stroke-linecap="round"/%3E%3Ccircle cx="13.5" cy="46.5" r="3" fill="url(%23ng)"/%3E%3C/svg%3E'>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         *, *::before, *::after {
@@ -709,7 +704,7 @@
             background: rgba(74, 108, 247, 0.12);
         }
 
-        .why-feature-body h4 {
+        .why-feature-body h3 {
             margin-bottom: 4px;
             color: #fff;
             font-size: 1rem;
@@ -781,7 +776,7 @@
         }
 
         .author-name,
-        .footer-col h5,
+        .footer-col h2,
         .cta-box h2 {
             color: #fff;
             font-family: "Plus Jakarta Sans", sans-serif;
@@ -1339,7 +1334,7 @@
                             </svg>
                         </div>
                         <div class="why-feature-body">
-                            <h4>Especialistas em PMEs e Automóvel</h4>
+                            <h3>Especialistas em PMEs e Automóvel</h3>
                             <p>Experiência comprovada em concessionários e pequenas e médias empresas da região do Porto, com foco em necessidades específicas de cada negócio.</p>
                         </div>
                     </div>
@@ -1351,7 +1346,7 @@
                             </svg>
                         </div>
                         <div class="why-feature-body">
-                            <h4>Estratégia integrada, baseada em dados</h4>
+                            <h3>Estratégia integrada, baseada em dados</h3>
                             <p>Cinco canais a trabalhar em conjunto — web, redes sociais, publicidade paga, SEO e IA. Cada decisão suportada por métricas reais e relatórios mensais transparentes.</p>
                         </div>
                     </div>
@@ -1364,7 +1359,7 @@
                             </svg>
                         </div>
                         <div class="why-feature-body">
-                            <h4>Resposta rápida, equipa dedicada</h4>
+                            <h3>Resposta rápida, equipa dedicada</h3>
                             <p>Não é um ticket de suporte. É uma equipa que conhece o seu negócio e responde em menos de 72 horas, sempre.</p>
                         </div>
                     </div>
@@ -1376,7 +1371,7 @@
                             </svg>
                         </div>
                         <div class="why-feature-body">
-                            <h4>IA e automação ao serviço do negócio</h4>
+                            <h3>IA e automação ao serviço do negócio</h3>
                             <p>Sistemas inteligentes que qualificam leads e respondem a clientes 24/7 — para que o negócio cresça sem crescer a equipa operacional.</p>
                         </div>
                     </div>
@@ -1582,13 +1577,13 @@
                 <h2>Pronto para crescer no digital?</h2>
                 <p>Fale connosco hoje. Uma conversa sem compromisso pode ser o início de uma grande transformação para o seu negócio.</p>
                 <div class="cta-actions">
-                    <a href="mailto:geral@nexusvora.pt" class="btn-primary">
+                    <a href="mailto:geral@nexusvora.com" class="btn-primary">
                         Pedir proposta gratuita
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
-                    <a href="tel:+351220000000" class="btn-ghost">Ligar agora</a>
+                    <a href="tel:+351932949284" class="btn-ghost">Ligar agora</a>
                 </div>
             </div>
         </div>
@@ -1720,12 +1715,6 @@
                 initHeroParticles();
             });
         }
-
-        window.addEventListener("scroll", () => {
-            navElement.style.background = window.scrollY > 50
-                ? "rgba(10, 15, 46, 0.96)"
-                : "rgba(10, 15, 46, 0.85)";
-        });
 
         if ("IntersectionObserver" in window) {
             const observer = new IntersectionObserver((entries) => {
