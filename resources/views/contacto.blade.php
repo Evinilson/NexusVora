@@ -158,7 +158,7 @@
     .hours-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; gap: 16px; }
     .hours-day { color: var(--text-muted); }
     .hours-time { color: #fff; font-weight: 500; }
-    .hours-closed { color: rgba(255,255,255,0.3); }
+    .hours-closed { color: #B8C0D9; font-weight: 600; }
 
     .map-placeholder {
       height: 200px;
@@ -426,7 +426,14 @@
       line-height: 1.5;
     }
 
-    .form-privacy a { color: var(--cyan); text-decoration: none; }
+    .form-privacy a {
+      color: #8EDBFF;
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+    .form-privacy a:hover { color: #fff; }
 
     .btn-submit {
       width: 100%;

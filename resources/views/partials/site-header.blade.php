@@ -237,7 +237,7 @@
     </button>
 </nav>
 
-<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true" inert>
     <div class="mobile-menu-glow"></div>
     <div class="mobile-menu-inner">
         <ul class="mobile-nav-links">
@@ -266,6 +266,7 @@
         function openMenu() {
             hamburger.classList.add("is-open");
             mobileMenu.classList.add("is-open");
+            mobileMenu.removeAttribute("inert");
             hamburger.setAttribute("aria-expanded", "true");
             mobileMenu.setAttribute("aria-hidden", "false");
             document.body.style.overflow = "hidden";
@@ -274,6 +275,7 @@
         function closeMenu() {
             hamburger.classList.remove("is-open");
             mobileMenu.classList.remove("is-open");
+            mobileMenu.setAttribute("inert", "");
             hamburger.setAttribute("aria-expanded", "false");
             mobileMenu.setAttribute("aria-hidden", "true");
             document.body.style.overflow = "";

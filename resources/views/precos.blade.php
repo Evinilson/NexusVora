@@ -593,6 +593,7 @@
 <body>
 @include('partials.site-header')
 
+<main>
 <div class="page-header">
   <div class="page-header-inner">
     <div class="section-tag">Preços</div>
@@ -682,6 +683,7 @@
     </div>
   </div>
 </section>
+</main>
 
 @include('partials.site-footer')
 
