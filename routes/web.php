@@ -13,9 +13,19 @@ Route::get('/servicos', function () {
     return view('services');
 })->name('services');
 
+Route::get('/precos', function () {
+    return view('precos');
+})->name('precos');
+
 Route::get('/sobre-nos', function () {
     return view('sobre');
 })->name('sobre');
+
+Route::get('/contacto', function () {
+    return view('contacto');
+})->name('contacto');
+Route::post('/contacto', [\App\Http\Controllers\ContactController::class, 'submit'])->name('contacto.submit');
+
 Route::get('/termos-servico', function () {
     return view('termos');
 })->name('termos');
@@ -26,11 +36,13 @@ Route::get('/politica-privacidade', function () {
 
 Route::get('/sitemap.xml', function () {
     $pages = [
-        ['route' => 'home',        'file' => 'welcome',    'priority' => '1.0'],
-        ['route' => 'services',    'file' => 'services',   'priority' => '0.9'],
-        ['route' => 'sobre',       'file' => 'sobre',      'priority' => '0.8'],
-        ['route' => 'privacidade', 'file' => 'privacidade','priority' => '0.3'],
-        ['route' => 'termos',      'file' => 'termos',     'priority' => '0.3'],
+        ['route' => 'home',        'file' => 'welcome'],
+        ['route' => 'services',    'file' => 'services'],
+        ['route' => 'precos',      'file' => 'precos'],
+        ['route' => 'sobre',       'file' => 'sobre'],
+        ['route' => 'contacto',    'file' => 'contacto'],
+        ['route' => 'privacidade', 'file' => 'privacidade'],
+        ['route' => 'termos',      'file' => 'termos'],
     ];
 
     foreach ($pages as &$page) {

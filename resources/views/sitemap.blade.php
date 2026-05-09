@@ -4,8 +4,6 @@
   <url>
     <loc>{{ route($page['route']) }}</loc>
     <lastmod>{{ $page['lastmod'] }}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>{{ $page['priority'] }}</priority>
   </url>
 @endforeach
 </urlset>

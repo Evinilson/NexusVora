@@ -332,6 +332,7 @@
             <li><a href="#t7">Limitação de responsabilidade</a></li>
             <li><a href="#t8">Rescisão</a></li>
             <li><a href="#t9">Lei aplicável</a></li>
+            <li><a href="#t10">Manutenção e suporte</a></li>
         </ul>
     </div>
 
@@ -494,6 +495,37 @@
             <p>Os presentes Termos de Serviço são regidos pela legislação portuguesa, nomeadamente pelo Código Civil, Código Comercial e demais legislação aplicável.</p>
             <p>Para resolução de litígios, as partes elegem o <strong>Tribunal da Comarca do Porto</strong> como competente, com expressa renúncia a qualquer outro, salvo acordo em contrário ou disposição legal imperativa.</p>
             <p>Em caso de conflito com um consumidor, poderá recorrer a entidades de Resolução Alternativa de Litígios (RAL) reconhecidas em Portugal, disponíveis em <a href="https://www.consumidor.gov.pt" class="inline-link" target="_blank">www.consumidor.gov.pt</a>.</p>
+        </div>
+    </div>
+
+    <!-- SECTION 10 -->
+    <div class="section" id="t10">
+        <div class="section-header">
+            <div class="section-num">10</div>
+            <h2>Manutenção, Suporte e Alterações Fora de Âmbito</h2>
+        </div>
+        <div class="section-body">
+            <p>Quando uma proposta ou plano indicar manutenção incluída, esta refere-se a manutenção técnica essencial do website ou solução entregue, durante o período expressamente indicado na proposta comercial ou na página de preços.</p>
+            <p>A manutenção técnica incluída pode abranger:</p>
+            <ul>
+                <li>Atualizações técnicas do website, CMS, plugins ou componentes utilizados</li>
+                <li>Verificações básicas de funcionamento, segurança e estabilidade</li>
+                <li>Backups ou apoio à configuração de rotinas de backup, quando aplicável</li>
+                <li>Pequenas correções preventivas relacionadas com o funcionamento técnico da solução entregue</li>
+                <li>Suporte técnico leve por email ou outro canal acordado</li>
+            </ul>
+            <p>Salvo indicação expressa em contrário, a manutenção incluída não abrange:</p>
+            <ul>
+                <li>Criação de novas páginas, secções, funcionalidades ou integrações</li>
+                <li>Alterações extensas de design, estrutura, textos, imagens ou conteúdos</li>
+                <li>Resolução de problemas causados por alterações feitas pelo cliente, por terceiros ou por ferramentas externas</li>
+                <li>Intervenções em campanhas, plataformas, contas ou sistemas que não façam parte do âmbito inicial contratado</li>
+                <li>Pedidos urgentes, trabalho fora de horário ou apoio operacional contínuo, salvo acordo específico</li>
+            </ul>
+            <div class="highlight-box">
+                <p>Alterações de conteúdo, novas funcionalidades ou resolução de problemas fora do âmbito inicial podem ser orçamentadas à parte ou descontadas de pacotes de horas previamente adquiridos pelo cliente.</p>
+            </div>
+            <p>A NexusVora informará o cliente sempre que um pedido exceda o âmbito da manutenção incluída, apresentando uma estimativa de custo ou de horas antes de avançar, salvo situações urgentes previamente autorizadas.</p>
         </div>
     </div>
 

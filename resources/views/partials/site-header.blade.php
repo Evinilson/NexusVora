@@ -1,8 +1,12 @@
 @php
     $homeUrl = route('home');
     $servicesUrl = route('services');
+    $pricesUrl = route('precos');
+    $contactUrl = route('contacto');
     $isHome = request()->routeIs('home');
     $isServices = request()->routeIs('services');
+    $isPrices = request()->routeIs('precos');
+    $isContact = request()->routeIs('contacto');
 @endphp
 
 @once
@@ -219,12 +223,12 @@
 
     <ul class="nav-links">
         <li><a href="{{ $servicesUrl }}" @class(['active' => $isServices])>Serviços</a></li>
+        <li><a href="{{ $pricesUrl }}" @class(['active' => $isPrices])>Preços</a></li>
         <li><a href="{{ route('sobre') }}">Sobre Nós</a></li>
-        <li><a href="{{ $homeUrl }}#depoimentos">Clientes</a></li>
-        <li><a href="{{ $homeUrl }}#portfolio">Portfólio</a></li>
+        <li><a href="{{ $contactUrl }}" @class(['active' => $isContact])>Contacto</a></li>
     </ul>
 
-    <a href="{{ $homeUrl }}#cta-final" class="nav-cta">Fale Connosco</a>
+    <a href="{{ $contactUrl }}" class="nav-cta">Fale Connosco</a>
 
     <button class="nav-hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
         <span></span>
@@ -238,12 +242,12 @@
     <div class="mobile-menu-inner">
         <ul class="mobile-nav-links">
             <li><a href="{{ $servicesUrl }}">Serviços</a></li>
+            <li><a href="{{ $pricesUrl }}">Preços</a></li>
             <li><a href="{{ route('sobre') }}">Sobre Nós</a></li>
-            <li><a href="{{ $homeUrl }}#depoimentos">Clientes</a></li>
-            <li><a href="{{ $homeUrl }}#portfolio">Portfólio</a></li>
+            <li><a href="{{ $contactUrl }}">Contacto</a></li>
         </ul>
         <div class="mobile-menu-divider"></div>
-        <a href="{{ $homeUrl }}#cta-final" class="btn-primary mobile-cta">
+        <a href="{{ $contactUrl }}" class="btn-primary mobile-cta">
             Fale Connosco
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>

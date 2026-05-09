@@ -100,6 +100,8 @@
 @php
     $homeUrl = route('home');
     $servicesUrl = route('services');
+    $pricesUrl = route('precos');
+    $contactUrl = route('contacto');
 @endphp
 
 <footer>
@@ -153,17 +155,18 @@
             <div class="footer-col">
                 <h2>Empresa</h2>
                 <ul>
+                    <li><a href="{{ $pricesUrl }}">Preços</a></li>
                     <li><a href="{{ route('sobre') }}">Sobre Nós</a></li>
                     <li><a href="{{ $homeUrl }}#portfolio">Portfólio</a></li>
                     <li><a href="{{ $homeUrl }}#portfolio">Casos de Sucesso</a></li>
-                    <li><a href="{{ $homeUrl }}#cta-final">Contacto</a></li>
+                    <li><a href="{{ $contactUrl }}">Contacto</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h2>Contacto</h2>
                 <ul>
-                    <li><a href="{{ $homeUrl }}#cta-final">Portugal</a></li>
+                    <li><a href="{{ $contactUrl }}">Portugal</a></li>
                     <li><a href="mailto:geral@nexusvora.com">geral@nexusvora.com</a></li>
                     <li><a href="tel:+351932949284">+351 932 949 284</a></li>
                     <li><a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></li>

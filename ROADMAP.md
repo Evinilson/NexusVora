@@ -33,11 +33,13 @@
 - [ ] Adicionar `<link rel="canonical">` para evitar conteúdo duplicado (http/https/www)
 
 ### 2.4 Sitemap.xml
-- [ ] Criar sitemap para facilitar indexação das páginas pelo Google
-- Rotas a incluir: `/`, `/servicos`, e futuras páginas de serviço
+- [x] Criar sitemap para facilitar indexação das páginas pelo Google
+- Rotas incluídas: `/`, `/servicos`, `/sobre`, `/privacidade`, `/termos`
+- Gerado dinamicamente via rota Laravel com `lastmod` automático a partir da data de modificação do ficheiro Blade
 
 ### 2.5 robots.txt
-- [ ] Verificar e configurar permissões de indexação
+- [x] Verificar e configurar permissões de indexação
+- Sitemap declarado em `robots.txt` → `Sitemap: https://nexusvora.pt/sitemap.xml`
 
 ---
 
