@@ -398,6 +398,18 @@
       gap: 10px;
       align-items: flex-start;
       margin-bottom: 24px;
+    }
+
+    .privacy-input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .privacy-label {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
       cursor: pointer;
     }
 
@@ -413,14 +425,29 @@
       justify-content: center;
       transition: background .2s, border-color .2s;
       cursor: pointer;
+      position: relative;
     }
 
-    .privacy-checkbox.checked {
+    .privacy-input:checked + .privacy-label .privacy-checkbox {
       background: var(--blue);
       border-color: var(--blue);
     }
 
-    .form-privacy span {
+    .privacy-input:checked + .privacy-label .privacy-checkbox::after {
+      content: '';
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    .privacy-input:focus-visible + .privacy-label .privacy-checkbox {
+      outline: 2px solid rgba(0,212,255,0.65);
+      outline-offset: 2px;
+    }
+
+    .privacy-label span:last-child {
       font-size: 0.8rem;
       color: var(--text-muted);
       line-height: 1.5;
@@ -693,9 +720,12 @@
               <div class="field-error" id="err-message">Campo obrigatório</div>
             </div>
 
-            <div class="form-privacy" id="privacy-toggle">
-              <div class="privacy-checkbox" id="privacy-box"></div>
-              <span>Autorizo o tratamento dos meus dados pessoais de acordo com a <a href="{{ route('privacidade') }}">Política de Privacidade</a> da NexusVora.</span>
+            <div class="form-privacy">
+              <input type="checkbox" class="privacy-input" id="f-privacy" name="privacy" required>
+              <label class="privacy-label" for="f-privacy">
+                <span class="privacy-checkbox" aria-hidden="true"></span>
+                <span>Autorizo o tratamento dos meus dados pessoais de acordo com a <a href="{{ route('privacidade') }}">Política de Privacidade</a> da NexusVora.</span>
+              </label>
             </div>
             <div class="field-error" id="err-privacy" style="margin-bottom:16px;">Deve aceitar a política de privacidade</div>
 
@@ -829,14 +859,8 @@
     window.history.replaceState({}, '', cleanUrl);
   });
 
-  let privacyChecked = false;
-  document.getElementById('privacy-toggle').addEventListener('click', () => {
-    privacyChecked = !privacyChecked;
-    const box = document.getElementById('privacy-box');
-    box.classList.toggle('checked', privacyChecked);
-    box.innerHTML = privacyChecked
-      ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>'
-      : '';
+  const privacyInput = document.getElementById('f-privacy');
+  privacyInput.addEventListener('change', () => {
     document.getElementById('err-privacy').classList.remove('show');
   });
 
@@ -872,7 +896,7 @@
       valid = false;
     }
 
-    if (!privacyChecked) {
+    if (!privacyInput.checked) {
       document.getElementById('err-privacy').classList.add('show');
       valid = false;
     }
@@ -907,7 +931,7 @@
             plan: plan,
             category: category,
             message: message.value.trim(),
-            privacy: privacyChecked
+            privacy: privacyInput.checked
         })
     })
     .then(response => {

@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'ga4' => [
+        'measurement_id' => env('GA4_MEASUREMENT_ID'),
+    ],
+
+    'meta_pixel' => [
+        'pixel_id' => env('META_PIXEL_ID'),
+    ],
+
 ];

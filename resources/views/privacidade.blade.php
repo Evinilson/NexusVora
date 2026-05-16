@@ -243,6 +243,33 @@
             margin: 0 !important;
         }
 
+        .legal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            overflow: hidden;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .legal-table th,
+        .legal-table td {
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .legal-table th {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .legal-table td {
+            color: var(--text-muted);
+        }
+
         strong {
             color: #fff;
             font-weight: 600;
@@ -297,6 +324,7 @@
 
         @media (max-width: 640px) {
             .index-list { grid-template-columns: 1fr; }
+            .legal-table { display: block; overflow-x: auto; }
             .page-hero { padding: 120px 1.5rem 2rem; }
             .content-wrapper { padding: 0 1.25rem 4rem; }
             .footer-top { grid-template-columns: 1fr; }
@@ -331,6 +359,7 @@
             <li><a href="#sec6">Os seus direitos</a></li>
             <li><a href="#sec7">Segurança</a></li>
             <li><a href="#sec8">Retenção de dados</a></li>
+            <li><a href="#sec9">Transferências internacionais</a></li>
         </ul>
     </div>
 
@@ -375,16 +404,56 @@
             <h2>Como Usamos os Seus Dados</h2>
         </div>
         <div class="section-body">
-            <p>Utilizamos os seus dados pessoais para as seguintes finalidades:</p>
-            <ul>
-                <li>Responder a pedidos de informação, diagnóstico ou proposta comercial</li>
-                <li>Prestar e gerir os serviços contratados</li>
-                <li>Enviar comunicações relevantes sobre os nossos serviços, com o seu consentimento</li>
-                <li>Melhorar a experiência no nosso website</li>
-                <li>Cumprir obrigações legais e regulatórias</li>
-                <li>Gestão interna e faturação quando existe uma relação comercial</li>
-            </ul>
-            <p>Os seus dados nunca serão utilizados para fins que não os indicados acima sem o seu consentimento prévio.</p>
+            <p>Utilizamos os seus dados pessoais apenas para finalidades definidas e com uma base legal aplicável:</p>
+            <table class="legal-table">
+                <thead>
+                    <tr>
+                        <th>Finalidade</th>
+                        <th>Dados tratados</th>
+                        <th>Base legal</th>
+                        <th>Retenção indicativa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Responder a pedidos de contacto, diagnóstico ou proposta</td>
+                        <td>Nome, email, telefone, empresa, setor, serviços de interesse e mensagem</td>
+                        <td>Diligências pré-contratuais ou interesse legítimo, Art. 6.º(1)(b) e Art. 6.º(1)(f) RGPD</td>
+                        <td>Até 1 ano após o último contacto, salvo relação comercial posterior</td>
+                    </tr>
+                    <tr>
+                        <td>Prestar e gerir serviços contratados</td>
+                        <td>Dados de cliente, contactos profissionais, informação de projeto e comunicações necessárias</td>
+                        <td>Execução de contrato, Art. 6.º(1)(b) RGPD</td>
+                        <td>Durante o contrato e até 5 anos após o seu termo, quando aplicável</td>
+                    </tr>
+                    <tr>
+                        <td>Faturação, contabilidade e cumprimento legal</td>
+                        <td>Nome/empresa, NIF, morada, dados de faturação e pagamentos</td>
+                        <td>Obrigação legal, Art. 6.º(1)(c) RGPD</td>
+                        <td>Pelo prazo legal fiscal e contabilístico aplicável</td>
+                    </tr>
+                    <tr>
+                        <td>Analytics e medição de desempenho do website</td>
+                        <td>Eventos de navegação, páginas visitadas, dispositivo, origem de tráfego e identificadores de cookies</td>
+                        <td>Consentimento, Art. 6.º(1)(a) RGPD</td>
+                        <td>Conforme configuração da ferramenta, tipicamente até 13 meses</td>
+                    </tr>
+                    <tr>
+                        <td>Marketing, medição de campanhas e remarketing</td>
+                        <td>Eventos de navegação, páginas visitadas e identificadores de cookies/pixel</td>
+                        <td>Consentimento, Art. 6.º(1)(a) RGPD</td>
+                        <td>Conforme configuração da ferramenta, tipicamente até 13 meses</td>
+                    </tr>
+                    <tr>
+                        <td>Comunicações comerciais solicitadas ou autorizadas</td>
+                        <td>Email, nome, empresa e preferências de contacto</td>
+                        <td>Consentimento ou interesse legítimo, conforme o contexto</td>
+                        <td>Até retirar consentimento, opor-se ao tratamento ou deixar de existir relação relevante</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Quando a base legal for o consentimento, pode retirá-lo a qualquer momento sem afetar a licitude do tratamento efetuado antes da retirada.</p>
         </div>
     </div>
 
@@ -402,7 +471,7 @@
                 <li><strong>Com o seu consentimento</strong> — em qualquer outra situação, apenas com a sua autorização expressa</li>
             </ul>
             <div class="highlight-box">
-                <p>Utilizamos ferramentas como Google Analytics e Meta Pixel para análise de desempenho. Estas ferramentas podem processar dados de forma anonimizada. Pode optar por não ser rastreado através das definições de cookies.</p>
+                <p>Google Analytics e Meta Pixel apenas devem carregar depois de consentimento explícito nas respetivas categorias de cookies. Se não der consentimento, estas ferramentas não são carregadas pelo website.</p>
             </div>
         </div>
     </div>
@@ -420,7 +489,8 @@
                 <li><strong>Cookies de desempenho</strong> — medem como os visitantes usam o site, por exemplo Google Analytics</li>
                 <li><strong>Cookies de marketing</strong> — utilizados para personalizar anúncios, por exemplo Meta Pixel</li>
             </ul>
-            <p>Pode gerir as suas preferências de cookies através do banner apresentado na primeira visita ao site ou nas definições do seu browser. A recusa de cookies não essenciais não prejudica a utilização do site.</p>
+            <p>Os cookies de desempenho e marketing só são ativados depois de consentimento explícito no banner de cookies. Pode aceitar, recusar ou escolher categorias específicas.</p>
+            <p>Pode alterar ou retirar o seu consentimento a qualquer momento através do botão fixo <strong>Gerir cookies</strong>. A recusa de cookies não essenciais não prejudica a utilização do site.</p>
         </div>
     </div>
 
@@ -477,6 +547,19 @@
                 <li><strong>Dados de navegação/cookies</strong> — conforme configuração das ferramentas utilizadas, geralmente 13 meses</li>
             </ul>
             <p>Após o prazo aplicável, os dados são eliminados de forma segura ou anonimizados.</p>
+        </div>
+    </div>
+
+    <!-- SECTION 9 -->
+    <div class="section" id="sec9">
+        <div class="section-header">
+            <div class="section-num">09</div>
+            <h2>Transferências Internacionais</h2>
+        </div>
+        <div class="section-body">
+            <p>Alguns prestadores tecnológicos, como Google e Meta, podem tratar dados fora do Espaço Económico Europeu quando os respetivos serviços forem ativados por consentimento.</p>
+            <p>Nessas situações, a transferência deve assentar em mecanismos reconhecidos pelo RGPD, incluindo decisões de adequação aplicáveis, o EU-US Data Privacy Framework quando aplicável, Standard Contractual Clauses ou medidas contratuais e técnicas equivalentes.</p>
+            <p>A NexusVora configura estas ferramentas para reduzir a recolha de dados ao mínimo necessário, incluindo a utilização de Google Analytics 4 com anonimização de IP e sinais de publicidade desativados quando não forem necessários.</p>
         </div>
     </div>
 

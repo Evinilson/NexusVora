@@ -46,6 +46,7 @@ class ContactController extends Controller
             Mail::to('geral@nexusvora.com')->send(new ContactFormMail($data));
         } catch (\Exception $e) {
             // Lead is already saved; email delivery can be retried operationally if needed.
+            report($e);
         }
 
         return response()->json(['success' => true]);

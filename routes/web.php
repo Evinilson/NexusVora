@@ -24,7 +24,9 @@ Route::get('/sobre-nos', function () {
 Route::get('/contacto', function () {
     return view('contacto');
 })->name('contacto');
-Route::post('/contacto', [\App\Http\Controllers\ContactController::class, 'submit'])->name('contacto.submit');
+Route::post('/contacto', [\App\Http\Controllers\ContactController::class, 'submit'])
+    ->middleware('throttle:5,1')
+    ->name('contacto.submit');
 
 Route::get('/termos-servico', function () {
     return view('termos');
@@ -57,7 +59,9 @@ Route::get('/sitemap.xml', function () {
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.store');
+    Route::post('/login', [AdminAuthController::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('login.store');
 
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
