@@ -18,7 +18,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            return redirect()->route('admin.login')->withErrors(['email' => 'A sessão expirou. Por favor inicia sessão novamente.']);
+        });
     })->create();
 
 $app->usePublicPath(base_path('public_html'));

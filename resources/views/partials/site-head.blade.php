@@ -2,9 +2,7 @@
     $siteUrl = url('/');
     $currentUrl = url()->current();
     $logoUrl = asset('img/logo/logo_100X100.png');
-    $faviconPngUrl = asset('favicon.png');
     $faviconSvgUrl = asset('favicon.svg');
-    $faviconIcoUrl = asset('favicon.ico');
 
     $seo = [
         'home' => [
@@ -94,10 +92,7 @@
 <meta name="twitter:title" content="{{ $pageTitle }}">
 <meta name="twitter:description" content="{{ $description }}">
 <meta name="twitter:image" content="{{ $logoUrl }}">
-<link rel="icon" href="{{ $faviconPngUrl }}" type="image/png" sizes="96x96">
 <link rel="icon" href="{{ $faviconSvgUrl }}" type="image/svg+xml">
-<link rel="shortcut icon" href="{{ $faviconIcoUrl }}">
-<link rel="apple-touch-icon" href="{{ $faviconPngUrl }}">
 <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
