@@ -21,9 +21,12 @@
 
     RewriteEngine On
 
-    # Redirect www to non-www
-    RewriteCond %{HTTP_HOST} ^www\.nexusvora\.com [NC]
-    RewriteRule ^(.*)$ https://nexusvora.com/$1 [L,R=301]
+    # Canonical domain: force HTTPS and the non-www host in a single redirect.
+    # This prevents the http/www variants from competing with https://nexusvora.com
+    # for indexing and consolidates all SEO signals on one URL.
+    RewriteCond %{HTTPS} !=on [OR]
+    RewriteCond %{HTTP_HOST} !^nexusvora\.com$ [NC]
+    RewriteRule ^ https://nexusvora.com%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
