@@ -6,8 +6,8 @@
 
     $seo = [
         'home' => [
-            'title' => 'NexusVora - Agência Full-Service | Web, Marketing Digital e IA',
-            'description' => 'NexusVora é uma agência de marketing digital full-service em Portugal, especializada em desenvolvimento web, SEO, Google Ads, Meta Ads, redes sociais e automação com IA.',
+            'title' => 'Desenvolvimento Web, Software e IA no Porto | NexusVora',
+            'description' => 'Criamos websites que geram contactos, software à medida, integrações e automações com IA para empresas que querem crescer. Transforme processos manuais em resultados.',
         ],
         'services' => [
             'title' => 'Serviços - NexusVora | Marketing Digital Full-Service',

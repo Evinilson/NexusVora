@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.site-head')
-    <title>NexusVora — Agência Full-Service | Web, Marketing Digital e IA</title>
+    <title>Desenvolvimento Web, Software e IA no Porto | NexusVora</title>
 
     <style>
         *, *::before, *::after {
@@ -1053,17 +1053,18 @@
             <div class="hero-content">
                 <div class="hero-badge">
                     <div class="hero-badge-dot"></div>
-                    Agência Full-Service · Web · Ads · SEO · IA
+                    Desenvolvimento Web · Software · Automação com IA
                 </div>
 
                 <h1>
-                    Transformamos o seu negócio numa<br>
-                    <span class="grad-text">máquina de crescimento digital.</span>
+                    Websites, sistemas e automações com IA<br>
+                    <span class="grad-text">para empresas que querem crescer.</span>
                 </h1>
 
                 <p>
-                    Da identidade visual à automação com IA — desenvolvemos sites, gerimos campanhas e implementamos
-                    estratégias que geram resultados mensuráveis para PMEs e concessionários.
+                    Transformamos a forma como a sua empresa trabalha e cresce: criamos websites que captam clientes,
+                    software à medida, integrações e automações com IA que reduzem erros, eliminam tarefas manuais
+                    e dão mais controlo à sua equipa.
                 </p>
 
                 <div class="hero-actions">
@@ -1169,8 +1170,8 @@
             <div class="services-header">
                 <div>
                     <div class="section-tag">O que fazemos</div>
-                    <h2 class="section-title">Serviços que geram<br>resultados reais</h2>
-                    <p class="section-sub">Uma suite completa de serviços digitais, desenhada para o crescimento de PMEs e concessionários automóveis.</p>
+                    <h2 class="section-title">Tecnologia para vender,<br>organizar e escalar</h2>
+                    <p class="section-sub">Do website que traz contactos ao sistema que elimina trabalho manual: soluções digitais pensadas para o crescimento real das PMEs.</p>
                 </div>
                 <a href="{{ route('services') }}" class="btn-ghost btn-ghost--project" style="white-space: nowrap;"><span>Ver todos os serviços</span></a>
             </div>
@@ -1292,8 +1293,8 @@
         <div class="section-inner">
             <div style="text-align: center;">
                 <div class="section-tag">Porquê a NexusVora</div>
-                <h2 class="section-title" style="max-width: 600px; margin: 0 auto 12px;">Não somos mais uma agência.<br>Somos o vosso parceiro de crescimento.</h2>
-                <p class="section-sub" style="margin: 0 auto;">Focamo-nos exclusivamente na região do Porto, conhecemos o mercado local, os consumidores e os comportamentos que fazem a diferença.</p>
+                <h2 class="section-title" style="max-width: 600px; margin: 0 auto 12px;">Não somos apenas uma agência.<br>Somos o vosso parceiro tecnológico.</h2>
+                <p class="section-sub" style="margin: 0 auto;">Juntamos desenvolvimento, operações e crescimento digital para transformar problemas do dia a dia em soluções que fazem a empresa avançar.</p>
             </div>
 
             <div class="why-grid">

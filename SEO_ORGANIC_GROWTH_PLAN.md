@@ -11,18 +11,18 @@
 
 ### Missão
 
-Fazer da NexusVora uma escolha visível e credível para PMEs e concessionários que procuram serviços de marketing digital na região do Porto, Gaia e Maia. O objetivo não é gerar visitas vazias; é gerar **pedidos de diagnóstico e propostas de empresas com potencial real de compra**.
+Fazer da NexusVora uma escolha visível e credível para PMEs que procuram desenvolvimento web, software à medida, automação com IA e crescimento digital na região do Porto, Gaia e Maia. O objetivo não é gerar visitas vazias; é gerar **pedidos de diagnóstico e propostas de empresas com potencial real de compra**.
 
 ### Objetivo a 90 dias
 
 Construir a base para que a NexusVora deixe de depender quase só de pesquisas pelo próprio nome e passe a aparecer para pesquisas comerciais não associadas à marca, como:
 
-- `agência de marketing digital porto`;
-- `seo porto`;
+- `desenvolvimento web porto`;
+- `software à medida`;
+- `automação de processos com ia`;
 - `criação de sites porto`;
+- `seo porto`;
 - `google ads porto`;
-- `gestão de redes sociais porto`;
-- `marketing digital para concessionários`.
 
 Não é realista prometer uma posição específica ou um volume de leads numa data fixa: o ranking depende de concorrência, procura, autoridade e qualidade. A meta controlável é publicar páginas excelentes, provar experiência, obter referências genuínas e medir a evolução semanalmente.
 
@@ -42,6 +42,14 @@ No final dos 90 dias, o site deve ter:
 ### Regra de ouro
 
 Não criar textos, reviews, casos de estudo, moradas, prémios ou clientes inventados. O Google privilegia conteúdo útil e confiança; conteúdo artificial pode prejudicar reputação, conversão e visibilidade a longo prazo.
+
+### Decisão de foco geográfico — 31/07/2026
+
+**Mercado inicial escolhido: Porto**, com Gaia e Maia comunicadas como áreas de serviço próximas quando fizer sentido. A NexusVora não vai tentar competir desde já por pesquisas nacionais genéricas de desenvolvimento web ou criação de sites.
+
+**Porque:** `criação de sites porto` tem intenção local e comercial — a empresa já procura um fornecedor — e está diretamente ligada à oferta de entrada de website. Um foco geográfico permite construir relevância, prova, relações e referências num mercado concreto antes de expandir para o restante país.
+
+**Como aplicar:** a homepage mantém a proposta ampla (websites, software, integrações e IA); as primeiras páginas comerciais usam o Porto quando a intenção for local. Software à medida e automação podem manter uma linguagem nacional quando forem páginas de maior valor, sem criar versões geográficas duplicadas.
 
 ---
 
@@ -174,30 +182,30 @@ Dar ao Google uma página clara para cada serviço e intenção comercial import
 
 ### 5.1 Definir prioridades de pesquisa
 
-**Cluster A — prioridade máxima e local:**
+**Cluster A — prioridade máxima, com foco no Porto:**
 
-1. `agência de marketing digital porto`
-2. `seo porto`
-3. `criação de sites porto`
-4. `google ads porto`
+1. `desenvolvimento web porto`
+2. `software à medida`
+3. `automação de processos com ia`
+4. `criação de sites porto`
 
 **Cluster B — prioridade seguinte:**
 
-5. `gestão de redes sociais porto`
-6. `marketing digital para concessionários`
-7. `automação ia para empresas`
+5. `ia para empresas`
+6. `seo porto`
+7. `google ads porto`
 
 Não criar automaticamente clones para Porto, Gaia e Maia. Uma página “SEO Porto” e outra quase igual “SEO Gaia” serão conteúdo pobre/duplicado. Gaia e Maia devem aparecer naturalmente como áreas de serviço e em conteúdo com contexto real.
 
 ### 5.2 Nova arquitetura recomendada
 
-- [ ] `/agencia-marketing-digital-porto` — página pilar / principal oferta local.
+- [ ] `/criacao-sites-porto` — página de websites profissionais que captam contactos.
+- [ ] `/software-a-medida` — página para sistemas, integrações e operações específicas.
+- [ ] `/automacao-ia-empresas` — página para automação de processos e IA aplicada.
 - [ ] `/seo-porto` — página de serviço SEO local e orgânico.
-- [ ] `/criacao-sites-porto` — página de websites profissionais.
 - [ ] `/google-ads-porto` — página de aquisição paga e gestão Google Ads.
 - [ ] `/gestao-redes-sociais-porto` — página de social media.
-- [ ] `/marketing-digital-concessionarios` — página vertical/nicho, se existirem provas e experiência real.
-- [ ] `/automacao-ia-empresas` — página para automação, chatbots e integrações.
+- [ ] `/ecommerce-operacoes` — página vertical para e-commerce, stock, encomendas e integrações, após reunir prova e autorização.
 - [ ] `/casos-de-estudo` — índice de provas reais.
 - [ ] `/blog` ou `/recursos` — índice editorial.
 
@@ -218,9 +226,9 @@ Não criar automaticamente clones para Porto, Gaia e Maia. Uma página “SEO Po
 
 ### 5.4 Texto inicial da homepage
 
-- [ ] Atualizar title para: `Agência de Marketing Digital no Porto | SEO, Google Ads e Websites | NexusVora`.
-- [ ] Atualizar H1 para uma promessa clara e geográfica, por exemplo: `Agência de marketing digital no Porto para PMEs que querem crescer`.
-- [ ] Ligar a homepage às quatro páginas do Cluster A com âncoras descritivas, não apenas “ver serviço”.
+- [x] Atualizar title para: `Desenvolvimento Web, Software e IA no Porto | NexusVora`. Implementado em 31/07/2026.
+- [x] Atualizar meta description, H1, texto do hero e mensagem de serviços para comunicar websites, software à medida e automação com IA. Implementado em 31/07/2026.
+- [ ] Ligar a homepage às quatro páginas do Cluster A com âncoras descritivas, não apenas “ver serviço”, quando essas páginas existirem.
 - [ ] Manter design/hero; não esconder conteúdo essencial em animações que possam atrasar ou confundir a leitura.
 
 **Porque esta é a maior prioridade:** hoje a página de serviços agrega muitos temas e o Google não tem uma URL precisa para servir a quem procura cada serviço. A arquitetura cria relevância antes mesmo de existir grande autoridade externa.

@@ -138,7 +138,7 @@
                     </svg>
                     <span class="nav-logo-text"><span>Nexus</span><span>Vora</span></span>
                 </a>
-                <p>Agência de marketing digital full-service focada em PMEs e concessionários automóveis da região do Porto, Gaia e Maia.</p>
+                <p>Desenvolvimento web, software à medida e automação com IA para PMEs no Porto, Gaia e Maia.</p>
             </div>
 
             <div class="footer-col">

@@ -370,7 +370,7 @@
             <h2>Quem Somos</h2>
         </div>
         <div class="section-body">
-            <p>A <strong>NexusVora</strong> é uma agência de marketing digital full-service focada no crescimento de PMEs e concessionários automóveis na região do Porto, Gaia e Maia.</p>
+            <p>A <strong>NexusVora</strong> presta serviços de desenvolvimento web, software à medida, automação com IA e crescimento digital a empresas na região do Porto, Gaia e Maia.</p>
             <p>Para efeitos do Regulamento Geral sobre a Proteção de Dados (RGPD), a NexusVora é o <strong>Responsável pelo Tratamento</strong> dos seus dados pessoais.</p>
             <div class="highlight-box">
                 <p><strong>NexusVora</strong> · Porto, Portugal · <a href="mailto:geral@nexusvora.com" class="inline-link">geral@nexusvora.com</a></p>
