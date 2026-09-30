@@ -35,6 +35,11 @@ class HourPackage extends Model
         return $this->hasMany(HourPackageEntry::class)->orderByDesc('performed_at');
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(ProjectTask::class)->orderBy('due_date');
+    }
+
     // Horas já utilizadas
     public function usedHours(): float
     {

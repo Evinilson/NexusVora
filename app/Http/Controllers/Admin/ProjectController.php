@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\ProjectTask;
+use App\Models\HourPackage;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
@@ -41,8 +42,19 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {
-        $project->load(['client', 'tasks', 'documentLogs']);
-        return view('admin.projects.show', compact('project'));
+        $project->load(['client', 'tasks.hourPackage', 'documentLogs']);
+        $hourPackages = HourPackage::query()
+            ->where('status', 'ativo')
+            ->where(function ($query) use ($project) {
+                $query->where('project_id', $project->id)
+                    ->orWhere(function ($clientPackages) use ($project) {
+                        $clientPackages->whereNull('project_id')->where('client_id', $project->client_id);
+                    });
+            })
+            ->orderBy('title')
+            ->get();
+
+        return view('admin.projects.show', compact('project', 'hourPackages'));
     }
 
     public function edit(Project $project)
@@ -77,9 +89,14 @@ class ProjectController extends Controller
             'description' => ['nullable', 'string'],
             'due_date'    => ['nullable', 'date'],
             'status'      => ['required', 'in:a_fazer,em_progresso,concluido,bloqueado'],
+            'hour_package_id' => ['nullable', 'exists:hour_packages,id'],
         ]);
 
         $data['sort_order'] = $project->tasks()->max('sort_order') + 1;
+
+        if (! empty($data['hour_package_id'])) {
+            abort_unless(HourPackage::whereKey($data['hour_package_id'])->where('client_id', $project->client_id)->exists(), 422);
+        }
 
         $project->tasks()->create($data);
 
@@ -104,7 +121,12 @@ class ProjectController extends Controller
             'description' => ['nullable', 'string'],
             'due_date'    => ['nullable', 'date'],
             'status'      => ['required', 'in:a_fazer,em_progresso,concluido,bloqueado'],
+            'hour_package_id' => ['nullable', 'exists:hour_packages,id'],
         ]);
+
+        if (! empty($data['hour_package_id'])) {
+            abort_unless(HourPackage::whereKey($data['hour_package_id'])->where('client_id', $project->client_id)->exists(), 422);
+        }
 
         $task->update($data);
 
