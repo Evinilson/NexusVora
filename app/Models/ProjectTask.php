@@ -21,7 +21,28 @@ class ProjectTask extends Model
 
     protected $casts = [
         'due_date' => 'date',
+        'completed_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $task) {
+            if ($task->status !== 'concluido') {
+                $task->completed_at = null;
+
+                return;
+            }
+
+            // Numa tarefa concluída, a data da tarefa é a data de conclusão.
+            if ($task->isDirty('due_date') && $task->due_date) {
+                $task->completed_at = $task->due_date;
+            } elseif ($task->isDirty('status')) {
+                $task->completed_at = $task->due_date && $task->due_date->lte(today())
+                    ? $task->due_date
+                    : now();
+            }
+        });
+    }
 
     public function project(): BelongsTo
     {

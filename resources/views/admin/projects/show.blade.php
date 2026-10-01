@@ -68,6 +68,9 @@
                         @if($task->description)
                         <div style="font-size:11px; color:var(--muted); margin-top:2px;">{{ $task->description }}</div>
                         @endif
+                        @if($task->hourPackage)
+                        <div style="font-size:11px; color:var(--cyan); margin-top:3px;">Pacote: {{ $task->hourPackage->title }}</div>
+                        @endif
                     </div>
 
                     @if($task->due_date)
@@ -82,6 +85,7 @@
                         data-description="{{ $task->description }}"
                         data-status="{{ $task->status }}"
                         data-due-date="{{ $task->due_date?->format('Y-m-d') }}"
+                        data-hour-package-id="{{ $task->hour_package_id }}"
                         style="background:none; border:none; color:var(--cyan); cursor:pointer; font-size:11px; padding:2px 4px;">
                         Editar
                     </button>
@@ -117,6 +121,12 @@
                     </div>
                     <button type="submit" style="background:var(--cyan); color:#000; font-weight:700; font-size:13px; padding:9px 18px; border-radius:8px; border:none; cursor:pointer; white-space:nowrap;">Adicionar</button>
                 </div>
+                @if($hourPackages->isNotEmpty())
+                <select name="hour_package_id" style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:8px; font-size:13px;">
+                    <option value="">Sem pacote de horas associado</option>
+                    @foreach($hourPackages as $hourPackage)<option value="{{ $hourPackage->id }}">{{ $hourPackage->title }} ({{ number_format($hourPackage->remainingHours(), 1) }}h disponíveis)</option>@endforeach
+                </select>
+                @endif
             </form>
         </div>
 
@@ -263,6 +273,15 @@
                             <option value="bloqueado">Bloqueado</option>
                         </select>
                     </div>
+                    @if($hourPackages->isNotEmpty())
+                    <div style="grid-column:1 / -1;">
+                        <label for="edit-task-package" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Pacote de horas</label>
+                        <select id="edit-task-package" name="hour_package_id" style="width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; font-size:13px;">
+                            <option value="">Sem pacote associado</option>
+                            @foreach($hourPackages as $hourPackage)<option value="{{ $hourPackage->id }}">{{ $hourPackage->title }}</option>@endforeach
+                        </select>
+                    </div>
+                    @endif
                     <div>
                         <label for="edit-task-due-date" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Prazo</label>
                         <input id="edit-task-due-date" type="date" name="due_date"
@@ -306,6 +325,7 @@ function toggleTask(taskId, newStatus) {
     var descriptionInput = document.getElementById('edit-task-description');
     var statusInput = document.getElementById('edit-task-status');
     var dueDateInput = document.getElementById('edit-task-due-date');
+    var hourPackageInput = document.getElementById('edit-task-package');
     var cancelButton = document.getElementById('cancel-edit-task');
     var activeButton = null;
 
@@ -315,6 +335,7 @@ function toggleTask(taskId, newStatus) {
         titleInput.value = button.dataset.title || '';
         descriptionInput.value = button.dataset.description || '';
         statusInput.value = button.dataset.status || 'a_fazer';
+        if (hourPackageInput) hourPackageInput.value = button.dataset.hourPackageId || '';
 
         if (dueDateInput._flatpickr) {
             dueDateInput._flatpickr.setDate(button.dataset.dueDate || null, false);

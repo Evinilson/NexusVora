@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
   @include('partials.site-head')
-  <title>Serviços — NexusVora | Marketing Digital Full-Service</title>
+  <title>Serviços Digitais para Empresas no Porto | NexusVora</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -68,6 +68,33 @@
     .page-header p {
       font-size: 1.02rem; color: var(--text-muted); line-height: 1.75; text-wrap: pretty;
     }
+
+    /* ── SERVICE HUB ── */
+    .service-hub { padding: 0 5vw 88px; background: var(--navy2); position: relative; }
+    .service-hub-inner { max-width: 1100px; margin: 0 auto; }
+    .service-hub-intro { display:flex; justify-content:space-between; gap:28px; align-items:end; margin-bottom:26px; }
+    .service-hub-intro h2 { font-size:clamp(1.45rem,2.6vw,2.15rem); color:#fff; letter-spacing:-.025em; max-width:560px; }
+    .service-hub-intro p { max-width:370px; color:var(--text-muted); line-height:1.65; font-size:.9rem; }
+    .service-card-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .service-hub-card {
+      position:relative; display:flex; min-height:238px; flex-direction:column; padding:24px;
+      overflow:hidden; border:1px solid var(--navy-border); border-radius:18px;
+      background:linear-gradient(145deg, rgba(17,25,54,.96), rgba(10,15,46,.84));
+      color:var(--text); text-decoration:none; isolation:isolate;
+      transition:transform .32s ease, border-color .32s ease, box-shadow .32s ease;
+    }
+    .service-hub-card::before { content:''; position:absolute; inset:0; opacity:0; z-index:-1; background:radial-gradient(circle at 100% 0, var(--card-glow), transparent 58%); transition:opacity .32s ease; }
+    .service-hub-card::after { content:''; position:absolute; left:0; right:0; top:0; height:2px; background:var(--card-grad); transform:scaleX(.25); transform-origin:left; transition:transform .32s ease; }
+    .service-hub-card:hover { transform:translateY(-7px); border-color:var(--card-border); box-shadow:0 22px 46px rgba(0,0,0,.28); }
+    .service-hub-card:hover::before { opacity:1; }
+    .service-hub-card:hover::after { transform:scaleX(1); }
+    .service-hub-icon { width:46px; height:46px; display:grid; place-items:center; margin-bottom:24px; border:1px solid var(--card-border); border-radius:13px; background:var(--card-bg); color:var(--card-color); transition:transform .32s ease; }
+    .service-hub-card:hover .service-hub-icon { transform:rotate(-5deg) scale(1.07); }
+    .service-hub-card h3 { color:#fff; font-size:1.08rem; letter-spacing:-.015em; margin-bottom:8px; }
+    .service-hub-card p { color:var(--text-muted); font-size:.83rem; line-height:1.6; }
+    .service-hub-link { display:flex; align-items:center; gap:8px; margin-top:auto; padding-top:20px; color:var(--card-color); font-size:.79rem; font-weight:800; letter-spacing:.02em; }
+    .service-hub-link svg { transition:transform .25s ease; }
+    .service-hub-card:hover .service-hub-link svg { transform:translateX(4px); }
 
     /* ── SERVICE NAV PILLS ── */
     .service-nav {
@@ -283,7 +310,7 @@
     .step-text strong { color: #fff; font-weight: 700; display: block; margin-bottom: 1px; }
 
     /* ══════════════════════════════
-       NEXUSAI — PREMIUM SECTION
+       NEXUSAI: PREMIUM SECTION
     ══════════════════════════════ */
     #nexusai {
       background: linear-gradient(180deg, #07091A 0%, #0D0B1E 100%) !important;
@@ -465,11 +492,16 @@
       .results-grid { grid-template-columns: 1fr 1fr; }
       .nav-links { display: none; }
       .footer-top { grid-template-columns: 1fr 1fr; }
+      .service-card-grid { grid-template-columns:repeat(2,1fr); }
+      .service-hub-intro { align-items:start; flex-direction:column; }
     }
 
     @media (max-width: 640px) {
       .footer-top { grid-template-columns: 1fr; }
       .footer-bottom { align-items: flex-start; flex-direction: column; }
+      .service-hub { padding-bottom:58px; }
+      .service-card-grid { grid-template-columns:1fr; }
+      .service-hub-card { min-height:210px; }
     }
   </style>
 </head>
@@ -482,521 +514,63 @@
   <div class="hero-dots"></div>
   <div class="page-header-inner">
     <div class="section-tag">Serviços</div>
-    <h1>Tudo o que o seu negócio precisa<br>para <span class="grad-text">crescer online</span></h1>
-    <p>Cinco serviços complementares, uma estratégia integrada. Cada canal potencia o outro — para resultados consistentes e mensuráveis.</p>
+    <h1>Tecnologia que ajuda a sua empresa<br>a <span class="grad-text">vender, organizar e crescer.</span></h1>
+    <p>Desenvolvimento web, software, e-commerce, marketing digital, marca e automação com IA. Escolha o serviço de que a sua empresa precisa.</p>
   </div>
 </div>
 
-<!-- SERVICE NAV PILLS -->
-<div class="service-nav">
-  <div class="service-nav-inner">
-    <a href="#web" class="service-pill active" data-section="web">
-      <span class="pill-dot" style="background:#00D4FF"></span>Desenvolvimento Web
-    </a>
-    <a href="#social" class="service-pill" data-section="social">
-      <span class="pill-dot" style="background:#4A6CF7"></span>Redes Sociais
-    </a>
-    <a href="#trafego" class="service-pill" data-section="trafego">
-      <span class="pill-dot" style="background:#8B3FDB"></span>Tráfego & Leads
-    </a>
-    <a href="#nexusai" class="service-pill ai-pill" data-section="nexusai">
-      <span class="pill-dot" style="background:#F5A623"></span>NexusAI
-    </a>
-    <a href="#marca" class="service-pill" data-section="marca">
-      <span class="pill-dot" style="background:#4A6CF7"></span>Marca & Estratégia
-    </a>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     01 · DESENVOLVIMENTO WEB
-══════════════════════════════════════ -->
-<section class="service-section" id="web" data-section="web">
-  <div class="service-inner">
-    <div class="service-number">01</div>
-    <div class="two-col">
-      <div class="service-content fade-up">
-        <div class="service-icon-wrap" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        </div>
-        <h2>Desenvolvimento Web<br>Profissional</h2>
-        <div class="service-subtitle">Criação de sites, lojas online e plataformas digitais para empresas que querem crescer</div>
-        <p class="service-desc">O vosso site é o vosso melhor comercial — trabalha 24 horas por dia, 7 dias por semana. Na NexusVora desenvolvemos sites profissionais para todo o tipo de negócios, desde PMEs e concessionários até e-commerce e plataformas SaaS, sempre com a tecnologia certa para cada cliente e foco num único objetivo: converter visitantes em clientes.</p>
-
-        <div class="areas-title">Áreas de atuação</div>
-        <div class="areas-grid">
-          <div class="area-item">
-            <h4>Sites Institucionais</h4>
-            <p>Design personalizado, estrutura SEO e foco em conversão. A sua marca representada com profissionalismo 24/7.</p>
-          </div>
-          <div class="area-item">
-            <h4>Landing Pages</h4>
-            <p>Páginas de alta conversão para campanhas de Ads, lançamentos de produto ou captação de leads qualificados.</p>
-          </div>
-          <div class="area-item">
-            <h4>Lojas Online / E-commerce</h4>
-            <p>Lojas prontas para vender — gestão de stock, pagamentos e experiência de compra otimizada.</p>
-          </div>
-          <div class="area-item">
-            <h4>Sites para Concessionários</h4>
-            <p>Especialistas em sites para automóvel — fichas de viaturas, formulários de test drive e pesquisa de stock.</p>
-          </div>
-          <div class="area-item">
-            <h4>Plataformas & SaaS</h4>
-            <p>Aplicações web personalizadas — integrações, automatizações e sistemas internos à medida.</p>
-          </div>
-          <div class="area-item">
-            <h4>Redesign & Migração</h4>
-            <p>Site desatualizado? Redesign profissional mantendo o histórico SEO e melhorando a performance.</p>
-          </div>
-        </div>
-
-        <div class="included-title">Sempre incluído</div>
-        <ul class="check-list">
-          <li><span class="chk" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Design 100% personalizado — sem templates genéricos</li>
-          <li><span class="chk" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Site responsivo — mobile, tablet e desktop</li>
-          <li><span class="chk" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>SEO técnico base desde o primeiro dia</li>
-          <li><span class="chk" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Certificado SSL, hosting e domínio configurado</li>
-          <li><span class="chk" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Manutenção mensal — atualizações, backups e segurança</li>
-          <li><span class="chk" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/></svg></span>Formação ao cliente para gestão autónoma</li>
-        </ul>
-
-        <a href="{{ route('home') }}#cta-final" class="btn-primary">
-          Quero o meu site
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-
-      <div class="service-visual fade-up">
-        <div class="sidebar-card">
-          <div class="card-section-title">Resultados Típicos</div>
-          <div class="results-grid">
-            <div class="result-item"><div class="result-val">+180%</div><div class="result-label">Taxa de conversão vs. site anterior</div></div>
-            <div class="result-item"><div class="result-val">&lt;2s</div><div class="result-label">Tempo de carregamento médio</div></div>
-            <div class="result-item"><div class="result-val">98/100</div><div class="result-label">Score PageSpeed Insights</div></div>
-            <div class="result-item"><div class="result-val">30 dias</div><div class="result-label">Prazo médio de entrega</div></div>
-          </div>
-          <div class="card-section-title" style="padding-top:16px;border-top:1px solid var(--navy-border);">Para cada perfil</div>
-          <table class="info-table">
-            <thead><tr><th>O seu perfil</th><th>A nossa abordagem</th></tr></thead>
-            <tbody>
-              <tr><td>Quer gerir o site sozinho</td><td>CMS intuitivo com formação incluída</td></tr>
-              <tr><td>Precisa de funcionalidades específicas</td><td>Desenvolvimento à medida</td></tr>
-              <tr><td>Tem loja online</td><td>E-commerce otimizado para vender</td></tr>
-              <tr><td>Site desatualizado</td><td>Redesign com foco em conversão e SEO</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<!-- SERVICE HUB: each card leads to an indexable service page -->
+<section class="service-hub" aria-labelledby="service-hub-title">
+  <div class="service-hub-inner">
+    <div class="service-hub-intro fade-up">
+      <h2 id="service-hub-title">Escolha o próximo passo<br><span class="grad-text">para a sua empresa.</span></h2>
+      <p>Cada serviço tem uma página própria, com uma solução clara, casos de utilização e um caminho direto para avançar.</p>
     </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════
-     02 · REDES SOCIAIS
-══════════════════════════════════════ -->
-<section class="service-section" id="social" data-section="social">
-  <div class="service-inner">
-    <div class="service-number">02</div>
-    <div class="two-col reverse">
-      <div class="service-content fade-up">
-        <div class="service-icon-wrap" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.2);">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="13" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="13" width="9" height="9" rx="1.5"/><rect x="13" y="13" width="9" height="9" rx="1.5"/></svg>
-        </div>
-        <h2>Gestão de Redes Sociais<br>Profissional</h2>
-        <div class="service-subtitle">Conteúdo estratégico, criativos de alto nível e gestão diária para marcas que querem crescer no digital</div>
-        <p class="service-desc">A presença nas redes sociais é frequentemente o primeiro contacto que um potencial cliente tem com a sua marca. Na NexusVora não nos limitamos a publicar conteúdo — criamos estratégias editoriais completas que constroem comunidade, geram confiança e transformam seguidores em clientes.</p>
-
-        <div class="areas-title">Plataformas que gerimos</div>
-        <table class="info-table">
-          <thead><tr><th>Plataforma</th><th>Foco</th></tr></thead>
-          <tbody>
-            <tr><td>Instagram</td><td>Identidade visual, reels de alto impacto e crescimento de comunidade</td></tr>
-            <tr><td>Facebook</td><td>Alcance orgânico, gestão de página e integração com Meta Ads</td></tr>
-            <tr><td>TikTok</td><td>Conteúdo viral, tendências e alcance a novas audiências</td></tr>
-            <tr><td>YouTube</td><td>Vídeos longos, shorts e construção de autoridade de marca</td></tr>
-          </tbody>
-        </table>
-
-        <div class="areas-title">Tipo de conteúdo que produzimos</div>
-        <div class="areas-grid">
-          <div class="area-item">
-            <h4>Posts & Infográficos</h4>
-            <p>Design gráfico personalizado, alinhado com a identidade visual da marca.</p>
-          </div>
-          <div class="area-item">
-            <h4>Reels & Vídeos Curtos</h4>
-            <p>Formato de maior alcance orgânico. Guião, edição e legendas otimizadas.</p>
-          </div>
-          <div class="area-item">
-            <h4>Stories</h4>
-            <p>Conteúdo dinâmico que mantém a marca no topo da atenção diariamente.</p>
-          </div>
-          <div class="area-item">
-            <h4>Criativos para Ads</h4>
-            <p>Peças desenvolvidas especificamente para campanhas pagas, com foco em conversão.</p>
-          </div>
-        </div>
-
-        <div class="included-title">Sempre incluído</div>
-        <ul class="check-list">
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Estratégia de conteúdo mensal personalizada</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Calendário editorial com aprovação prévia pelo cliente</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Design gráfico 100% personalizado — sem templates</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Gestão de comentários e mensagens diretas</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Integração estratégica com campanhas pagas</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Reunião mensal de alinhamento estratégico</li>
-        </ul>
-        <a href="{{ route('home') }}#cta-final" class="btn-primary">
-          Pedir proposta gratuita
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-      <div class="service-visual fade-up">
-        <div class="sidebar-card">
-          <div class="card-section-title">Resultados Típicos</div>
-          <div class="results-grid">
-            <div class="result-item"><div class="result-val">+320%</div><div class="result-label">Crescimento de seguidores em 6 meses</div></div>
-            <div class="result-item"><div class="result-val">4.8%</div><div class="result-label">Taxa de engagement média</div></div>
-            <div class="result-item"><div class="result-val">16×</div><div class="result-label">Publicações mensais mínimo</div></div>
-            <div class="result-item"><div class="result-val">48h</div><div class="result-label">Aprovação prévia antes de publicar</div></div>
-          </div>
-          <div class="card-section-title" style="padding-top:16px;border-top:1px solid var(--navy-border);">O que nos diferencia</div>
-          <div class="process-steps">
-            <div class="process-step">
-              <div class="step-num">✓</div>
-              <div class="step-text"><strong>Aprovação prévia de todos os conteúdos</strong>Controlo total sobre o que sai em nome da sua marca</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">✓</div>
-              <div class="step-text"><strong>Criativos de alto nível — sem templates</strong>Cada peça desenhada de raiz para a sua identidade</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">✓</div>
-              <div class="step-text"><strong>Sem métricas de vaidade</strong>Reportamos o que realmente impacta o negócio</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════
-     03 · TRÁFEGO, LEADS E CONVERSÕES
-══════════════════════════════════════ -->
-<section class="service-section" id="trafego" data-section="trafego">
-  <div class="service-inner">
-    <div class="service-number">03</div>
-    <div class="two-col">
-      <div class="service-content fade-up">
-        <div class="service-icon-wrap" style="background:rgba(139,63,219,0.1);border:1px solid rgba(139,63,219,0.2);">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8B3FDB" stroke-width="1.8" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        </div>
-        <h2>Tráfego, Leads<br>e Conversões</h2>
-        <div class="service-subtitle">Google Ads, Meta Ads e SEO numa estratégia integrada que faz o seu negócio crescer todos os dias</div>
-        <p class="service-desc">Não basta estar online — é preciso ser encontrado pelas pessoas certas, no momento certo. Na NexusVora combinamos publicidade paga e SEO numa estratégia única: o Google Ads e o Meta Ads geram resultados imediatos, o SEO constrói autoridade duradoura, e os três juntos criam um funil de crescimento contínuo.</p>
-
-        <!-- Google Ads -->
-        <div class="sub-service">
-          <div class="sub-service-header">
-            <div class="sub-service-icon" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.2);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            </div>
-            <h3>Google Ads — Seja encontrado por quem quer comprar</h3>
-          </div>
-          <p>Gerimos campanhas Search, Display e Performance Max com segmentação precisa e foco em conversões reais — não apenas cliques. Cada euro investido é rastreado e justificado.</p>
-          <div class="sub-results">
-            <div class="sub-result-chip"><strong>3.2×</strong><span>ROAS médio 90 dias</span></div>
-            <div class="sub-result-chip"><strong>-41%</strong><span>Custo por clique</span></div>
-            <div class="sub-result-chip"><strong>+89%</strong><span>Leads qualificados</span></div>
-          </div>
-        </div>
-
-        <!-- Meta Ads -->
-        <div class="sub-service">
-          <div class="sub-service-header">
-            <div class="sub-service-icon" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-            </div>
-            <h3>Meta Ads — Facebook e Instagram</h3>
-          </div>
-          <p>Campanhas que cobrem todo o funil — do awareness à conversão — com criativos de alto impacto, segmentação avançada e retargeting para recuperar quem ainda não converteu.</p>
-          <div class="sub-results">
-            <div class="sub-result-chip"><strong>4.2×</strong><span>ROAS médio</span></div>
-            <div class="sub-result-chip"><strong>-38%</strong><span>Custo por lead</span></div>
-            <div class="sub-result-chip"><strong>+210%</strong><span>Alcance vs. orgânico</span></div>
-          </div>
-        </div>
-
-        <!-- SEO -->
-        <div class="sub-service">
-          <div class="sub-service-header">
-            <div class="sub-service-icon" style="background:rgba(139,63,219,0.1);border:1px solid rgba(139,63,219,0.2);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B3FDB" stroke-width="2" stroke-linecap="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
-            </div>
-            <h3>SEO — Visibilidade orgânica que não para de crescer</h3>
-          </div>
-          <p>SEO técnico, criação de conteúdo e construção de autoridade. Tráfego qualificado todos os meses, sem depender exclusivamente de publicidade paga.</p>
-          <div class="sub-results">
-            <div class="sub-result-chip"><strong>+240%</strong><span>Tráfego orgânico 6m</span></div>
-            <div class="sub-result-chip"><strong>Top 3</strong><span>Google keywords</span></div>
-            <div class="sub-result-chip"><strong>∞</strong><span>Sem custo p/ clique</span></div>
-          </div>
-        </div>
-
-        <div class="integration-quote">
-          <strong>Os dados do SEO melhoram as campanhas pagas.</strong> Os melhores anúncios tornam-se conteúdo orgânico. Uma estratégia alimenta a outra — e é por isso que funcionamos diferente.
-        </div>
-
-        <a href="{{ route('home') }}#cta-final" class="btn-primary">
-          Falar com especialista
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-
-      <div class="service-visual fade-up">
-        <div class="sidebar-card">
-          <div class="card-section-title">Porquê uma estratégia integrada?</div>
-          <table class="info-table">
-            <thead><tr><th>Canal</th><th>O que faz</th><th>Quando</th></tr></thead>
-            <tbody>
-              <tr><td>Google Ads</td><td>Captura quem já quer comprar</td><td>Imediato</td></tr>
-              <tr><td>Meta Ads</td><td>Encontra quem ainda não te conhece</td><td>Curto prazo</td></tr>
-              <tr><td>SEO</td><td>Constrói autoridade orgânica duradoura</td><td>Médio/longo</td></tr>
-            </tbody>
-          </table>
-          <div class="card-section-title" style="padding-top:16px;border-top:1px solid var(--navy-border);">O que está sempre incluído</div>
-          <div class="process-steps">
-            <div class="process-step">
-              <div class="step-num">1</div>
-              <div class="step-text"><strong>Auditoria e configuração</strong>Setup completo de conta, pixel, conversões e rastreio</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">2</div>
-              <div class="step-text"><strong>Testes A/B contínuos</strong>Audiências, criativos e copy testados sistematicamente</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">3</div>
-              <div class="step-text"><strong>Otimização semanal</strong>Ajustes de lances, keywords negativas e orçamentos</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">4</div>
-              <div class="step-text"><strong>Relatório mensal detalhado</strong>ROAS, CPL e recomendações de escala transparentes</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════
-     04 · NEXUSAI — PREMIUM
-══════════════════════════════════════ -->
-<section class="service-section" id="nexusai" data-section="nexusai">
-  <div class="service-inner">
-    <div class="service-number" style="color:#F5A623;">04</div>
-    <div class="two-col reverse">
-      <div class="service-content fade-up">
-        <div class="ai-badge"><span class="ai-badge-dot"></span>Produto Premium</div>
-        <div class="service-icon-wrap" style="background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.25);">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="19" cy="5" r="3" fill="#F5A623" opacity=".3"/><circle cx="19" cy="5" r="1.5" fill="#F5A623"/></svg>
-        </div>
-        <h2 class="ai-title"><span class="ai-grad-text">NexusAI</span> — O seu negócio<br>a trabalhar enquanto dorme</h2>
-        <div class="service-subtitle ai-subtitle">Automação de processos, integrações inteligentes e IA aplicada para PMEs que querem crescer sem crescer a equipa</div>
-        <p class="service-desc">A maioria das PMEs perde horas por semana em tarefas repetitivas que uma máquina faz em segundos. Na NexusVora implementamos sistemas de automação inteligente com inteligência artificial que eliminam o trabalho manual, respondem a clientes 24/7, qualificam leads automaticamente e integram todas as ferramentas do seu negócio numa única operação fluída.</p>
-
-        <div class="areas-title">O que automatizamos para si</div>
-        <div class="ai-feature-grid">
-          <div class="ai-feature">
-            <div class="ai-feature-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <h4>Chatbots & Assistentes com IA</h4>
-            <p>Responde a clientes, qualifica leads e agenda reuniões 24/7 — mesmo enquanto a sua equipa dorme.</p>
-          </div>
-          <div class="ai-feature">
-            <div class="ai-feature-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            </div>
-            <h4>Automação de Processos</h4>
-            <p>Conecta CRM, email, redes sociais, faturação e formulários em fluxos automáticos sem erros.</p>
-          </div>
-          <div class="ai-feature">
-            <div class="ai-feature-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            </div>
-            <h4>Email Marketing Automatizado</h4>
-            <p>Sequências que se adaptam ao comportamento — mensagem certa, pessoa certa, momento certo.</p>
-          </div>
-          <div class="ai-feature">
-            <div class="ai-feature-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            </div>
-            <h4>Lead Scoring com IA</h4>
-            <p>A IA analisa e pontua cada lead — a sua equipa comercial foca-se apenas nos que vão fechar.</p>
-          </div>
-          <div class="ai-feature">
-            <div class="ai-feature-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M17.5 17.5l3 3M17.5 20.5l3-3"/></svg>
-            </div>
-            <h4>Integrações entre Sistemas</h4>
-            <p>CRM, ERP, e-commerce, plataformas de reservas — todos os dados fluem automaticamente.</p>
-          </div>
-          <div class="ai-feature">
-            <div class="ai-feature-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-            </div>
-            <h4>Relatórios & Analytics Automáticos</h4>
-            <p>Dashboards em tempo real que agregam Google Ads, Meta, SEO — sem trabalho manual.</p>
-          </div>
-        </div>
-
-        <a href="{{ route('home') }}#cta-final" class="btn-primary btn-ai">
-          Saber mais sobre NexusAI
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-
-      <div class="service-visual fade-up">
-        <div class="sidebar-card ai-sidebar" style="border-color:rgba(245,166,35,0.2);">
-          <style>.sidebar-card.ai-sidebar::before{background:var(--ai-grad)!important;}</style>
-          <div class="card-section-title" style="color:var(--ai-gold);">Antes vs. Depois do NexusAI</div>
-          <table class="before-after">
-            <thead>
-              <tr><th>Antes</th><th>Depois</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Responder manualmente a cada lead</td><td>Chatbot com IA qualifica e responde 24/7</td></tr>
-              <tr><td>Relatórios manuais que demoram horas</td><td>Dashboard automático em tempo real</td></tr>
-              <tr><td>Leads perdidos fora do horário</td><td>Nenhum lead escapa — o sistema nunca dorme</td></tr>
-              <tr><td>Ferramentas desconectadas</td><td>Todos os sistemas integrados e sincronizados</td></tr>
-              <tr><td>Equipa sobrecarregada</td><td>Equipa focada no que gera valor real</td></tr>
-            </tbody>
-          </table>
-          <div class="card-section-title" style="padding-top:16px;border-top:1px solid var(--navy-border);color:var(--ai-gold);">Sempre incluído</div>
-          <div class="process-steps">
-            <div class="process-step">
-              <div class="step-num ai-step-num" style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.25);color:var(--ai-gold);">1</div>
-              <div class="step-text"><strong>Diagnóstico de processos</strong>Mapeamos todas as tarefas repetitivas e oportunidades de automação</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num" style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.25);color:var(--ai-gold);">2</div>
-              <div class="step-text"><strong>Implementação completa</strong>Configuração e integração com as ferramentas que já usa</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num" style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.25);color:var(--ai-gold);">3</div>
-              <div class="step-text"><strong>Formação da equipa</strong>Para gerir o sistema de forma autónoma</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num" style="background:rgba(245,166,35,0.12);border-color:rgba(245,166,35,0.25);color:var(--ai-gold);">4</div>
-              <div class="step-text"><strong>Suporte e otimização contínua</strong>Relatório mensal de desempenho das automações</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ══════════════════════════════════════
-     05 · MARCA, ESTRATÉGIA & VISÃO
-══════════════════════════════════════ -->
-<section class="service-section" id="marca" data-section="marca">
-  <div class="service-inner">
-    <div class="service-number">05</div>
-    <div class="two-col">
-      <div class="service-content fade-up">
-        <div class="service-icon-wrap" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.2);">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <h2>Marca, Estratégia<br>&amp; Visão Digital</h2>
-        <div class="service-subtitle">Do zero ao plano — construímos a identidade da sua marca e a estratégia que a faz crescer com consistência</div>
-        <p class="service-desc">Antes de investir um único euro em publicidade ou redes sociais, há duas perguntas que precisam de resposta: Quem é a sua marca? e Onde quer chegar? Na NexusVora começamos pelo princípio — construímos a identidade visual completa e a estratégia digital que transforma essa marca numa máquina de crescimento.</p>
-
-        <div class="areas-title">Identidade Visual — entregamos</div>
-        <div class="deliverables-grid">
-          <div class="deliverable">
-            <div class="deliverable-icon" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.2);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-            </div>
-            <div class="deliverable-body"><h4>Logótipo Profissional</h4><p>Versão primária, secundária e ícone para todos os contextos</p></div>
-          </div>
-          <div class="deliverable">
-            <div class="deliverable-icon" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.2);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
-            </div>
-            <div class="deliverable-body"><h4>Guia de Identidade Visual</h4><p>Paleta de cores, tipografia e regras de uso da marca</p></div>
-          </div>
-          <div class="deliverable">
-            <div class="deliverable-icon" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.2);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="13" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="13" width="9" height="9" rx="1.5"/><rect x="13" y="13" width="9" height="9" rx="1.5"/></svg>
-            </div>
-            <div class="deliverable-body"><h4>Templates Redes Sociais</h4><p>Posts, stories e capas prontos a usar com a sua identidade</p></div>
-          </div>
-          <div class="deliverable">
-            <div class="deliverable-icon" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.2);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            </div>
-            <div class="deliverable-body"><h4>Manual de Marca Completo</h4><p>O documento definitivo para consistência em todos os pontos de contacto</p></div>
-          </div>
-        </div>
-
-        <div class="areas-title">Estratégia & Visão Digital</div>
-        <ul class="check-list">
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Diagnóstico digital completo — análise honesta do ponto de partida</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Análise de concorrência — oportunidades que os outros não viram</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Definição de público-alvo e personas detalhadas</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Plano de marketing anual — calendário com ações para 12 meses</li>
-          <li><span class="chk" style="background:rgba(74,108,247,0.1);border:1px solid rgba(74,108,247,0.25);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2 6 5 9 10 3" stroke="#4A6CF7" stroke-width="2" stroke-linecap="round"/></svg></span>Roadmap de crescimento com milestones e métricas definidas</li>
-        </ul>
-
-        <div class="integration-quote" style="border-left-color:var(--blue);">
-          <strong>Uma marca bem construída e uma estratégia clara</strong> transformam todos os outros serviços em investimentos com retorno previsível. Sem esta base, tudo o resto é adivinhação.
-        </div>
-
-        <a href="{{ route('home') }}#cta-final" class="btn-primary">
-          Pedir proposta gratuita
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-
-      <div class="service-visual fade-up">
-        <div class="sidebar-card">
-          <div class="card-section-title">Para quem é este serviço</div>
-          <div class="process-steps">
-            <div class="process-step">
-              <div class="step-num">→</div>
-              <div class="step-text"><strong>Negócios a arrancar do zero</strong>Começar bem é metade do caminho</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">→</div>
-              <div class="step-text"><strong>Empresas a reposicionar a marca</strong>Quando o negócio cresceu mas a marca ficou para trás</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">→</div>
-              <div class="step-text"><strong>PMEs sem identidade visual definida</strong>Profissionalizar a imagem para competir a sério</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">→</div>
-              <div class="step-text"><strong>Marketing desorganizado</strong>Dar ordem, direção e coerência ao que já existe</div>
-            </div>
-            <div class="process-step">
-              <div class="step-num">→</div>
-              <div class="step-text"><strong>Concessionários a entrar no digital</strong>Estratégia específica para um setor competitivo e exigente</div>
-            </div>
-          </div>
-          <div class="card-section-title" style="padding-top:16px;border-top:1px solid var(--navy-border);">O processo de trabalho</div>
-          <div class="process-steps">
-            <div class="process-step"><div class="step-num">1</div><div class="step-text"><strong>Descoberta</strong>Sessão de briefing profunda — negócio, valores e objetivos</div></div>
-            <div class="process-step"><div class="step-num">2</div><div class="step-text"><strong>Pesquisa & Análise</strong>Mercado, concorrência, público-alvo e oportunidades</div></div>
-            <div class="process-step"><div class="step-num">3</div><div class="step-text"><strong>Identidade Visual</strong>Criação e refinamento da marca até estar perfeita</div></div>
-            <div class="process-step"><div class="step-num">4</div><div class="step-text"><strong>Estratégia</strong>Construção do plano digital completo e personalizado</div></div>
-            <div class="process-step"><div class="step-num">5</div><div class="step-text"><strong>Entrega & Briefing</strong>Todos os entregáveis com formação para os usar</div></div>
-          </div>
-        </div>
-      </div>
+    <div class="service-card-grid">
+      <a class="service-hub-card fade-up" href="{{ route('service.websites') }}" style="--card-color:#00D4FF;--card-border:rgba(0,212,255,.28);--card-bg:rgba(0,212,255,.1);--card-glow:rgba(0,212,255,.18);--card-grad:linear-gradient(90deg,#00D4FF,#4A6CF7)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+        <h3>Criação de Sites no Porto</h3><p>Websites profissionais, rápidos e preparados para captar contactos.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.software') }}" style="--card-color:#7C9CFF;--card-border:rgba(124,156,255,.3);--card-bg:rgba(74,108,247,.12);--card-glow:rgba(74,108,247,.2);--card-grad:linear-gradient(90deg,#4A6CF7,#8B3FDB)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span>
+        <h3>Software à Medida</h3><p>Sistemas e plataformas criados à volta do processo real do seu negócio.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.integrations') }}" style="--card-color:#B08CFF;--card-border:rgba(176,140,255,.3);--card-bg:rgba(139,63,219,.11);--card-glow:rgba(139,63,219,.2);--card-grad:linear-gradient(90deg,#8B3FDB,#00D4FF)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="m8.5 10.5 7-3M8.5 13.5l7 3"/></svg></span>
+        <h3>Integrações & Sistemas</h3><p>Ligue ferramentas, dados e equipas sem duplicação de trabalho.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.automation') }}" style="--card-color:#F5A623;--card-border:rgba(245,166,35,.32);--card-bg:rgba(245,166,35,.1);--card-glow:rgba(245,166,35,.19);--card-grad:linear-gradient(90deg,#F5A623,#FF6B35,#8B3FDB)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="19" cy="5" r="2"/></svg></span>
+        <h3>Automação & IA</h3><p>Menos tarefas repetitivas, respostas mais rápidas e processos sob controlo.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.ecommerce') }}" style="--card-color:#2DE2A6;--card-border:rgba(45,226,166,.28);--card-bg:rgba(45,226,166,.09);--card-glow:rgba(45,226,166,.16);--card-grad:linear-gradient(90deg,#2DE2A6,#00D4FF)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h2l2 13h10l2-9H7"/><circle cx="9" cy="20" r="1"/><circle cx="17" cy="20" r="1"/></svg></span>
+        <h3>E-commerce & Operações</h3><p>Stock, encomendas, lojas online e fluxos operacionais prontos a escalar.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.seo') }}" style="--card-color:#00D4FF;--card-border:rgba(0,212,255,.28);--card-bg:rgba(0,212,255,.09);--card-glow:rgba(0,212,255,.17);--card-grad:linear-gradient(90deg,#00D4FF,#8B3FDB)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4M8 11h6"/></svg></span>
+        <h3>SEO no Porto</h3><p>Visibilidade orgânica para ser encontrado por clientes certos.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.ads') }}" style="--card-color:#A7B9FF;--card-border:rgba(167,185,255,.3);--card-bg:rgba(74,108,247,.1);--card-glow:rgba(74,108,247,.2);--card-grad:linear-gradient(90deg,#4A6CF7,#00D4FF,#8B3FDB)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V9m5 10V5m5 14v-7m5 7V3"/></svg></span>
+        <h3>Google Ads & Captação</h3><p>Campanhas, landing pages e medição para transformar procura em oportunidades comerciais qualificadas.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.social') }}" style="--card-color:#FF78C8;--card-border:rgba(255,120,200,.3);--card-bg:rgba(255,120,200,.1);--card-glow:rgba(255,120,200,.18);--card-grad:linear-gradient(90deg,#FF78C8,#8B3FDB)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg></span>
+        <h3>Gestão de Redes Sociais</h3><p>Estratégia e conteúdos consistentes para comunicar com o público certo.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.ai') }}" style="--card-color:#F5A623;--card-border:rgba(245,166,35,.32);--card-bg:rgba(245,166,35,.1);--card-glow:rgba(245,166,35,.19);--card-grad:linear-gradient(90deg,#F5A623,#FF6B35)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.36-6.36-2.12 2.12M7.76 16.24l-2.12 2.12m12.72 0-2.12-2.12M7.76 7.76 5.64 5.64"/><circle cx="12" cy="12" r="5"/></svg></span>
+        <h3>Inteligência Artificial</h3><p>IA aplicada a tarefas reais, com dados, limites e validação definidos.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.branding') }}" style="--card-color:#B08CFF;--card-border:rgba(176,140,255,.3);--card-bg:rgba(176,140,255,.1);--card-glow:rgba(176,140,255,.18);--card-grad:linear-gradient(90deg,#8B3FDB,#00D4FF)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 0 18h1.2a2 2 0 0 0 1.5-3.3 1.8 1.8 0 0 1 1.4-3h.8A4.1 4.1 0 0 0 21 10.6C21 6.4 17 3 12 3z"/><circle cx="7.5" cy="10" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="16" cy="8" r="1"/></svg></span>
+        <h3>Branding & Identidade</h3><p>Posicionamento e identidade visual alinhados com o valor da empresa.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
+      <a class="service-hub-card fade-up" href="{{ route('service.trafego') }}" style="--card-color:#00D4FF;--card-border:rgba(0,212,255,.28);--card-bg:rgba(0,212,255,.1);--card-glow:rgba(0,212,255,.18);--card-grad:linear-gradient(90deg,#00D4FF,#4A6CF7)">
+        <span class="service-hub-icon"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11v2a1 1 0 0 0 1 1h2l4 5V5l-4 5H4a1 1 0 0 0-1 1zM14 9a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/></svg></span>
+        <h3>Tráfego, Leads & Conversões</h3><p>Google Ads, Meta Ads, SEO e otimização de conversão para atrair procura e acompanhar resultados.</p><span class="service-hub-link">Explorar serviço <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      </a>
     </div>
   </div>
 </section>
@@ -1005,7 +579,7 @@
 <div class="final-cta">
   <div class="cta-box">
     <h2>Não sabe por onde começar?<br><span class="grad-text">Nós ajudamos.</span></h2>
-    <p>Marque uma conversa gratuita. Analisamos o seu negócio e recomendamos os serviços com maior impacto para si — sem compromisso.</p>
+    <p>Marque uma conversa gratuita. Analisamos o seu negócio e recomendamos os serviços com maior impacto para si, sem compromisso.</p>
     <div class="cta-actions">
       <a href="{{ route('home') }}#cta-final" class="btn-primary">
         Pedir Diagnóstico Grátis
@@ -1019,47 +593,10 @@
 @include('partials.site-footer')
 
 <script>
-  // Selectors
-  const sections = document.querySelectorAll('.service-section[data-section]');
-  const pills = document.querySelectorAll('.service-pill[data-section]');
-
-  // Intersection Observer for scroll synchronization
-  const sectionObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      // Only trigger if the entry is intersecting significantly
-      if (e.isIntersecting && e.intersectionRatio > 0.3) {
-        const id = e.target.dataset.section;
-        updateActivePill(id);
-      }
-    });
-  }, { threshold: [0.1, 0.3, 0.5] });
-
-  sections.forEach(s => sectionObserver.observe(s));
-
-  // Fade-up on scroll
   const fadeObserver = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => fadeObserver.observe(el));
-
-  // Function to update the active state and scroll into view
-  function updateActivePill(id) {
-    pills.forEach(p => {
-      const isActive = p.dataset.section === id;
-      p.classList.toggle('active', isActive);
-      if (isActive) {
-        p.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }
-    });
-  }
-
-  // Immediate feedback on click
-  pills.forEach(pill => {
-    pill.addEventListener('click', (e) => {
-      const id = pill.dataset.section;
-      if (id) updateActivePill(id);
-    });
-  });
 
 </script>
 </body>

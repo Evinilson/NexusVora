@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NexusVora · Apresentação original · 15 s</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-content:center;gap:14px;background:#0b0e11;color:#eee;font:14px Arial,sans-serif}canvas{display:block;width:min(90vw,44vh);aspect-ratio:9/16;box-shadow:0 24px 70px #000b}nav{display:flex;align-items:center;gap:12px;width:min(90vw,44vh)}button{border:0;background:#d9ff43;color:#101419;border-radius:30px;padding:8px 14px;font-weight:bold;cursor:pointer}input{min-width:0;flex:1;accent-color:#d9ff43}small{white-space:nowrap}
+</style>
+</head>
+<body>
+<canvas id="frame" width="540" height="960"></canvas>
+<nav><button id="play">Pausa</button><input id="scrub" type="range" min="0" max="15" step=".01" value="0"><small id="clock">0.0 / 15s</small></nav>
+<script>
+const c=document.querySelector('#frame'),x=c.getContext('2d'),W=540,H=960,D=15;
+const C={bg:'#101419',cream:'#F2F0E7',lime:'#D9FF43',coral:'#FF725E',cyan:'#75E1E8',muted:'#A5A9A4',line:'#394041'};
+const clamp=n=>Math.max(0,Math.min(1,n)),p=(t,a,b)=>clamp((t-a)/(b-a)),ease=n=>1-Math.pow(1-clamp(n),3),smooth=n=>{n=clamp(n);return n*n*(3-2*n)},lerp=(a,b,k)=>a+(b-a)*k;
+function rect(a,b,w,h,r=0,color=C.cream){x.fillStyle=color;x.beginPath();x.roundRect(a,b,w,h,r);x.fill()}
+function stroke(a,b,w,h,r=0,color=C.line,lw=1){x.strokeStyle=color;x.lineWidth=lw;x.beginPath();x.roundRect(a,b,w,h,r);x.stroke()}
+function txt(s,a,b,size=30,color=C.cream,weight=700,align='left'){x.fillStyle=color;x.font=`${weight} ${size}px Arial, sans-serif`;x.textAlign=align;x.fillText(s,a,b);x.textAlign='left'}
+function line(a,b,aa,bb,color=C.cream,lw=2){x.beginPath();x.moveTo(a,b);x.lineTo(aa,bb);x.strokeStyle=color;x.lineWidth=lw;x.stroke()}
+function arrow(a,b,size=16,color=C.bg){line(a-size,b,a+size,b,color,3);line(a+size-9,b-9,a+size,b,color,3);line(a+size-9,b+9,a+size,b,color,3)}
+function base(t,num){rect(0,0,W,H,0,C.bg);for(let i=0;i<14;i++)line(i*40,0,i*40,H,'#1a2022',.7);for(let j=0;j<25;j++)line(0,j*40,W,j*40,'#1a2022',.7);rect(30,28,8,8,4,C.lime);txt('NEXUSVORA',48,37,16,C.cream,800);txt('DIGITAL STUDIO',510,37,11,C.muted,700,'right');line(30,52,510,52,C.line);txt(num,30,915,13,C.muted,700);txt('NEXUSVORA.COM',510,915,13,C.muted,700,'right');rect(30,930,480*p(t,0,D),3,1,C.lime)}
+function transition(t,a){let k=p(t,a,a+.38);if(k<=0||k>=1)return;let w=640;rect(lerp(-w,540,ease(k)),0,w,H,0,C.lime)}
+function intro(t){let k=ease(p(t,.05,.65)),out=1-smooth(p(t,2.6,3));x.save();x.globalAlpha=out;base(t,'01 / 05');
+  let turn=t*.3;for(let i=0;i<4;i++){x.beginPath();x.ellipse(270,472,70+i*46,210+i*22,turn+i*.7,0,Math.PI*2);x.strokeStyle=i%2?C.line:C.lime;x.lineWidth=i===0?2:1;x.stroke()}
+  rect(262,464,16,16,8,C.coral);let a=t*1.8;rect(270+180*Math.cos(a)-5,472+170*Math.sin(a)-5,10,10,5,C.cyan);
+  x.save();x.translate(30+(1-k)*-400,0);txt('O DIGITAL',0,248,61,C.cream,900);txt('GANHA',0,318,77,C.lime,900);x.restore();
+  x.save();x.translate(540-(1-k)*-400,0);txt('FORMA.',510,395,76,C.cream,900,'right');x.restore();
+  rect(30,665,4,94,0,C.coral);txt('Criamos experiências',50,696,25,C.cream,700);txt('que movem negócios.',50,730,25,C.cream,700);
+  x.restore()}
+function site(t){let k=ease(p(t,3,3.55)),out=1-smooth(p(t,6.2,6.6));x.save();x.globalAlpha=out;base(t,'02 / 05');
+  txt('01 / WEB',30,153,18,C.lime,800);txt('SITES QUE',30,230,51,C.cream,900);txt('MARCAM.',30,291,63,C.lime,900);
+  x.save();x.translate(lerp(580,50,k),370);x.rotate((1-k)*.15);rect(0,0,440,390,14,C.cream);rect(0,0,440,42,14,C.coral);rect(0,28,440,14,0,C.coral);for(let i=0;i<3;i++)rect(17+i*18,17,8,8,4,C.bg);txt('nexusvora.com',345,27,11,C.bg,700,'right');
+  rect(18,65,404,184,8,C.bg);txt('A TUA IDEIA',38,118,29,C.cream,900);txt('EM GRANDE.',38,158,37,C.lime,900);rect(38,184,148,39,20,C.lime);txt('Começar',59,210,16,C.bg,800);arrow(159,202,8,C.bg);
+  for(let i=0;i<3;i++){let q=ease(p(t,4+i*.18,4.45+i*.18));rect(18+i*136,267+(1-q)*80,126,100,8,i===1?C.cyan:'#DADED5');txt(['Design','Rápido','À medida'][i],29+i*136,320+(1-q)*80,16,C.bg,800)}x.restore();
+  let cursor=ease(p(t,4.5,5.6));x.save();x.translate(470-260*cursor,780-200*cursor);x.rotate(-.3);x.beginPath();x.moveTo(0,0);x.lineTo(0,32);x.lineTo(10,24);x.lineTo(17,38);x.lineTo(24,35);x.lineTo(16,21);x.lineTo(29,20);x.closePath();x.fillStyle=C.lime;x.fill();x.restore();
+  txt('Presença digital com personalidade.',30,826,21,C.cream,700);x.restore()}
+function platform(t){let k=ease(p(t,6.6,7.15)),out=1-smooth(p(t,9.55,10));x.save();x.globalAlpha=out;base(t,'03 / 05');
+  txt('02 / PLATAFORMAS',30,153,18,C.cyan,800);txt('MENOS',30,230,64,C.cream,900);txt('COMPLICAÇÃO.',30,289,48,C.cyan,900);
+  txt('Tudo ligado. Tudo mais simples.',30,331,21,C.muted,700);
+  const boxes=[['CLIENTES','01',C.cyan,58,435],['PROCESSOS','02',C.lime,286,435],['DADOS','03',C.coral,58,639],['CRESCIMENTO','04',C.cream,286,639]];
+  boxes.forEach((b,i)=>{let q=ease(p(t,6.9+i*.25,7.4+i*.25));x.save();x.translate(b[3],b[4]+(1-q)*170);x.globalAlpha*=q;rect(0,0,196,166,12,b[2]);txt(b[1],18,36,15,C.bg,800);line(18,110,178,110,C.bg,1);txt(b[0],18,143,i===3?17:20,C.bg,900);x.restore()});
+  let q=ease(p(t,8.2,9.1));x.strokeStyle=C.cream;x.lineWidth=3;x.setLineDash([7,7]);x.beginPath();x.moveTo(254,518);x.lineTo(286,518);x.moveTo(384,601);x.lineTo(384,639);x.moveTo(286,722);x.lineTo(254,722);x.moveTo(156,639);x.lineTo(156,601);x.globalAlpha*=q;x.stroke();x.setLineDash([]);x.globalAlpha=out;
+  rect(249,606,42,42,21,C.bg);stroke(249,606,42,42,21,C.cream,2);txt('↗',259,636,25,C.lime,900);x.restore()}
+function solution(t){let k=ease(p(t,10,10.55)),out=1-smooth(p(t,12.9,13.25));x.save();x.globalAlpha=out;base(t,'04 / 05');
+  txt('03 / SOLUÇÕES DIGITAIS',30,153,18,C.coral,800);txt('IDEIAS QUE',30,226,55,C.cream,900);txt('AVANÇAM.',30,290,62,C.coral,900);txt('Automação • IA • Integrações',30,337,20,C.muted,700);
+  x.save();x.translate(270,593);for(let i=0;i<8;i++){let a=i*Math.PI/4+t*.15,dist=150+(i%2)*28,q=ease(p(t,10.25+i*.08,10.8+i*.08));let xx=Math.cos(a)*dist,yy=Math.sin(a)*dist;line(0,0,xx*q,yy*q,C.line,2);rect(xx*q-10,yy*q-10,20,20,10,i%2?C.cyan:C.coral)}
+  x.rotate(t*.4);x.strokeStyle=C.lime;x.lineWidth=6;x.beginPath();x.arc(0,0,70,0,Math.PI*1.6);x.stroke();x.restore();rect(232,555,76,76,38,C.lime);txt('✦',270,606,43,C.bg,900,'center');
+  let q=ease(p(t,11.15,11.7));rect(70,786+(1-q)*100,400,61,30,C.cream);txt('Tecnologia ao teu ritmo',270,825+(1-q)*100,20,C.bg,800,'center');x.restore()}
+function ending(t){let k=ease(p(t,13.15,13.65));x.save();base(t,'05 / 05');
+  for(let i=0;i<5;i++){x.beginPath();x.arc(270,450,100+i*54+(t-13)*12,0,Math.PI*2);x.strokeStyle=i%2?C.line:C.lime;x.lineWidth=i===0?2:1;x.stroke()}
+  x.save();x.translate(270,459);x.rotate((t-13)*.5);for(let i=0;i<8;i++){let a=i*Math.PI/4;line(Math.cos(a)*21,Math.sin(a)*21,Math.cos(a)*77,Math.sin(a)*77,i%2?C.cyan:C.lime,5);rect(Math.cos(a)*77-5,Math.sin(a)*77-5,10,10,5,C.lime)}rect(-15,-15,30,30,15,C.cream);x.restore();
+  x.globalAlpha=k;txt('NexusVora',270,652,56,C.cream,900,'center');txt('Sites. Plataformas. Soluções digitais.',270,698,20,C.muted,700,'center');
+  rect(70,753,400,68,34,C.lime);txt('Vamos criar juntos?',234,796,23,C.bg,900,'center');arrow(417,786,13,C.bg);x.restore()}
+function render(t){t=Math.max(0,Math.min(15,t));x.clearRect(0,0,W,H);if(t<3.05)intro(t);if(t>=2.95&&t<6.65)site(t);if(t>=6.55&&t<10.05)platform(t);if(t>=9.95&&t<13.3)solution(t);if(t>=13.15)ending(t);for(const a of [3,6.6,10,13.2])transition(t,a)}
+window.renderAt=render;let current=0,playing=true,last=performance.now();const play=document.querySelector('#play'),scrub=document.querySelector('#scrub'),clock=document.querySelector('#clock');play.onclick=()=>{playing=!playing;play.textContent=playing?'Pausa':'Reproduzir'};scrub.oninput=()=>{current=+scrub.value;render(current)};function loop(now){if(playing)current=(current+Math.min(.05,(now-last)/1000))%D;last=now;render(current);scrub.value=current;clock.textContent=`${current.toFixed(1)} / 15s`;requestAnimationFrame(loop)}render(0);if(!new URLSearchParams(location.search).has('export'))requestAnimationFrame(loop);
+</script>
+</body>
+</html>

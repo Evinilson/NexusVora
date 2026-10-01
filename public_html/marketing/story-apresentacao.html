@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusVora · Story 15s</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#05081c; --muted:#98A3C2; --cyan:#00D4FF; --blue:#4A6CF7; --purple:#8B3FDB; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; }
+  body { background:var(--bg); color:#fff; font-family:'Plus Jakarta Sans',sans-serif;
+         display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:16px; overflow:hidden; }
+  #stage { height:min(84vh, calc((100vw - 32px) * 16 / 9)); aspect-ratio:9/16; position:relative; }
+  canvas { width:100%; height:100%; display:block; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06); cursor:crosshair; }
+  #ui { display:flex; align-items:center; gap:10px; width:min(100%, 520px); font-size:13px; color:var(--muted); }
+  #ui button { background:linear-gradient(135deg,var(--cyan),var(--blue),var(--purple)); color:#fff; border:0; border-radius:999px;
+               padding:8px 16px; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+  #ui input { flex:1; accent-color:var(--blue); }
+  #time { font-variant-numeric:tabular-nums; min-width:70px; text-align:right; }
+  body.export { padding:0; background:#000; }
+  body.export #ui { display:none; }
+  body.export #stage { height:auto; }
+  body.export canvas { border-radius:0; box-shadow:none; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<div id="ui">
+  <button id="play">Pausa</button>
+  <input id="scrub" type="range" min="0" max="15" step="0.01" value="0">
+  <span id="time">0.0s / 15s</span>
+</div>
+<script>
+const W = 1080, H = 1920, DUR = 15;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const C = { navy:'#0A0F2E', card:'#111936', cyan:'#00D4FF', blue:'#4A6CF7', purple:'#8B3FDB', muted:'#98A3C2', green:'#22E3A0' };
+const F = "'Plus Jakarta Sans', sans-serif";
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const P = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eback = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const eexpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+
+function grad(x0, y0, x1, y1, a = 1) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  g.addColorStop(0, `rgba(0,212,255,${a})`);
+  g.addColorStop(.5, `rgba(74,108,247,${a})`);
+  g.addColorStop(1, `rgba(139,63,219,${a})`);
+  return g;
+}
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, Math.max(0, w), Math.max(0, h), Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2)); }
+function glow(x, y, r, rgb, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function font(weight, size) { ctx.font = `${weight} ${size}px ${F}`; }
+
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const parts = Array.from({ length: 70 }, () => ({ x: rnd() * W, y: rnd() * H, r: 1 + rnd() * 2.6, s: 20 + rnd() * 70, ph: rnd() * 6.28, c: rnd() }));
+const streaks = Array.from({ length: 46 }, () => ({ a: rnd() * Math.PI * 2, d: .7 + rnd() * .5, o: rnd() * .25 }));
+
+// Parallax + taps (preview only — never used during export)
+let mx = 0, my = 0, tmx = 0, tmy = 0; const taps = [];
+
+// ---------- background ----------
+function background(t) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#060A22'); g.addColorStop(1, C.navy);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  glow(540 + Math.sin(t * .6) * 280 + mx * 70, 520 + Math.cos(t * .5) * 180 + my * 50, 720, '0,212,255', .20);
+  glow(540 + Math.cos(t * .45) * 300 - mx * 70, 1460 + Math.sin(t * .7) * 200 - my * 50, 820, '139,63,219', .26);
+  glow(540 + Math.sin(t * .3 + 2) * 200, 980, 560, '74,108,247', .12);
+
+  // drifting dot grid
+  ctx.fillStyle = 'rgba(152,163,194,.10)';
+  const off = (t * 22) % 60;
+  for (let y = -60; y < H + 60; y += 60)
+    for (let x = 30; x < W; x += 60) ctx.fillRect(x + mx * 12 - 1.5, y + off + my * 12 - 1.5, 3, 3);
+
+  // particles
+  for (const p of parts) {
+    const y = ((p.y - t * p.s) % H + H) % H;
+    const x = p.x + Math.sin(t * .8 + p.ph) * 22 + mx * p.r * 10;
+    ctx.fillStyle = p.c > .5 ? `rgba(0,212,255,${.18 + .4 * Math.sin(t * 2 + p.ph) ** 2})` : `rgba(139,63,219,${.2 + .4 * Math.cos(t * 1.7 + p.ph) ** 2})`;
+    ctx.beginPath(); ctx.arc(x, y, p.r, 0, 7); ctx.fill();
+  }
+}
+
+// ---------- brand ----------
+const ANG = [-90, 90, 180, 0, -135, 45, -45, 135].map(a => a * Math.PI / 180);
+function drawLogo(cx, cy, s, k, a = 1) {
+  if (k <= 0 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(cx, cy);
+  const g = grad(-30 * s, -30 * s, 30 * s, 30 * s);
+  ctx.strokeStyle = g; ctx.fillStyle = g; ctx.lineCap = 'round';
+  ctx.shadowColor = 'rgba(74,108,247,.9)'; ctx.shadowBlur = 4 * s;
+  const kc = eback(P(k, 0, .3));
+  ctx.lineWidth = 2.5 * s;
+  ctx.beginPath(); ctx.arc(0, 0, 7 * s * Math.max(kc, .01), -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * eo(P(k, 0, .35))); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 3 * s * Math.max(kc, 0), 0, 7); ctx.fill();
+  ANG.forEach((an, i) => {
+    const kk = P(k, .2 + i * .05, .6 + i * .05); if (kk <= 0) return;
+    const l = eo(kk), cs = Math.cos(an), sn = Math.sin(an);
+    ctx.lineWidth = 2 * s;
+    ctx.beginPath(); ctx.moveTo(cs * 7 * s, sn * 7 * s); ctx.lineTo(cs * lerp(7, 20, l) * s, sn * lerp(7, 20, l) * s); ctx.stroke();
+    const kn = eback(P(kk, .55, 1));
+    if (kn > 0) { ctx.beginPath(); ctx.arc(cs * 22.5 * s, sn * 22.5 * s, 3 * s * kn, 0, 7); ctx.fill(); }
+  });
+  ctx.restore();
+}
+function wordmark(cx, y, size, k, a = 1) {
+  if (k <= 0 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; font(800, size); ctx.textBaseline = 'alphabetic';
+  const txt = 'NexusVora', total = ctx.measureText(txt).width, x0 = cx - total / 2;
+  const w1 = ctx.measureText('Nexus').width, g = grad(x0 + w1, 0, x0 + total, 0);
+  ctx.beginPath(); ctx.rect(x0 - 20, y - size * 1.05, total + 40, size * 1.35); ctx.clip();
+  for (let i = 0; i < txt.length; i++) {
+    const kk = eo(P(k, i * .06, i * .06 + .45));
+    ctx.fillStyle = i < 5 ? '#fff' : g;
+    ctx.fillText(txt[i], x0 + ctx.measureText(txt.slice(0, i)).width, y + (1 - kk) * size * 1.1);
+  }
+  ctx.restore();
+}
+function maskText(s, x, y, weight, size, fill, k, align = 'left') {
+  if (k <= 0) return;
+  ctx.save(); font(weight, size); ctx.textAlign = align;
+  const w = ctx.measureText(s).width, left = align === 'center' ? x - w / 2 : x;
+  ctx.beginPath(); ctx.rect(left - 20, y - size * 1.05, w + 40, size * 1.4); ctx.clip();
+  ctx.fillStyle = fill; ctx.fillText(s, x, y + (1 - k) * size * 1.3);
+  ctx.restore();
+}
+
+// Section header shared by the three service scenes
+function title(num, l1, l2, t, t0, t1) {
+  const ko = eio(P(t, t1 - .45, t1)); if (t < t0 || ko >= 1) return;
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(0, -70 * ko);
+  const y0 = 300, kc = eo(P(t, t0, t0 + .6));
+  // number chip + growing line
+  ctx.globalAlpha *= kc; font(700, 28); ctx.fillStyle = C.cyan; ctx.fillText(num, 90, y0 + 10);
+  ctx.fillStyle = grad(140, 0, 400, 0); ctx.fillRect(140, y0, 240 * kc, 3);
+  font(600, 24); ctx.fillStyle = C.muted; ctx.globalAlpha = (1 - ko) * P(t, t0 + .3, t0 + .8);
+  ctx.fillText('O QUE FAZEMOS', 400, y0 + 9);
+  ctx.globalAlpha = 1 - ko;
+  maskText(l1, 90, y0 + 110, 600, 60, '#fff', eo(P(t, t0 + .1, t0 + .7)));
+  font(800, 124); const fit = Math.min(124, 900 / ctx.measureText(l2).width * 124);
+  maskText(l2, 90, y0 + 110 + fit * 1.05, 800, fit, grad(90, 0, 990, 0), eo(P(t, t0 + .2, t0 + .85)));
+  ctx.restore();
+}
+function panel(w, h) {
+  ctx.save(); ctx.shadowColor = 'rgba(74,108,247,.35)'; ctx.shadowBlur = 60;
+  rr(0, 0, w, h, 32); ctx.fillStyle = 'rgba(17,25,54,.92)'; ctx.fill(); ctx.restore();
+  rr(0, 0, w, h, 32); ctx.lineWidth = 2; ctx.strokeStyle = grad(0, 0, w, h, .45); ctx.stroke();
+}
+function bar(x, y, w, h, a = .12) { rr(x, y, w, h, h / 2); ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fill(); }
+function cursor(x, y, press) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(1.6 - press * .2, 1.6 - press * .2);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 26); ctx.lineTo(7, 20); ctx.lineTo(12, 31); ctx.lineTo(17, 29); ctx.lineTo(12, 18); ctx.lineTo(21, 18); ctx.closePath();
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = C.navy; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+  ctx.restore();
+}
+function check(x, y, s, k, color = C.green) {
+  if (k <= 0) return;
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = s * .18; ctx.lineCap = ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(x - s * .35, y); ctx.lineTo(x - s * .1, y + s * .25 * Math.min(1, k * 2));
+  if (k > .5) ctx.lineTo(lerp(x - s * .1, x + s * .38, (k - .5) * 2), lerp(y + s * .25, y - s * .28, (k - .5) * 2));
+  ctx.stroke(); ctx.restore();
+}
+
+// ---------- transitions: light sweep ----------
+function sweep(t, ts) {
+  const k = P(t, ts - .3, ts + .35); if (k <= 0 || k >= 1) return;
+  ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(-.35);
+  const x = lerp(-1300, 1300, eio(k));
+  const g = ctx.createLinearGradient(x - 220, 0, x + 220, 0);
+  g.addColorStop(0, 'rgba(0,212,255,0)'); g.addColorStop(.45, 'rgba(0,212,255,.35)');
+  g.addColorStop(.5, 'rgba(255,255,255,.55)'); g.addColorStop(.55, 'rgba(139,63,219,.35)'); g.addColorStop(1, 'rgba(139,63,219,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - 220, -1500, 440, 3000);
+  ctx.restore();
+  ctx.fillStyle = `rgba(255,255,255,${.06 * Math.sin(k * Math.PI)})`; ctx.fillRect(0, 0, W, H);
+}
+
+// ---------- scene 1: intro (0 – 2.8s) ----------
+function sceneIntro(t) {
+  if (t > 2.9) return;
+  const ko = eio(P(t, 2.3, 2.85));
+  ctx.save(); ctx.globalAlpha = 1 - ko;
+  ctx.translate(540, 900); ctx.scale(1 + ko * .8, 1 + ko * .8); ctx.translate(-540, -900);
+
+  // streaks converging to the center
+  const ks = P(t, 0, .8);
+  if (ks < 1) for (const s of streaks) {
+    const k = eexpo(clamp((ks - s.o) / .75)); if (k <= 0) continue;
+    const r1 = lerp(1100 * s.d, 80, k), r0 = r1 + 180 * (1 - k);
+    ctx.strokeStyle = `rgba(0,212,255,${.6 * (1 - k)})`; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(540 + Math.cos(s.a) * r0, 860 + Math.sin(s.a) * r0); ctx.lineTo(540 + Math.cos(s.a) * r1, 860 + Math.sin(s.a) * r1); ctx.stroke();
+  }
+  // shockwave
+  const kw = P(t, .75, 1.6);
+  if (kw > 0 && kw < 1) {
+    ctx.strokeStyle = `rgba(74,108,247,${.7 * (1 - kw)})`; ctx.lineWidth = 6 * (1 - kw) + 1;
+    ctx.beginPath(); ctx.arc(540, 860, 60 + eo(kw) * 520, 0, 7); ctx.stroke();
+  }
+  glow(540, 860, 360, '74,108,247', .35 * P(t, .4, 1.2));
+  drawLogo(540, 860, 9, P(t, .35, 1.6));
+  wordmark(540, 1230, 140, P(t, 1.15, 2.0));
+  ctx.textAlign = 'center';
+  maskText('Websites  ·  Plataformas  ·  Soluções digitais', 540, 1320, 600, 36, C.muted, eo(P(t, 1.55, 2.1)), 'center');
+  ctx.restore();
+}
+
+// ---------- scene 2: websites (2.5 – 6.2s) ----------
+function sceneWeb(t) {
+  const t0 = 2.5, t1 = 6.2; if (t < t0 || t > t1) return;
+  title('01', 'Criação de', 'Websites', t, t0, t1);
+  const lt = t - t0, ki = eo(P(lt, .2, 1)), ko = eio(P(t, t1 - .5, t1));
+  const w = 860, h = 880;
+  ctx.save(); ctx.globalAlpha = ki * (1 - ko);
+  ctx.translate(540 - ko * 380, 660 + h / 2 + (1 - ki) * 200 + Math.sin(t * 2) * 8);
+  ctx.rotate((1 - ki) * .08 - ko * .06); ctx.scale(.9 + .1 * ki, .9 + .1 * ki); ctx.translate(-w / 2, -h / 2);
+  panel(w, h);
+
+  // browser chrome + typed URL
+  ['#FF5F57', '#FEBC2E', '#28C840'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(40 + i * 28, 38, 9, 0, 7); ctx.fill(); });
+  bar(140, 18, w - 180, 40, .06);
+  const url = 'nexusvora.com', n = Math.floor(url.length * P(lt, .35, 1.0));
+  font(600, 22); ctx.fillStyle = C.muted; ctx.fillText('🔒', 160, 46);
+  ctx.fillStyle = '#fff'; ctx.fillText(url.slice(0, n), 196, 46);
+  if (lt < 1.3 && Math.floor(lt * 4) % 2 === 0) ctx.fillRect(196 + ctx.measureText(url.slice(0, n)).width + 3, 26, 2, 26);
+  ctx.fillStyle = 'rgba(255,255,255,.06)'; ctx.fillRect(0, 76, w, 2);
+
+  // nav
+  const kn = eo(P(lt, .8, 1.2)); ctx.globalAlpha = ki * (1 - ko) * kn;
+  drawLogo(60, 114, .85, 1);
+  font(800, 24); ctx.fillStyle = '#fff'; ctx.fillText('NexusVora', 92, 123);
+  [0, 1, 2].forEach(i => bar(w - 330 + i * 100, 108, 70, 12, .18));
+  ctx.globalAlpha = ki * (1 - ko);
+
+  // hero block wiping in
+  const kh = eio(P(lt, .9, 1.5));
+  if (kh > 0) {
+    ctx.save(); rr(36, 160, w - 72, 320, 24); ctx.clip();
+    ctx.fillStyle = grad(36, 160, w - 36, 480, .95); ctx.fillRect(36, 160, (w - 72) * kh, 320);
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(w - 120, 220, 150 * kh, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(w - 60, 450, 90 * kh, 0, 7); ctx.fill();
+    bar(76, 214, 460 * eo(P(lt, 1.2, 1.7)), 36, .95);
+    bar(76, 266, 340 * eo(P(lt, 1.3, 1.8)), 36, .95);
+    bar(76, 326, 400 * eo(P(lt, 1.4, 1.9)), 14, .55);
+    bar(76, 350, 300 * eo(P(lt, 1.45, 1.95)), 14, .55);
+    // CTA button (gets "clicked")
+    const kb = eback(P(lt, 1.6, 2.0)), press = Math.sin(Math.PI * P(lt, 2.55, 2.8));
+    if (kb > 0) {
+      ctx.save(); ctx.translate(191, 419); ctx.scale(kb * (1 - press * .08), kb * (1 - press * .08));
+      rr(-115, -30, 230, 60, 30); ctx.fillStyle = '#fff'; ctx.fill();
+      font(800, 22); ctx.fillStyle = C.navy; ctx.textAlign = 'center'; ctx.fillText('Pedir proposta', 0, 8);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  // feature cards
+  const cw = (w - 72 - 48) / 3;
+  for (let i = 0; i < 3; i++) {
+    const kc = eo(P(lt, 1.7 + i * .12, 2.2 + i * .12)); if (kc <= 0) continue;
+    const x = 36 + i * (cw + 24), y = 510 + (1 - kc) * 80;
+    ctx.save(); ctx.globalAlpha *= kc;
+    rr(x, y, cw, 200, 22); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = grad(x, y, x + cw, y + 200); ctx.beginPath(); ctx.arc(x + 50, y + 55, 26, 0, 7); ctx.fill();
+    font(700, 22); ctx.fillStyle = '#fff'; ctx.fillText(['Rápido', 'Mobile', 'SEO'][i], x + 28, y + 128);
+    bar(x + 28, y + 150, cw - 70, 10, .15); bar(x + 28, y + 170, cw - 110, 10, .1);
+    ctx.restore();
+  }
+  // footer stats row
+  const kf = eo(P(lt, 2.1, 2.6));
+  if (kf > 0) {
+    ctx.save(); ctx.globalAlpha *= kf;
+    rr(36, 740, w - 72, 110, 22); ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill();
+    font(800, 40); ctx.fillStyle = grad(60, 0, 800, 0);
+    ctx.fillText(`${(0.4 + 1.6 * (1 - eo(P(lt, 2.1, 2.9)))).toFixed(1)}s`, 70, 810);
+    ctx.fillText(`${Math.round(100 * eo(P(lt, 2.1, 2.9)))}`, 330, 810);
+    font(600, 20); ctx.fillStyle = C.muted; ctx.fillText('carregamento', 170, 805); ctx.fillText('PageSpeed', 420, 805);
+    ctx.restore();
+  }
+  // cursor travels to the button and clicks
+  const km = eio(P(lt, 1.95, 2.55));
+  if (lt > 1.9) {
+    const cx = lerp(w - 90, 200, km), cy = lerp(h - 120, 425, km) - Math.sin(km * Math.PI) * 80;
+    const kr = P(lt, 2.65, 3.2);
+    if (kr > 0 && kr < 1) { ctx.strokeStyle = `rgba(255,255,255,${.8 * (1 - kr)})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(191, 419, 30 + kr * 140, 0, 7); ctx.stroke(); }
+    cursor(cx, cy, Math.sin(Math.PI * P(lt, 2.55, 2.8)));
+  }
+  // toast
+  const kt = eback(P(lt, 2.8, 3.1));
+  if (kt > 0) {
+    ctx.save(); ctx.translate(w - 200, 124); ctx.scale(kt, kt);
+    rr(-170, -34, 340, 68, 34); ctx.fillStyle = '#fff'; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 30; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(-130, 0, 20, 0, 7); ctx.fill();
+    check(-130, 0, 26, P(lt, 2.9, 3.2), '#fff');
+    font(800, 22); ctx.fillStyle = C.navy; ctx.fillText('Novo pedido recebido', -98, 8);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- scene 3: platforms (5.9 – 9.4s) ----------
+const BARS = [.42, .55, .48, .66, .6, .78, .72, .95];
+const LINE = Array.from({ length: 41 }, (_, i) => { const x = i / 40; return .18 + x * .62 + Math.sin(x * 9) * .07 + Math.sin(x * 23) * .025; });
+function sceneApp(t) {
+  const t0 = 5.9, t1 = 9.4; if (t < t0 || t > t1) return;
+  title('02', 'Sistemas e', 'Plataformas', t, t0, t1);
+  const lt = t - t0, ki = eo(P(lt, .2, 1)), ko = eio(P(t, t1 - .5, t1));
+  const w = 900, h = 880;
+  ctx.save(); ctx.globalAlpha = ki * (1 - ko);
+  ctx.translate(540 + (1 - ki) * 420 - ko * 420, 660 + h / 2 + Math.sin(t * 2 + 1) * 8);
+  ctx.rotate(-(1 - ki) * .06 + ko * .05); ctx.translate(-w / 2, -h / 2);
+  panel(w, h);
+
+  // sidebar
+  ctx.fillStyle = 'rgba(255,255,255,.03)'; rr(0, 0, 110, h, 32); ctx.fill();
+  const active = lt > 2.3 ? lerp(0, 1, eio(P(lt, 2.3, 2.6))) : 0;
+  rr(22, 40 + active * 100, 66, 66, 18); ctx.fillStyle = grad(22, 40, 88, 106, .9); ctx.fill();
+  for (let i = 0; i < 5; i++) {
+    const k = eback(P(lt, .5 + i * .06, .8 + i * .06)); if (k <= 0) continue;
+    ctx.save(); ctx.translate(55, 73 + i * 100); ctx.scale(k, k);
+    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 3;
+    rr(-14, -14, 28, 28, 7); ctx.stroke(); ctx.restore();
+  }
+
+  // KPI cards with counters
+  const kpis = [['Visitas', 12480, v => Math.round(v).toLocaleString('pt-PT')], ['Pedidos', 356, v => Math.round(v)], ['Conversão', 4.8, v => v.toFixed(1) + '%']];
+  const kw = (w - 140 - 40) / 3;
+  kpis.forEach(([label, val, fmt], i) => {
+    const k = eo(P(lt, .6 + i * .1, 1.1 + i * .1)); if (k <= 0) return;
+    const x = 130 + i * (kw + 20), y = 30 + (1 - k) * 40;
+    ctx.save(); ctx.globalAlpha *= k;
+    rr(x, y, kw, 150, 22); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fill();
+    font(600, 20); ctx.fillStyle = C.muted; ctx.fillText(label, x + 24, y + 42);
+    font(800, 44); ctx.fillStyle = '#fff'; ctx.fillText(fmt(val * eo(P(lt, .8, 2.2))), x + 24, y + 98);
+    font(700, 18); ctx.fillStyle = C.green; ctx.fillText(['▲ 38%', '▲ 21%', '▲ 1.2pp'][i], x + 24, y + 130);
+    ctx.restore();
+  });
+
+  // bar chart
+  const kbc = eo(P(lt, .9, 1.3));
+  if (kbc > 0) {
+    ctx.save(); ctx.globalAlpha *= kbc;
+    rr(130, 205, w - 150, 300, 22); ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill();
+    font(700, 22); ctx.fillStyle = '#fff'; ctx.fillText('Pedidos por mês', 156, 248);
+    // toggle switch that flips (interactive feel)
+    const on = eio(P(lt, 2.0, 2.25));
+    rr(w - 110, 226, 64, 34, 17); ctx.fillStyle = on > .5 ? C.green : 'rgba(255,255,255,.2)'; ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(w - 93 + on * 30, 243, 13, 0, 7); ctx.fill();
+    const bw = 58, gap = (w - 150 - 52 - bw * 8) / 7;
+    BARS.forEach((v, i) => {
+      const k = eback(P(lt, 1.0 + i * .07, 1.5 + i * .07)) * (1 + on * (i === 7 ? .0 : .04 * Math.sin(i + lt * 6)));
+      const bh = 190 * v * k, x = 156 + i * (bw + gap);
+      rr(x, 480 - bh, bw, bh, 12); ctx.fillStyle = i === 7 ? grad(x, 480 - bh, x, 480) : 'rgba(74,108,247,.55)'; ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  // line chart
+  const klc = eo(P(lt, 1.3, 1.7));
+  if (klc > 0) {
+    ctx.save(); ctx.globalAlpha *= klc;
+    const X = 130, Y = 530, CW = w - 150, CH = 320;
+    rr(X, Y, CW, CH, 22); ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill();
+    font(700, 22); ctx.fillStyle = '#fff'; ctx.fillText('Crescimento', X + 26, Y + 44);
+    const kd = eio(P(lt, 1.4, 2.6));
+    const px = i => X + 26 + (CW - 52) * i / 40, py = v => Y + CH - 30 - v * (CH - 100);
+    ctx.save(); ctx.beginPath(); ctx.rect(X, Y, 26 + (CW - 52) * kd, CH); ctx.clip();
+    ctx.beginPath(); LINE.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
+    ctx.lineTo(px(40), Y + CH - 20); ctx.lineTo(px(0), Y + CH - 20); ctx.closePath();
+    const ga = ctx.createLinearGradient(0, Y + 60, 0, Y + CH); ga.addColorStop(0, 'rgba(0,212,255,.35)'); ga.addColorStop(1, 'rgba(0,212,255,0)');
+    ctx.fillStyle = ga; ctx.fill();
+    ctx.beginPath(); LINE.forEach((v, i) => i ? ctx.lineTo(px(i), py(v)) : ctx.moveTo(px(i), py(v)));
+    ctx.strokeStyle = grad(X, 0, X + CW, 0); ctx.lineWidth = 6; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.restore();
+    const fi = kd * 40, i0 = Math.floor(fi), i1 = Math.min(40, i0 + 1), v = lerp(LINE[i0], LINE[i1], fi - i0);
+    const dx = X + 26 + (CW - 52) * kd, dy = py(v);
+    ctx.fillStyle = '#fff'; ctx.shadowColor = C.cyan; ctx.shadowBlur = 25; ctx.beginPath(); ctx.arc(dx, dy, 11, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+    const kb = eback(P(lt, 2.55, 2.85));
+    if (kb > 0) {
+      ctx.save(); ctx.translate(dx - 70, dy - 60); ctx.scale(kb, kb);
+      rr(-70, -30, 140, 56, 16); ctx.fillStyle = '#fff'; ctx.fill();
+      font(800, 26); ctx.fillStyle = C.navy; ctx.textAlign = 'center'; ctx.fillText('+38%', 0, 8);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- scene 4: digital solutions / AI (9.1 – 12.5s) ----------
+const NODES = [
+  { t: 'Novo contacto', s: 'Site · WhatsApp', x: 90, y: 690, icon: 'mail' },
+  { t: 'IA analisa', s: 'Qualifica o pedido', x: 470, y: 870, icon: 'spark' },
+  { t: 'CRM atualizado', s: 'Tudo organizado', x: 90, y: 1050, icon: 'db' },
+  { t: 'Resposta enviada', s: 'Em minutos', x: 470, y: 1230, icon: 'send' },
+];
+function icon(type, x, y) {
+  ctx.save(); ctx.translate(x, y); ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff'; ctx.lineWidth = 3.5; ctx.lineJoin = ctx.lineCap = 'round';
+  if (type === 'mail') { rr(-16, -12, 32, 24, 4); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-16, -10); ctx.lineTo(0, 3); ctx.lineTo(16, -10); ctx.stroke(); }
+  if (type === 'spark') { ctx.beginPath(); for (let i = 0; i < 8; i++) { const r = i % 2 ? 6 : 18, a = i * Math.PI / 4 - Math.PI / 2; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.closePath(); ctx.fill(); }
+  if (type === 'db') { [-10, 0, 10].forEach(o => { ctx.beginPath(); ctx.ellipse(0, o, 15, 6, 0, 0, 7); ctx.stroke(); }); }
+  if (type === 'send') { ctx.beginPath(); ctx.moveTo(-16, -2); ctx.lineTo(16, -14); ctx.lineTo(6, 16); ctx.lineTo(1, 3); ctx.closePath(); ctx.stroke(); }
+  ctx.restore();
+}
+function bez(a, b, k) { // vertical S-curve between two points
+  const c1 = { x: a.x, y: lerp(a.y, b.y, .6) }, c2 = { x: b.x, y: lerp(a.y, b.y, .4) }, u = 1 - k;
+  return { x: u ** 3 * a.x + 3 * u * u * k * c1.x + 3 * u * k * k * c2.x + k ** 3 * b.x, y: u ** 3 * a.y + 3 * u * u * k * c1.y + 3 * u * k * k * c2.y + k ** 3 * b.y };
+}
+function sceneAI(t) {
+  const t0 = 9.1, t1 = 12.5; if (t < t0 || t > t1) return;
+  title('03', 'IA, automação e', 'Soluções digitais', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .5, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko;
+  ctx.translate(540, 1100); ctx.scale(1 - ko * .35, 1 - ko * .35); ctx.translate(-540, -1100);
+  const NW = 520, NH = 130;
+
+  // connectors + travelling data pulses
+  for (let i = 0; i < 3; i++) {
+    const a = { x: NODES[i].x + NW / 2, y: NODES[i].y + NH }, b = { x: NODES[i + 1].x + NW / 2, y: NODES[i + 1].y };
+    const kd = eio(P(lt, .75 + i * .35, 1.1 + i * .35)); if (kd <= 0) continue;
+    ctx.beginPath(); for (let s = 0; s <= 40 * kd; s++) { const p = bez(a, b, s / 40); s ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); }
+    ctx.strokeStyle = 'rgba(74,108,247,.7)'; ctx.lineWidth = 4; ctx.setLineDash([10, 10]); ctx.lineDashOffset = -lt * 60; ctx.stroke(); ctx.setLineDash([]);
+    if (kd >= 1) for (let j = 0; j < 2; j++) {
+      const p = bez(a, b, ((lt * .9 + j * .5 + i * .2) % 1));
+      ctx.fillStyle = C.cyan; ctx.shadowColor = C.cyan; ctx.shadowBlur = 20; ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+    }
+  }
+  // nodes
+  NODES.forEach((n, i) => {
+    const k = eback(P(lt, .4 + i * .35, .8 + i * .35)); if (k <= 0) return;
+    const on = P(lt, .95 + i * .35, 1.2 + i * .35);
+    ctx.save(); ctx.translate(n.x + NW / 2, n.y + NH / 2); ctx.scale(k, k); ctx.globalAlpha *= clamp(k);
+    if (on > 0) { ctx.shadowColor = 'rgba(0,212,255,.55)'; ctx.shadowBlur = 40 * on; }
+    rr(-NW / 2, -NH / 2, NW, NH, 28); ctx.fillStyle = 'rgba(17,25,54,.95)'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 2.5; ctx.strokeStyle = on > 0 ? grad(-NW / 2, 0, NW / 2, 0, .4 + .6 * on) : 'rgba(255,255,255,.1)'; ctx.stroke();
+    ctx.fillStyle = grad(-NW / 2 + 30, -40, -NW / 2 + 110, 40); ctx.beginPath(); ctx.arc(-NW / 2 + 70, 0, 38, 0, 7); ctx.fill();
+    icon(n.icon, -NW / 2 + 70, 0);
+    font(800, 30); ctx.fillStyle = '#fff'; ctx.fillText(n.t, -NW / 2 + 130, -4);
+    font(600, 21); ctx.fillStyle = C.muted; ctx.fillText(n.s, -NW / 2 + 130, 30);
+    if (on > 0) { ctx.fillStyle = 'rgba(34,227,160,.15)'; ctx.beginPath(); ctx.arc(NW / 2 - 50, 0, 24, 0, 7); ctx.fill(); check(NW / 2 - 50, 0, 30, on); }
+    ctx.restore();
+  });
+  // chat bubble typed by the AI
+  const kb = eback(P(lt, 2.0, 2.3));
+  if (kb > 0) {
+    ctx.save(); ctx.translate(540, 1470); ctx.scale(kb, kb);
+    rr(-450, -60, 900, 120, 30); ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-380, 60); ctx.lineTo(-410, 90); ctx.lineTo(-340, 60); ctx.fill();
+    ctx.fillStyle = grad(-420, -30, -360, 30); ctx.beginPath(); ctx.arc(-390, 0, 32, 0, 7); ctx.fill(); icon('spark', -390, 0);
+    const msg = 'Olá! Já analisámos o teu pedido. 🚀', kt = P(lt, 2.35, 3.0);
+    font(700, 28); ctx.fillStyle = C.navy;
+    if (kt <= 0) [0, 1, 2].forEach(i => { ctx.fillStyle = `rgba(10,15,46,${.3 + .5 * Math.abs(Math.sin(lt * 6 + i))})`; ctx.beginPath(); ctx.arc(-320 + i * 26, 0, 8, 0, 7); ctx.fill(); });
+    else ctx.fillText([...msg].slice(0, Math.ceil([...msg].length * kt)).join(''), -335, 10);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- scene 5: outro / CTA (12.2 – 15s) ----------
+function sceneOutro(t) {
+  const t0 = 12.2; if (t < t0) return;
+  const lt = t - t0;
+  const zoom = 1 + lt * .012;
+  ctx.save(); ctx.translate(540, 960); ctx.scale(zoom, zoom); ctx.translate(-540, -960);
+  // pulse rings from the logo
+  for (let j = 0; j < 3; j++) {
+    const k = ((lt - 1.0) * .6 + j / 3) % 1; if (lt < 1.0 || k < 0) continue;
+    ctx.strokeStyle = `rgba(0,212,255,${.35 * (1 - k)})`; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(540, 740, 200 + k * 320, 0, 7); ctx.stroke();
+  }
+  glow(540, 740, 380, '74,108,247', .4 * P(lt, .2, 1));
+  drawLogo(540, 740, 7.2, P(lt, 0, 1.2));
+  wordmark(540, 1070, 128, P(lt, .6, 1.4));
+  maskText('Websites  ·  Plataformas  ·  Soluções digitais', 540, 1150, 600, 34, C.muted, eo(P(lt, 1.0, 1.5)), 'center');
+
+  // CTA pill with shimmer
+  const kc = eback(P(lt, 1.3, 1.8));
+  if (kc > 0) {
+    ctx.save(); ctx.translate(540, 1290); ctx.scale(kc, kc);
+    ctx.shadowColor = 'rgba(74,108,247,.8)'; ctx.shadowBlur = 50;
+    rr(-280, -56, 560, 112, 56); ctx.fillStyle = grad(-280, 0, 280, 0); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.save(); rr(-280, -56, 560, 112, 56); ctx.clip();
+    const sx = lerp(-500, 500, ((lt - 1.6) * .7) % 1);
+    const sg = ctx.createLinearGradient(sx - 80, 0, sx + 80, 0);
+    sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,255,255,.45)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sg; ctx.fillRect(sx - 80, -60, 160, 120); ctx.restore();
+    font(800, 44); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('nexusvora.com', -24, 15);
+    const ax = 205 + Math.sin(lt * 6) * 6;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(ax - 16, 0); ctx.lineTo(ax + 14, 0); ctx.moveTo(ax + 2, -12); ctx.lineTo(ax + 14, 0); ctx.lineTo(ax + 2, 12); ctx.stroke();
+    ctx.restore();
+  }
+  maskText('Vamos criar o teu próximo projeto?', 540, 1440, 700, 40, '#fff', eo(P(lt, 1.8, 2.3)), 'center');
+  ctx.restore();
+}
+
+// ---------- compose ----------
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  background(t);
+  sceneIntro(t); sceneWeb(t); sceneApp(t); sceneAI(t); sceneOutro(t);
+  [2.6, 6.0, 9.2, 12.3].forEach(ts => sweep(t, ts));
+  // preview taps: ripple bursts where the viewer clicks
+  for (let i = taps.length - 1; i >= 0; i--) {
+    const k = (performance.now() - taps[i].at) / 700; if (k >= 1) { taps.splice(i, 1); continue; }
+    ctx.strokeStyle = `rgba(0,212,255,${1 - k})`; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(taps[i].x, taps[i].y, 20 + eo(k) * 160, 0, 7); ctx.stroke();
+    for (let j = 0; j < 8; j++) { const a = j * Math.PI / 4, r = 30 + eo(k) * 130; ctx.fillStyle = `rgba(139,63,219,${1 - k})`; ctx.beginPath(); ctx.arc(taps[i].x + Math.cos(a) * r, taps[i].y + Math.sin(a) * r, 6 * (1 - k), 0, 7); ctx.fill(); }
+  }
+}
+
+// ---------- player ----------
+const exporting = new URLSearchParams(location.search).has('export');
+window.renderAt = t => { mx = my = 0; render(t); };
+const playBtn = document.getElementById('play'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
+let playing = !exporting, cur = 0, last = performance.now();
+if (exporting) document.body.classList.add('export');
+
+cv.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); tmx = ((e.clientX - r.left) / r.width - .5) * 2; tmy = ((e.clientY - r.top) / r.height - .5) * 2; });
+cv.addEventListener('pointerleave', () => { tmx = tmy = 0; });
+cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); taps.push({ x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H, at: performance.now() }); });
+playBtn.onclick = () => { playing = !playing; playBtn.textContent = playing ? 'Pausa' : 'Play'; };
+scrub.oninput = () => { cur = +scrub.value; };
+document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); playBtn.click(); } });
+
+function loop(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (playing) cur = (cur + dt) % DUR;
+  mx = lerp(mx, tmx, .08); my = lerp(my, tmy, .08);
+  render(cur);
+  scrub.value = cur; timeEl.textContent = `${cur.toFixed(1)}s / ${DUR}s`;
+  requestAnimationFrame(loop);
+}
+window.ready = document.fonts.load(`800 40px ${F}`).then(() => Promise.all([400, 600, 700].map(w => document.fonts.load(`${w} 40px ${F}`)))).catch(() => {}).then(() => {
+  if (exporting) render(0); else requestAnimationFrame(loop);
+  return true;
+});
+</script>
+</body>
+</html>

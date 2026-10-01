@@ -184,10 +184,12 @@ class HourPackageController extends Controller
             'due_date' => ['nullable', 'date'],
             'status' => ['required', 'in:a_fazer,em_progresso,concluido,bloqueado'],
             'target_hour_package_id' => ['nullable', 'integer', 'exists:hour_packages,id'],
+            'parent_task_id' => ['nullable', 'integer', 'exists:project_tasks,id'],
         ]);
 
         $targetPackageId = $data['target_hour_package_id'] ?? null;
-        unset($data['target_hour_package_id']);
+        $parentTaskId = $data['parent_task_id'] ?? null;
+        unset($data['target_hour_package_id'], $data['parent_task_id']);
 
         if ($targetPackageId && (int) $targetPackageId !== $hourPackage->id) {
             abort_unless($task->status !== 'concluido', 422, 'Não é possível mover uma tarefa concluída.');
@@ -207,6 +209,21 @@ class HourPackageController extends Controller
 
             return redirect()->route('admin.hour-packages.show', $targetPackage)
                 ->with('success', 'Tarefa movida para o novo pacote.');
+        }
+
+        // O campo só é enviado quando a tarefa pode mudar de tarefa principal.
+        if ($request->exists('parent_task_id') && (int) $parentTaskId !== (int) $task->parent_task_id) {
+            if ($parentTaskId) {
+                abort_if((int) $parentTaskId === $task->id, 422, 'Uma tarefa não pode ser subtarefa de si própria.');
+                abort_if($task->subtasks()->exists(), 422, 'Uma tarefa com subtarefas não pode passar a subtarefa.');
+                abort_unless(
+                    $hourPackage->tasks()->whereKey($parentTaskId)->whereNull('parent_task_id')->exists(),
+                    422,
+                    'A tarefa principal tem de ser uma tarefa deste pacote (e não uma subtarefa).'
+                );
+            }
+
+            $data['parent_task_id'] = $parentTaskId;
         }
 
         $task->update($data);

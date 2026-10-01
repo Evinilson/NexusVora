@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cria o teu site 30s</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#05081c; --muted:#98A3C2; --cyan:#00D4FF; --blue:#4A6CF7; --purple:#8B3FDB; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; }
+  body { background:var(--bg); color:#fff; font-family:'Plus Jakarta Sans',sans-serif;
+         display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:16px; overflow:hidden; }
+  #stage { height:min(84vh, calc((100vw - 32px) * 16 / 9)); aspect-ratio:9/16; position:relative; }
+  canvas { width:100%; height:100%; display:block; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06); cursor:crosshair; }
+  #ui { display:flex; align-items:center; gap:10px; width:min(100%, 520px); font-size:13px; color:var(--muted); }
+  #ui button { background:linear-gradient(135deg,var(--cyan),var(--blue),var(--purple)); color:#fff; border:0; border-radius:999px;
+               padding:8px 16px; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+  #ui input { flex:1; accent-color:var(--blue); }
+  #time { font-variant-numeric:tabular-nums; min-width:70px; text-align:right; }
+  body.export { padding:0; background:#000; }
+  body.export #ui { display:none; }
+  body.export #stage { height:auto; }
+  body.export canvas { border-radius:0; box-shadow:none; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<div id="ui">
+  <button id="play">Pausa</button>
+  <input id="scrub" type="range" min="0" max="30" step="0.01" value="0">
+  <span id="time">0.0s / 30s</span>
+</div>
+<script>
+const W = 1080, H = 1920, DUR = 30;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const C = { navy:'#0A0F2E', card:'#111936', cyan:'#00D4FF', blue:'#4A6CF7', purple:'#8B3FDB', muted:'#98A3C2', green:'#22E3A0' };
+const F = "'Plus Jakarta Sans', sans-serif";
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const P = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eback = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const eexpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+
+function grad(x0, y0, x1, y1, a = 1) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  g.addColorStop(0, `rgba(0,212,255,${a})`);
+  g.addColorStop(.5, `rgba(74,108,247,${a})`);
+  g.addColorStop(1, `rgba(139,63,219,${a})`);
+  return g;
+}
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, Math.max(0, w), Math.max(0, h), Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2)); }
+function glow(x, y, r, rgb, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function font(weight, size) { ctx.font = `${weight} ${size}px ${F}`; }
+
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const parts = Array.from({ length: 70 }, () => ({ x: rnd() * W, y: rnd() * H, r: 1 + rnd() * 2.6, s: 20 + rnd() * 70, ph: rnd() * 6.28, c: rnd() }));
+const streaks = Array.from({ length: 46 }, () => ({ a: rnd() * Math.PI * 2, d: .7 + rnd() * .5, o: rnd() * .25 }));
+
+// Parallax + taps (preview only — never used during export)
+let mx = 0, my = 0, tmx = 0, tmy = 0; const taps = [];
+
+// ---------- background ----------
+function background(t) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#060A22'); g.addColorStop(1, C.navy);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  glow(540 + Math.sin(t * .6) * 280 + mx * 70, 520 + Math.cos(t * .5) * 180 + my * 50, 720, '0,212,255', .20);
+  glow(540 + Math.cos(t * .45) * 300 - mx * 70, 1460 + Math.sin(t * .7) * 200 - my * 50, 820, '139,63,219', .26);
+  glow(540 + Math.sin(t * .3 + 2) * 200, 980, 560, '74,108,247', .12);
+
+  // drifting dot grid
+  ctx.fillStyle = 'rgba(152,163,194,.10)';
+  const off = (t * 22) % 60;
+  for (let y = -60; y < H + 60; y += 60)
+    for (let x = 30; x < W; x += 60) ctx.fillRect(x + mx * 12 - 1.5, y + off + my * 12 - 1.5, 3, 3);
+
+  // particles
+  for (const p of parts) {
+    const y = ((p.y - t * p.s) % H + H) % H;
+    const x = p.x + Math.sin(t * .8 + p.ph) * 22 + mx * p.r * 10;
+    ctx.fillStyle = p.c > .5 ? `rgba(0,212,255,${.18 + .4 * Math.sin(t * 2 + p.ph) ** 2})` : `rgba(139,63,219,${.2 + .4 * Math.cos(t * 1.7 + p.ph) ** 2})`;
+    ctx.beginPath(); ctx.arc(x, y, p.r, 0, 7); ctx.fill();
+  }
+}
+
+// ---------- brand ----------
+const ANG = [-90, 90, 180, 0, -135, 45, -45, 135].map(a => a * Math.PI / 180);
+function drawLogo(cx, cy, s, k, a = 1) {
+  if (k <= 0 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(cx, cy);
+  const g = grad(-30 * s, -30 * s, 30 * s, 30 * s);
+  ctx.strokeStyle = g; ctx.fillStyle = g; ctx.lineCap = 'round';
+  ctx.shadowColor = 'rgba(74,108,247,.9)'; ctx.shadowBlur = 4 * s;
+  const kc = eback(P(k, 0, .3));
+  ctx.lineWidth = 2.5 * s;
+  ctx.beginPath(); ctx.arc(0, 0, 7 * s * Math.max(kc, .01), -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * eo(P(k, 0, .35))); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 3 * s * Math.max(kc, 0), 0, 7); ctx.fill();
+  ANG.forEach((an, i) => {
+    const kk = P(k, .2 + i * .05, .6 + i * .05); if (kk <= 0) return;
+    const l = eo(kk), cs = Math.cos(an), sn = Math.sin(an);
+    ctx.lineWidth = 2 * s;
+    ctx.beginPath(); ctx.moveTo(cs * 7 * s, sn * 7 * s); ctx.lineTo(cs * lerp(7, 20, l) * s, sn * lerp(7, 20, l) * s); ctx.stroke();
+    const kn = eback(P(kk, .55, 1));
+    if (kn > 0) { ctx.beginPath(); ctx.arc(cs * 22.5 * s, sn * 22.5 * s, 3 * s * kn, 0, 7); ctx.fill(); }
+  });
+  ctx.restore();
+}
+function wordmark(cx, y, size, k, a = 1) {
+  if (k <= 0 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; font(800, size); ctx.textBaseline = 'alphabetic';
+  const txt = 'NexusVora', total = ctx.measureText(txt).width, x0 = cx - total / 2;
+  const w1 = ctx.measureText('Nexus').width, g = grad(x0 + w1, 0, x0 + total, 0);
+  ctx.beginPath(); ctx.rect(x0 - 20, y - size * 1.05, total + 40, size * 1.35); ctx.clip();
+  for (let i = 0; i < txt.length; i++) {
+    const kk = eo(P(k, i * .06, i * .06 + .45));
+    ctx.fillStyle = i < 5 ? '#fff' : g;
+    ctx.fillText(txt[i], x0 + ctx.measureText(txt.slice(0, i)).width, y + (1 - kk) * size * 1.1);
+  }
+  ctx.restore();
+}
+function maskText(s, x, y, weight, size, fill, k, align = 'left') {
+  if (k <= 0) return;
+  ctx.save(); font(weight, size); ctx.textAlign = align;
+  const w = ctx.measureText(s).width, left = align === 'center' ? x - w / 2 : x;
+  ctx.beginPath(); ctx.rect(left - 20, y - size * 1.05, w + 40, size * 1.4); ctx.clip();
+  ctx.fillStyle = fill; ctx.fillText(s, x, y + (1 - k) * size * 1.3);
+  ctx.restore();
+}
+
+// Section header shared by the three service scenes
+function title(num, l1, l2, t, t0, t1) {
+  const ko = eio(P(t, t1 - .45, t1)); if (t < t0 || ko >= 1) return;
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(0, -70 * ko);
+  const y0 = 300, kc = eo(P(t, t0, t0 + .6));
+  // number chip + growing line
+  ctx.globalAlpha *= kc; font(700, 28); ctx.fillStyle = C.cyan; ctx.fillText(num, 90, y0 + 10);
+  ctx.fillStyle = grad(140, 0, 400, 0); ctx.fillRect(140, y0, 240 * kc, 3);
+  font(600, 24); ctx.fillStyle = C.muted; ctx.globalAlpha = (1 - ko) * P(t, t0 + .3, t0 + .8);
+  ctx.fillText('O QUE FAZEMOS', 400, y0 + 9);
+  ctx.globalAlpha = 1 - ko;
+  maskText(l1, 90, y0 + 110, 600, 60, '#fff', eo(P(t, t0 + .1, t0 + .7)));
+  font(800, 124); const fit = Math.min(124, 900 / ctx.measureText(l2).width * 124);
+  maskText(l2, 90, y0 + 110 + fit * 1.05, 800, fit, grad(90, 0, 990, 0), eo(P(t, t0 + .2, t0 + .85)));
+  ctx.restore();
+}
+function panel(w, h) {
+  ctx.save(); ctx.shadowColor = 'rgba(74,108,247,.35)'; ctx.shadowBlur = 60;
+  rr(0, 0, w, h, 32); ctx.fillStyle = 'rgba(17,25,54,.92)'; ctx.fill(); ctx.restore();
+  rr(0, 0, w, h, 32); ctx.lineWidth = 2; ctx.strokeStyle = grad(0, 0, w, h, .45); ctx.stroke();
+}
+function bar(x, y, w, h, a = .12) { rr(x, y, w, h, h / 2); ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fill(); }
+function cursor(x, y, press) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(1.6 - press * .2, 1.6 - press * .2);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 26); ctx.lineTo(7, 20); ctx.lineTo(12, 31); ctx.lineTo(17, 29); ctx.lineTo(12, 18); ctx.lineTo(21, 18); ctx.closePath();
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = C.navy; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+  ctx.restore();
+}
+function check(x, y, s, k, color = C.green) {
+  if (k <= 0) return;
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = s * .18; ctx.lineCap = ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(x - s * .35, y); ctx.lineTo(x - s * .1, y + s * .25 * Math.min(1, k * 2));
+  if (k > .5) ctx.lineTo(lerp(x - s * .1, x + s * .38, (k - .5) * 2), lerp(y + s * .25, y - s * .28, (k - .5) * 2));
+  ctx.stroke(); ctx.restore();
+}
+
+// ---------- transitions: light sweep ----------
+function sweep(t, ts) {
+  const k = P(t, ts - .3, ts + .35); if (k <= 0 || k >= 1) return;
+  ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(-.35);
+  const x = lerp(-1300, 1300, eio(k));
+  const g = ctx.createLinearGradient(x - 220, 0, x + 220, 0);
+  g.addColorStop(0, 'rgba(0,212,255,0)'); g.addColorStop(.45, 'rgba(0,212,255,.35)');
+  g.addColorStop(.5, 'rgba(255,255,255,.55)'); g.addColorStop(.55, 'rgba(139,63,219,.35)'); g.addColorStop(1, 'rgba(139,63,219,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - 220, -1500, 440, 3000);
+  ctx.restore();
+  ctx.fillStyle = `rgba(255,255,255,${.06 * Math.sin(k * Math.PI)})`; ctx.fillRect(0, 0, W, H);
+}
+
+// ================= STORY: SITES DESDE 499€ =================
+const RED = '#FF4D6D', GOLD = '#FFC857';
+
+// camera shake: every "impact" moment kicks the whole frame
+const HITS = [[.08, 22], [.3, 16], [.55, 30], [3.25, 34], [11.45, 40], [6.95, 6], [7.5, 6], [8.05, 6], [8.6, 6], [9.15, 6]];
+function shake(t) {
+  let a = 0; for (const [ts, amp] of HITS) { const d = t - ts; if (d >= 0 && d < .45) a += amp * Math.pow(1 - d / .45, 2); }
+  return { x: Math.sin(t * 91) * a, y: Math.cos(t * 77) * a * .7 };
+}
+function fit(s, weight, size, maxW) { font(weight, size); const w = ctx.measureText(s).width; return w > maxW ? size * maxW / w : size; }
+function slam(s, x, y, weight, size, fill, k, align = 'center') { // text punches in from big + blurred-ish
+  if (k <= 0) return;
+  const e = eo(k), sc = lerp(2.4, 1, e);
+  ctx.save(); ctx.globalAlpha *= clamp(k * 3); ctx.translate(x, y); ctx.scale(sc, sc);
+  font(weight, size); ctx.textAlign = align; ctx.fillStyle = fill; ctx.fillText(s, 0, 0); ctx.restore();
+}
+function heading(l1, l2, t, t0, t1, y0 = 330) {
+  const ko = eio(P(t, t1 - .4, t1)); if (t < t0 || ko >= 1) return;
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(0, -60 * ko);
+  const s1 = fit(l1, 700, 62, 900), s2 = fit(l2, 800, 104, 900);
+  maskText(l1, 540, y0, 700, s1, '#fff', eo(P(t, t0, t0 + .45)), 'center');
+  maskText(l2, 540, y0 + s2 * 1.1, 800, s2, grad(90, 0, 990, 0), eo(P(t, t0 + .1, t0 + .6)), 'center');
+  ctx.restore();
+}
+function ico(type, x, y, s = 1, color = '#fff') {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3.5; ctx.lineJoin = ctx.lineCap = 'round';
+  switch (type) {
+    case 'mail': rr(-16, -12, 32, 24, 4); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-16, -10); ctx.lineTo(0, 3); ctx.lineTo(16, -10); ctx.stroke(); break;
+    case 'chat': rr(-17, -14, 34, 24, 8); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 10); ctx.lineTo(-12, 18); ctx.lineTo(0, 10); ctx.stroke(); break;
+    case 'phone': ctx.beginPath(); ctx.moveTo(-12, -16); ctx.quadraticCurveTo(-18, 10, 12, 16); ctx.lineTo(16, 8); ctx.lineTo(6, 2); ctx.lineTo(2, 7); ctx.quadraticCurveTo(-6, 2, -8, -6); ctx.lineTo(-3, -9); ctx.lineTo(-7, -18); ctx.closePath(); ctx.stroke(); break;
+    case 'brush': ctx.beginPath(); ctx.moveTo(14, -16); ctx.lineTo(-4, 4); ctx.stroke(); ctx.beginPath(); ctx.arc(-9, 10, 7, 0, 7); ctx.fill(); break;
+    case 'mobile': rr(-11, -18, 22, 36, 5); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 12, 2, 0, 7); ctx.fill(); break;
+    case 'search': ctx.beginPath(); ctx.arc(-4, -4, 11, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(4, 4); ctx.lineTo(15, 15); ctx.stroke(); break;
+    case 'globe': ctx.beginPath(); ctx.arc(0, 0, 16, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.ellipse(0, 0, 7, 16, 0, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(16, 0); ctx.stroke(); break;
+    case 'sliders': [-9, 0, 9].forEach((yy, i) => { ctx.beginPath(); ctx.moveTo(-15, yy); ctx.lineTo(15, yy); ctx.stroke(); ctx.beginPath(); ctx.arc([-6, 8, -2][i], yy, 4.5, 0, 7); ctx.fill(); }); break;
+    case 'lock': rr(-12, -2, 24, 18, 4); ctx.fill(); ctx.beginPath(); ctx.arc(0, -4, 8, Math.PI, 0); ctx.stroke(); break;
+  }
+  ctx.restore();
+}
+function stars(x, y, s, n, k) {
+  for (let i = 0; i < 5; i++) {
+    const kk = eback(P(k, i * .12, i * .12 + .4)); if (kk <= 0) continue;
+    ctx.save(); ctx.translate(x + i * s * 2.3, y); ctx.scale(kk, kk); ctx.fillStyle = i < n ? GOLD : 'rgba(255,255,255,.2)';
+    ctx.beginPath(); for (let j = 0; j < 10; j++) { const r = j % 2 ? s * .45 : s, a = j * Math.PI / 5 - Math.PI / 2; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill(); ctx.restore();
+  }
+}
+
+// ================= STORY: CRIA O TEU SITE ONLINE (público frio) =================
+const HITS2 = [[.04, 26], [.2, 16], [1.75, 12], [5.95, 8], [6.75, 8], [7.55, 8], [12.4, 42]];
+function shake2(t) {
+  let a = 0; for (const [ts, amp] of HITS2) { const d = t - ts; if (d >= 0 && d < .45) a += amp * Math.pow(1 - d / .45, 2); }
+  return { x: Math.sin(t * 91) * a, y: Math.cos(t * 77) * a * .7 };
+}
+function pop(cx, cy, k, fn) { if (k <= 0) return; ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k); ctx.translate(-cx, -cy); ctx.globalAlpha *= clamp(k); fn(); ctx.restore(); }
+
+// ---------- phone mockup that "builds" a website ----------
+const THEMES = {
+  nv:     { a: C.cyan,    b: C.purple,  name: 'O teu negócio',  tag: 'Bem-vindo',        btn: 'Pedir contacto' },
+  food:   { a: '#FF7A45', b: '#FFC857', name: 'Casa do Sabor',  tag: 'Restaurante',      btn: 'Reservar mesa' },
+  clinic: { a: '#14B8A6', b: '#0EA5E9', name: 'Clínica Sorriso', tag: 'Clínica',         btn: 'Marcar consulta' },
+  build:  { a: '#F59E0B', b: '#EF4444', name: 'Obras & Cia',    tag: 'Construção',       btn: 'Pedir orçamento' },
+  shop:   { a: '#EC4899', b: '#8B5CF6', name: 'Loja Bella',     tag: 'Loja',             btn: 'Ver coleção' },
+};
+function phone(cx, cy, s, th, k) {
+  const PW = 440, PH = 900, SW = PW - 32;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.translate(-PW / 2, -PH / 2);
+  ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 70; rr(0, 0, PW, PH, 66); ctx.fillStyle = '#0B0F1F'; ctx.fill(); ctx.shadowBlur = 0;
+  ctx.lineWidth = 4; ctx.strokeStyle = grad(0, 0, PW, PH, .6); ctx.stroke();
+  ctx.save(); rr(16, 16, SW, PH - 32, 52); ctx.clip(); ctx.translate(16, 16);
+  ctx.fillStyle = '#F4F6FB'; ctx.fillRect(0, 0, SW, PH);
+  const B = i => eback(P(k, i * .075, i * .075 + .22));
+  // empty state
+  const ke = 1 - P(k, 0, .15);
+  if (ke > 0) {
+    ctx.save(); ctx.globalAlpha *= ke; rr(30, 120, SW - 60, PH - 260, 26); ctx.setLineDash([14, 12]); ctx.strokeStyle = '#B8BFD6'; ctx.lineWidth = 3; ctx.stroke(); ctx.setLineDash([]);
+    font(700, 30); ctx.fillStyle = '#8B93AE'; ctx.textAlign = 'center'; ctx.fillText('O teu site aqui', SW / 2, 440);
+    ctx.fillRect(SW / 2 - 1.5, 470, 3, 36); ctx.restore();
+  }
+  font(700, 20); ctx.fillStyle = '#0B0F1F'; ctx.fillText('9:41', 40, 44);
+  pop(SW / 2, 90, B(0), () => {
+    ctx.fillStyle = th.a; ctx.beginPath(); ctx.arc(44, 90, 18, 0, 7); ctx.fill();
+    font(800, 22); ctx.fillStyle = '#0B0F1F'; ctx.fillText(th.name, 72, 98);
+    [0, 1, 2].forEach(j => { ctx.fillRect(SW - 62, 80 + j * 9, 30, 4); });
+  });
+  pop(SW / 2, 270, B(1), () => {
+    rr(16, 125, SW - 32, 300, 26); const g = ctx.createLinearGradient(16, 125, SW, 425); g.addColorStop(0, th.a); g.addColorStop(1, th.b); ctx.fillStyle = g; ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.arc(SW - 60, 170, 90, 0, 7); ctx.fill();
+  });
+  pop(150, 230, B(2), () => {
+    font(700, 18); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillText(th.tag.toUpperCase(), 44, 180);
+    const fs = fit(th.name, 800, 44, SW - 90); font(800, fs); ctx.fillStyle = '#fff'; ctx.fillText(th.name, 44, 232);
+  });
+  pop(150, 280, B(3), () => { bar(44, 262, 250, 14, .8); bar(44, 286, 190, 14, .6); });
+  pop(150, 360, B(4), () => {
+    font(800, 20); const w = ctx.measureText(th.btn).width + 48;
+    rr(44, 336, w, 52, 26); ctx.fillStyle = '#fff'; ctx.fill(); ctx.fillStyle = th.a; ctx.fillText(th.btn, 68, 369);
+  });
+  pop(120, 470, B(5), () => { rr(16, 458, 200, 22, 11); ctx.fillStyle = '#0B0F1F'; ctx.fill(); });
+  [0, 1].forEach(j => pop(16 + j * 196 + 90, 590, B(6 + j), () => {
+    const x = 16 + j * 196; rr(x, 500, 180, 180, 22); ctx.fillStyle = '#fff'; ctx.fill();
+    rr(x + 12, 512, 156, 96, 14); const g = ctx.createLinearGradient(x, 512, x + 156, 608); g.addColorStop(0, th.a + '55'); g.addColorStop(1, th.b + '88'); ctx.fillStyle = g; ctx.fill();
+    rr(x + 14, 624, 120, 14, 7); ctx.fillStyle = '#1E2437'; ctx.fill(); rr(x + 14, 648, 90, 12, 6); ctx.fillStyle = '#C3C9DB'; ctx.fill();
+  }));
+  pop(SW / 2, 715, B(8), () => { stars(34, 715, 13, 5, 1); font(700, 20); ctx.fillStyle = '#5B6485'; ctx.fillText('4.9 · 120 avaliações', 160, 722); });
+  pop(SW / 2, 785, B(9), () => {
+    rr(16, 750, SW - 32, 70, 35); ctx.fillStyle = '#0B0F1F'; ctx.fill();
+    font(800, 22); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(th.btn + '  →', SW / 2, 793); ctx.textAlign = 'left';
+  });
+  pop(SW / 2, 840, B(10), () => { rr(16, 836, SW - 32, 90, 22); ctx.fillStyle = '#E3E7F2'; ctx.fill(); });
+  ctx.restore();
+  rr(PW / 2 - 60, 30, 120, 34, 17); ctx.fillStyle = '#0B0F1F'; ctx.fill();
+  ctx.restore();
+}
+const CONF = Array.from({ length: 70 }, () => ({ a: rnd() * Math.PI * 2, v: 500 + rnd() * 900, r: 5 + rnd() * 8, c: [C.cyan, C.blue, C.purple, GOLD, '#fff'][Math.floor(rnd() * 5)], sp: rnd() * 10 }));
+
+// ---------- 1 · HOOK (0 – 2.45s): a site builds itself in front of you ----------
+function cHook(t) {
+  if (t > 2.5) return;
+  const ko = eio(P(t, 2.0, 2.45));
+  ctx.save(); ctx.globalAlpha = 1 - ko;
+  ctx.save(); ctx.translate(0, -80 * ko);
+  slam('Cria o teu', 540, 330, 800, 84, '#fff', P(t, -.3, .15));
+  slam('site online', 540, 480, 800, fit('site online', 800, 160, 940), grad(90, 0, 990, 0), P(t, -.22, .25));
+  // brand in the first 2 seconds
+  const kb = eback(P(t, 1.1, 1.45));
+  if (kb > 0) {
+    ctx.save(); ctx.translate(540, 565); ctx.scale(kb, kb);
+    font(700, 30); const w1 = ctx.measureText('com a ').width; font(800, 30); const w2 = ctx.measureText('NexusVora').width, W0 = w1 + w2 + 110;
+    rr(-W0 / 2, -34, W0, 68, 34); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill(); ctx.strokeStyle = grad(-W0 / 2, 0, W0 / 2, 0, .7); ctx.lineWidth = 2; ctx.stroke();
+    drawLogo(-W0 / 2 + 42, 0, .82, 1);
+    font(700, 30); ctx.fillStyle = C.muted; ctx.fillText('com a ', -W0 / 2 + 80, 11);
+    font(800, 30); ctx.fillStyle = '#fff'; ctx.fillText('NexusVora', -W0 / 2 + 80 + w1, 11);
+    ctx.restore();
+  }
+  ctx.restore();
+  // phone builds
+  const sc = .92 * (1 - ko * .35), kp = eo(P(t, 0, .35));
+  phone(540, 1070 + (1 - kp) * 200 + ko * 150, sc * (.9 + .1 * kp), THEMES.nv, P(t, .3, 1.7));
+  // "online" badge + ring when build completes
+  const kr = P(t, 1.72, 2.3);
+  if (kr > 0 && kr < 1) { ctx.strokeStyle = `rgba(34,227,160,${.8 * (1 - kr)})`; ctx.lineWidth = 6; rr(540 - 203 - kr * 60, 1070 - 414 - kr * 60, 406 + kr * 120, 828 + kr * 120, 60 + kr * 20); ctx.stroke(); }
+  const ko2 = eback(P(t, 1.72, 2.0));
+  if (ko2 > 0) {
+    ctx.save(); ctx.translate(820, 700); ctx.scale(ko2, ko2); ctx.rotate(.08);
+    rr(-110, -36, 220, 72, 36); ctx.fillStyle = C.green; ctx.shadowColor = 'rgba(34,227,160,.7)'; ctx.shadowBlur = 30; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = '#063B2A'; ctx.beginPath(); ctx.arc(-70, 0, 9, 0, 7); ctx.fill();
+    font(800, 30); ctx.fillText('Online!', -48, 11); ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- 2 · WHO WE ARE (2.3 – 5.5s): sites for any business ----------
+const CAR = ['food', 'clinic', 'build', 'shop'];
+function cWho(t) {
+  const t0 = 2.3, t1 = 5.5; if (t < t0 || t > t1) return;
+  heading('Somos a NexusVora e criamos', 'sites profissionais', t, t0, t1, 310);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1)), ki = eo(P(lt, .05, .55));
+  const step = Math.max(0, (lt - .6) / .7), fl = Math.floor(step), f = Math.min(3, fl + eio(clamp((step - fl) / .35)));
+  ctx.save(); ctx.globalAlpha = ki * (1 - ko); ctx.translate(0, (1 - ki) * 300 + ko * 120);
+  const order = CAR.map((key, i) => ({ key, d: i - f })).sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+  for (const { key, d } of order) {
+    const ad = Math.min(Math.abs(d), 1.6);
+    ctx.save(); ctx.globalAlpha *= 1 - ad * .5;
+    phone(540 + d * 400, 1010 + ad * 40, .74 * (1 - ad * .25), THEMES[key], 1);
+    ctx.restore();
+  }
+  // business-type label crossfades
+  const idx = Math.round(f), th = THEMES[CAR[idx]], kl = 1 - Math.abs(f - idx) * 2;
+  ctx.save(); ctx.globalAlpha *= clamp(kl);
+  font(800, 34); const w = ctx.measureText(th.tag).width + 70;
+  rr(540 - w / 2, 1400, w, 70, 35); ctx.fillStyle = th.a; ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(th.tag, 540, 1447); ctx.restore();
+  maskText('Para qualquer tipo de negócio', 540, 1545, 700, 40, '#fff', eo(P(lt, .8, 1.2)), 'center');
+  ctx.restore();
+}
+
+// ---------- 3 · HOW IT WORKS (5.3 – 8.6s) ----------
+const STEPS = [['chat', 'Falas connosco', 'Contas-nos o que precisas'], ['brush', 'Criamos o teu site', 'Design, tecnologia e SEO'], ['globe', 'O teu site fica online', 'Em até 30 dias']];
+function cSteps(t) {
+  const t0 = 5.3, t1 = 8.6; if (t < t0 || t > t1) return;
+  heading('Simples assim:', 'em 3 passos', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(-ko * 250, 0);
+  const kl = eio(P(lt, .5, 2.3));
+  ctx.fillStyle = 'rgba(255,255,255,.1)'; rr(166, 720, 8, 600, 4); ctx.fill();
+  ctx.fillStyle = grad(0, 720, 0, 1320); rr(166, 720, 8, 600 * kl, 4); ctx.fill();
+  STEPS.forEach(([ic, a, b], i) => {
+    const ts = .55 + i * .8, k = eback(P(lt, ts, ts + .35)); if (k <= 0) return;
+    const y = 720 + i * 300;
+    pop(170, y, k, () => {
+      ctx.fillStyle = grad(120, y - 50, 220, y + 50); ctx.shadowColor = 'rgba(74,108,247,.8)'; ctx.shadowBlur = 30;
+      ctx.beginPath(); ctx.arc(170, y, 52, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      font(800, 46); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(String(i + 1), 170, y + 16); ctx.textAlign = 'left';
+    });
+    const kc = eo(P(lt, ts + .1, ts + .45));
+    ctx.save(); ctx.globalAlpha *= kc; ctx.translate((1 - kc) * 200, 0);
+    rr(260, y - 95, 730, 190, 30); ctx.fillStyle = 'rgba(17,25,54,.92)'; ctx.fill();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = grad(260, 0, 990, 0, .5); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.beginPath(); ctx.arc(340, y, 44, 0, 7); ctx.fill(); ico(ic, 340, y, 1.3);
+    font(800, fit(a, 800, 42, 560)); ctx.fillStyle = '#fff'; ctx.fillText(a, 408, y - 6);
+    font(600, 30); ctx.fillStyle = i === 2 ? C.green : C.muted; ctx.fillText(b, 408, y + 40);
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+// ---------- 4 · INCLUDED (8.5 – 11.3s) ----------
+const INC = [['brush', 'Design', 'à tua medida'], ['mobile', '100% mobile', 'telemóvel e PC'], ['search', 'No Google', 'SEO + SSL'], ['globe', 'Domínio', '+ alojamento 1.º ano']];
+function cIncluded(t) {
+  const t0 = 8.5, t1 = 11.3; if (t < t0 || t > t1) return;
+  heading('Sem complicações:', 'tudo incluído', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(540, 1060); ctx.scale(1 - ko * .2, 1 - ko * .2); ctx.translate(-540, -1060);
+  const pulse = Math.max(0, 1 - Math.abs(lt - 1.85) / .3);
+  INC.forEach(([ic, a, b], i) => {
+    const k = eback(P(lt, .4 + i * .22, .75 + i * .22)); if (k <= 0) return;
+    const x = 90 + (i % 2) * 470, y = 650 + Math.floor(i / 2) * 430, w = 430, h = 400;
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate((1 - clamp(k)) * (i % 2 ? .25 : -.25)); ctx.scale(k, k); ctx.globalAlpha *= clamp(k);
+    ctx.shadowColor = 'rgba(0,212,255,.6)'; ctx.shadowBlur = 50 * pulse;
+    rr(-w / 2, -h / 2, w, h, 36); ctx.fillStyle = 'rgba(17,25,54,.94)'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 2.5; ctx.strokeStyle = grad(-w / 2, -h / 2, w / 2, h / 2, .35 + .65 * pulse); ctx.stroke();
+    const bob = Math.sin(lt * 5 + i) * 6;
+    ctx.fillStyle = grad(-70, -140, 70, 0); ctx.beginPath(); ctx.arc(0, -70 + bob, 70, 0, 7); ctx.fill(); ico(ic, 0, -70 + bob, 2);
+    ctx.textAlign = 'center'; font(800, fit(a, 800, 44, 380)); ctx.fillStyle = '#fff'; ctx.fillText(a, 0, 70);
+    font(600, fit(b, 600, 30, 380)); ctx.fillStyle = C.muted; ctx.fillText(b, 0, 118);
+    check(w / 2 - 50, -h / 2 + 50, 34, P(lt, .7 + i * .22, 1 + i * .22));
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+// ---------- 5 · OFFER + CTA (11.2 – 15s) ----------
+function cOffer(t) {
+  const t0 = 11.2; if (t < t0) return;
+  const lt = t - t0;
+  drawLogo(540, 320, 2.6, P(lt, 0, .8));
+  wordmark(540, 450, 56, P(lt, .15, .7));
+  maskText('O teu site profissional', 540, 600, 700, 62, '#fff', eo(P(lt, .2, .6)), 'center');
+  maskText('desde', 540, 690, 700, 46, C.muted, eo(P(lt, .35, .7)), 'center');
+  const kn = P(lt, .5, 1.2);
+  if (kn > 0) {
+    const land = P(lt, 1.2, 1.55), punch = 1 + .12 * Math.sin(Math.PI * land);
+    glow(540, 880, 480, '74,108,247', .45 * P(lt, .5, 1.2));
+    ctx.save(); ctx.translate(540, 960); ctx.scale(punch, punch);
+    font(800, 280); ctx.textAlign = 'center'; ctx.fillStyle = grad(-360, 0, 360, 0);
+    ctx.shadowColor = 'rgba(0,212,255,.6)'; ctx.shadowBlur = 50 * land;
+    ctx.fillText(`${Math.round(499 * eo(kn))}€`, 0, 0); ctx.restore();
+  }
+  const dc = lt - 1.2;
+  if (dc > 0) for (const c of CONF) {
+    const x = 540 + Math.cos(c.a) * c.v * dc, y = 880 + Math.sin(c.a) * c.v * dc + 900 * dc * dc;
+    ctx.save(); ctx.globalAlpha *= clamp(1.3 - dc); ctx.translate(x, y); ctx.rotate(c.sp * dc); ctx.fillStyle = c.c; ctx.fillRect(-c.r, -c.r / 2, c.r * 2, c.r); ctx.restore();
+  }
+  const kw = P(lt, 1.2, 1.9);
+  if (kw > 0 && kw < 1) { ctx.strokeStyle = `rgba(255,255,255,${.7 * (1 - kw)})`; ctx.lineWidth = 8 * (1 - kw); ctx.beginPath(); ctx.arc(540, 880, 100 + eo(kw) * 650, 0, 7); ctx.stroke(); }
+  const kc = eback(P(lt, 1.5, 1.8));
+  if (kc > 0) {
+    ctx.save(); ctx.translate(540, 1075); ctx.scale(kc, kc);
+    const s = 'Domínio + alojamento incluídos'; font(700, 30); const w = ctx.measureText(s).width + 100;
+    rr(-w / 2, -36, w, 72, 36); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 2; ctx.stroke();
+    check(-w / 2 + 42, 0, 28, 1); ctx.fillStyle = '#fff'; ctx.fillText(s, -w / 2 + 74, 10); ctx.restore();
+  }
+  const kb = eback(P(lt, 1.8, 2.15));
+  if (kb > 0) {
+    const br = 1 + .03 * Math.sin(lt * 7);
+    ctx.save(); ctx.translate(540, 1240); ctx.scale(kb * br, kb * br);
+    ctx.shadowColor = 'rgba(74,108,247,.9)'; ctx.shadowBlur = 60;
+    rr(-400, -68, 800, 136, 68); ctx.fillStyle = grad(-400, 0, 400, 0); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.save(); rr(-400, -68, 800, 136, 68); ctx.clip();
+    const sx = lerp(-600, 600, ((lt - 2) * .8) % 1), sg = ctx.createLinearGradient(sx - 90, 0, sx + 90, 0);
+    sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,255,255,.5)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sg; ctx.fillRect(sx - 90, -70, 180, 140); ctx.restore();
+    font(800, 46); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('Pede o teu orçamento', 0, 16);
+    ctx.restore();
+  }
+  maskText('nexusvora.com', 540, 1380, 700, 36, C.muted, eo(P(lt, 2.1, 2.4)), 'center');
+  const ka = eo(P(lt, 2.3, 2.6));
+  if (ka > 0) {
+    const bob = Math.abs(Math.sin(lt * 5)) * 24;
+    ctx.save(); ctx.strokeStyle = C.cyan; ctx.lineWidth = 9; ctx.lineCap = ctx.lineJoin = 'round'; ctx.shadowColor = C.cyan; ctx.shadowBlur = 20;
+    for (let j = 0; j < 2; j++) { const yy = 1430 + bob + j * 38; ctx.globalAlpha = ka * (1 - j * .45); ctx.beginPath(); ctx.moveTo(505, yy); ctx.lineTo(540, yy + 30); ctx.lineTo(575, yy); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+
+// ================= 30s EXTENSION SCENES =================
+function cross(x, y, s, k) {
+  if (k <= 0) return;
+  ctx.save(); ctx.strokeStyle = RED; ctx.lineWidth = s * .18; ctx.lineCap = 'round';
+  const a = Math.min(1, k * 2), b = clamp(k * 2 - 1);
+  ctx.beginPath(); ctx.moveTo(x - s * .3, y - s * .3); ctx.lineTo(lerp(x - s * .3, x + s * .3, a), lerp(y - s * .3, y + s * .3, a)); ctx.stroke();
+  if (b > 0) { ctx.beginPath(); ctx.moveTo(x + s * .3, y - s * .3); ctx.lineTo(lerp(x + s * .3, x - s * .3, b), lerp(y - s * .3, y + s * .3, b)); ctx.stroke(); }
+  ctx.restore();
+}
+function chip(x, y, text, color, k, rot = 0) {
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(k, k); ctx.globalAlpha *= clamp(k);
+  font(800, 30); const w = ctx.measureText(text).width + 56;
+  rr(-w / 2, -34, w, 68, 34); ctx.fillStyle = color; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 24; ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(text, 0, 11); ctx.restore();
+}
+
+// ---------- WHY: customers search on Google (5.3 – 9.3s) ----------
+const NOTIF2 = [['mail', 'Novo pedido de orçamento', 'Formulário do site', C.blue], ['chat', 'Nova mensagem', 'Cliente interessado', C.green], ['phone', 'Chamada recebida', 'Veio pelo Google', C.purple]];
+function cWhy(t) {
+  const t0 = 5.3, t1 = 9.3; if (t < t0 || t > t1) return;
+  heading('Hoje, os clientes procuram', 'tudo no Google', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(ko * -220, 0);
+  const kb = eback(P(lt, .1, .45));
+  if (kb > 0) {
+    ctx.save(); ctx.translate(540, 565); ctx.scale(kb, kb);
+    ctx.shadowColor = 'rgba(0,212,255,.45)'; ctx.shadowBlur = 40;
+    rr(-450, -55, 900, 110, 55); ctx.fillStyle = '#fff'; ctx.fill(); ctx.shadowBlur = 0;
+    ico('search', -385, 0, 1.2, C.blue);
+    const q = 'restaurante perto de mim', n = Math.floor(q.length * P(lt, .35, 1.0));
+    font(600, 38); ctx.fillStyle = C.navy; ctx.fillText(q.slice(0, n), -335, 13);
+    if (lt < 1.2) ctx.fillRect(-335 + ctx.measureText(q.slice(0, n)).width + 4, -22, 3, 44);
+    ctx.restore();
+  }
+  // #1 result = a business with a proper site
+  const kr = eback(P(lt, 1.05, 1.4));
+  if (kr > 0) {
+    ctx.save(); ctx.translate(540, 750); ctx.scale(kr, kr);
+    ctx.shadowColor = 'rgba(0,212,255,.6)'; ctx.shadowBlur = 50;
+    rr(-450, -80, 900, 160, 30); ctx.fillStyle = 'rgba(17,25,54,.98)'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 4; ctx.strokeStyle = grad(-450, 0, 450, 0); ctx.stroke();
+    rr(-420, -45, 90, 90, 22); ctx.fillStyle = grad(-420, -45, -330, 45); ctx.fill();
+    font(800, 44); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('1º', -375, 15); ctx.textAlign = 'left';
+    font(800, 40); ctx.fillText('Casa do Sabor', -300, -8);
+    stars(-290, 38, 15, 5, P(lt, 1.2, 1.8));
+    rr(250, -28, 170, 56, 28); ctx.fillStyle = 'rgba(34,227,160,.18)'; ctx.fill();
+    font(800, 24); ctx.fillStyle = C.green; ctx.textAlign = 'center'; ctx.fillText('✓ Site', 335, 9);
+    ctx.restore();
+  }
+  NOTIF2.forEach(([ic, a, b, col], i) => {
+    const k = eback(P(lt, 1.6 + i * .3, 1.9 + i * .3)); if (k <= 0) return;
+    const yy = 950 + i * 160, vib = Math.sin(lt * 70) * 6 * (1 - P(lt, 1.7 + i * .3, 2.0 + i * .3));
+    ctx.save(); ctx.translate(540 + (1 - clamp(k)) * 500 + vib, yy); ctx.scale(clamp(k, 0, 1.2), clamp(k, 0, 1.2));
+    rr(-420, -62, 840, 124, 32); ctx.fillStyle = 'rgba(255,255,255,.96)'; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 30; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(-340, 0, 40, 0, 7); ctx.fill(); ico(ic, -340, 0, 1.1);
+    font(800, 32); ctx.fillStyle = C.navy; ctx.fillText(a, -275, -6);
+    font(600, 24); ctx.fillStyle = '#5B6485'; ctx.fillText(b, -275, 30);
+    font(600, 22); ctx.fillText('agora', 320, -20);
+    ctx.restore();
+  });
+  maskText('Um site trabalha por ti 24/7', 540, 1500, 800, 54, grad(160, 0, 920, 0), eo(P(lt, 2.7, 3.1)), 'center');
+  ctx.restore();
+}
+
+// ---------- BEFORE / AFTER slider (9.1 – 13.3s) ----------
+function phoneShell(cx, cy, s, drawScreen) {
+  const PW = 440, PH = 900;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s); ctx.translate(-PW / 2, -PH / 2);
+  ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 70; rr(0, 0, PW, PH, 66); ctx.fillStyle = '#0B0F1F'; ctx.fill(); ctx.shadowBlur = 0;
+  ctx.lineWidth = 4; ctx.strokeStyle = grad(0, 0, PW, PH, .6); ctx.stroke();
+  ctx.save(); rr(16, 16, PW - 32, PH - 32, 52); ctx.clip(); ctx.translate(16, 16); drawScreen(PW - 32); ctx.restore();
+  rr(PW / 2 - 60, 30, 120, 34, 17); ctx.fillStyle = '#0B0F1F'; ctx.fill();
+  ctx.restore();
+}
+function oldSite(SW, lt) {
+  ctx.fillStyle = '#D6D6D6'; ctx.fillRect(0, 0, SW, 900);
+  ctx.fillStyle = '#FDE2E2'; ctx.fillRect(0, 60, SW, 50);
+  ctx.font = "700 20px Georgia, 'Times New Roman', serif"; ctx.fillStyle = '#C0392B'; ctx.fillText('⚠ Não seguro · http://', 20, 92);
+  ctx.fillStyle = '#1A3D8F'; ctx.fillRect(0, 110, SW, 90);
+  ctx.font = "700 30px 'Times New Roman', serif"; ctx.fillStyle = '#FFEB3B'; ctx.fillText('Bem-vindo ao site!!', 22, 166);
+  ctx.fillStyle = '#9E9E9E'; ctx.fillRect(22, 222, SW - 60, 230);
+  ctx.strokeStyle = '#E53935'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(SW / 2 - 40, 297); ctx.lineTo(SW / 2 + 20, 377); ctx.moveTo(SW / 2 + 20, 297); ctx.lineTo(SW / 2 - 40, 377); ctx.stroke();
+  ctx.fillStyle = '#555'; [480, 506, 532, 558, 600, 626].forEach((y, i) => ctx.fillRect(22 + (i % 2) * 14, y, SW - 90 - (i * 23) % 70, 11));
+  ctx.fillStyle = '#0000EE'; ctx.font = "400 22px 'Times New Roman', serif"; ctx.fillText('Clique aqui', 22, 690);
+  ctx.fillStyle = '#BDBDBD'; ctx.fillRect(22, 720, 160, 120); ctx.fillRect(200, 740, 170, 100);
+  // spinner overlay "slow site"
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, SW, 900);
+  ctx.save(); ctx.translate(SW / 2, 470); ctx.rotate(lt * 7);
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(0, 0, 38, 0, 4.4); ctx.stroke(); ctx.restore();
+  font(700, 24); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('A carregar… 8s', SW / 2, 550); ctx.textAlign = 'left';
+}
+function cBeforeAfter(t) {
+  const t0 = 9.1, t1 = 13.3; if (t < t0 || t > t1) return;
+  heading('Já tens um site antigo?', 'Nós renovamos', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1)), ki = eo(P(lt, .1, .5));
+  const cx = 540, cy = 1060, s = .86, hw = 440 * s / 2, hh = 900 * s / 2;
+  ctx.save(); ctx.globalAlpha = ki * (1 - ko); ctx.translate(0, (1 - ki) * 250 + ko * 150);
+  // slider position: 1 = all "before", 0 = all "after" (with a playful back-and-forth)
+  let hx = 1;
+  if (lt > 1.0) hx = lerp(1, .3, eio(P(lt, 1.0, 1.6)));
+  if (lt > 1.6) hx = lerp(.3, .62, eio(P(lt, 1.6, 1.95)));
+  if (lt > 1.95) hx = lerp(.62, 0, eio(P(lt, 1.95, 2.6)));
+  const X = cx - hw + hx * hw * 2;
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, X, H); ctx.clip(); phoneShell(cx, cy, s, SW => oldSite(SW, lt)); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(X, 0, W - X, H); ctx.clip(); phone(cx, cy, s, THEMES.food, 1); ctx.restore();
+  if (lt > .9 && hx > 0.005) {
+    ctx.fillStyle = '#fff'; ctx.fillRect(X - 3, cy - hh - 20, 6, hh * 2 + 40);
+    ctx.save(); ctx.translate(X, cy); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(0, 0, 44, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = C.navy; ctx.lineWidth = 5; ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(-10, -12); ctx.lineTo(-22, 0); ctx.lineTo(-10, 12); ctx.moveTo(10, -12); ctx.lineTo(22, 0); ctx.lineTo(10, 12); ctx.stroke();
+    ctx.restore();
+  }
+  chip(cx - hw - 10, cy - hh + 10, 'ANTES', RED, eback(P(lt, .4, .7)) * clamp(hx * 3), -.08);
+  chip(cx + hw + 10, cy - hh + 10, 'DEPOIS', '#12B886', eback(P(lt, 1.1, 1.4)), .08);
+  // perks float in once the new site is revealed
+  [['⚡ Rápido', 180, 1180, -.06], ['🔒 Seguro', 900, 1260, .06], ['📱 Mobile', 190, 1420, .05]].forEach(([txt, x, y, r], i) => {
+    const k = eback(P(lt, 2.6 + i * .15, 2.9 + i * .15)); chip(x, y + Math.sin(lt * 3 + i) * 8, txt, i === 1 ? C.purple : C.blue, k, r);
+  });
+  ctx.restore();
+}
+
+// ---------- INCLUDED, 6 tiles (16.2 – 19.8s) ----------
+const INC6 = [['brush', 'Design', 'à tua medida'], ['mobile', '100% mobile', 'telemóvel e PC'], ['search', 'No Google', 'SEO + SSL'], ['globe', 'Domínio', '+ alojamento 1.º ano'], ['sliders', 'Painel fácil', 'editas tu o site'], ['chat', 'Formação', '1h incluída']];
+function cIncluded6(t) {
+  const t0 = 16.2, t1 = 19.8; if (t < t0 || t > t1) return;
+  heading('Sem complicações:', 'tudo incluído', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(540, 1060); ctx.scale(1 - ko * .2, 1 - ko * .2); ctx.translate(-540, -1060);
+  const pulse = Math.max(0, 1 - Math.abs(lt - 2.5) / .3);
+  INC6.forEach(([ic, a, b], i) => {
+    const k = eback(P(lt, .4 + i * .22, .75 + i * .22)); if (k <= 0) return;
+    const w = 430, h = 280, x = 90 + (i % 2) * 470, y = 620 + Math.floor(i / 2) * 300;
+    ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate((1 - clamp(k)) * (i % 2 ? .25 : -.25)); ctx.scale(k, k); ctx.globalAlpha *= clamp(k);
+    ctx.shadowColor = 'rgba(0,212,255,.6)'; ctx.shadowBlur = 50 * pulse;
+    rr(-w / 2, -h / 2, w, h, 32); ctx.fillStyle = 'rgba(17,25,54,.94)'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 2.5; ctx.strokeStyle = grad(-w / 2, -h / 2, w / 2, h / 2, .35 + .65 * pulse); ctx.stroke();
+    const bob = Math.sin(lt * 5 + i) * 5;
+    ctx.fillStyle = grad(-50, -110, 50, -10); ctx.beginPath(); ctx.arc(0, -52 + bob, 52, 0, 7); ctx.fill(); ico(ic, 0, -52 + bob, 1.6);
+    ctx.textAlign = 'center'; font(800, fit(a, 800, 40, 380)); ctx.fillStyle = '#fff'; ctx.fillText(a, 0, 50);
+    font(600, fit(b, 600, 28, 380)); ctx.fillStyle = C.muted; ctx.fillText(b, 0, 92);
+    check(w / 2 - 42, -h / 2 + 42, 30, P(lt, .7 + i * .22, 1 + i * .22));
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+// ---------- DIY vs NexusVora (19.6 – 23.8s) ----------
+const VS = [['Horas a configurar', 'Nós tratamos de tudo'], ['Template igual a todos', 'Design único'], ['Difícil de achar no Google', 'SEO incluído'], ['Aprendes sozinho', 'Formação incluída']];
+function cVersus(t) {
+  const t0 = 19.6, t1 = 23.8; if (t < t0 || t > t1) return;
+  heading('Fazer sozinho?', 'Ou com a NexusVora', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1)), ki = eo(P(lt, .2, .6));
+  ctx.save(); ctx.globalAlpha = ki * (1 - ko); ctx.translate(0, (1 - ki) * 120 - ko * 100);
+  const dim = .45 + .55 * (1 - P(lt, 2.8, 3.3));
+  // left: DIY
+  ctx.save(); ctx.globalAlpha *= dim;
+  rr(90, 620, 430, 900, 34); ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 2; ctx.stroke();
+  font(800, 38); ctx.fillStyle = C.muted; ctx.textAlign = 'center'; ctx.fillText('Sozinho', 305, 700);
+  ctx.restore();
+  // right: NexusVora (winner)
+  const win = eback(P(lt, 2.9, 3.3)), sc = 1 + .04 * clamp(win);
+  ctx.save(); ctx.translate(775, 1070); ctx.scale(sc, sc); ctx.translate(-775, -1070);
+  ctx.shadowColor = 'rgba(74,108,247,.7)'; ctx.shadowBlur = 40 + 30 * clamp(win);
+  rr(560, 620, 430, 900, 34); ctx.fillStyle = 'rgba(17,25,54,.96)'; ctx.fill(); ctx.shadowBlur = 0;
+  ctx.lineWidth = 4; ctx.strokeStyle = grad(560, 620, 990, 1520); ctx.stroke();
+  drawLogo(650, 688, .9, 1); font(800, 36); ctx.fillStyle = '#fff'; ctx.fillText('NexusVora', 688, 701);
+  ctx.restore();
+  VS.forEach(([bad, good], i) => {
+    const ts = .6 + i * .55, y = 800 + i * 180, k = eo(P(lt, ts, ts + .3)); if (k <= 0) return;
+    ctx.save(); ctx.globalAlpha *= k;
+    ctx.save(); ctx.globalAlpha *= dim; ctx.fillStyle = 'rgba(255,77,109,.14)'; ctx.beginPath(); ctx.arc(305, y, 32, 0, 7); ctx.fill(); cross(305, y, 40, P(lt, ts + .05, ts + .3));
+    ctx.textAlign = 'center'; font(700, fit(bad, 700, 28, 390)); ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.fillText(bad, 305, y + 80); ctx.restore();
+    ctx.fillStyle = 'rgba(34,227,160,.16)'; ctx.beginPath(); ctx.arc(775, y, 32, 0, 7); ctx.fill(); check(775, y, 42, P(lt, ts + .15, ts + .4));
+    ctx.textAlign = 'center'; font(800, fit(good, 800, 30, 390)); ctx.fillStyle = '#fff'; ctx.fillText(good, 775, y + 80);
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+// ---------- compose (30s) ----------
+const HITS30 = [[.04, 26], [.2, 16], [1.75, 12], [6.9, 10], [7.2, 8], [7.5, 8], [13.75, 8], [14.55, 8], [14.9, 0], [15.35, 8], [20.5, 7], [21.05, 7], [21.6, 7], [22.15, 7], [24.9, 42]];
+function shake30(t) {
+  let a = 0; for (const [ts, amp] of HITS30) { const d = t - ts; if (d >= 0 && d < .45) a += amp * Math.pow(1 - d / .45, 2); }
+  return { x: Math.sin(t * 91) * a, y: Math.cos(t * 77) * a * .7 };
+}
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  background(t);
+  const s = shake30(t); ctx.translate(s.x, s.y);
+  cHook(t); cWho(t); cWhy(t); cBeforeAfter(t);
+  cSteps(t - 7.8); cIncluded6(t); cVersus(t); cOffer(t - 12.5);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  [2.35, 5.4, 9.2, 13.2, 16.3, 19.7, 23.8].forEach(ts => sweep(t, ts));
+  const fp = P(t, 24.9, 25.25); if (fp > 0 && fp < 1) { ctx.fillStyle = `rgba(255,255,255,${.25 * (1 - fp)})`; ctx.fillRect(0, 0, W, H); }
+  for (let i = taps.length - 1; i >= 0; i--) {
+    const k = (performance.now() - taps[i].at) / 700; if (k >= 1) { taps.splice(i, 1); continue; }
+    ctx.strokeStyle = `rgba(0,212,255,${1 - k})`; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(taps[i].x, taps[i].y, 20 + eo(k) * 160, 0, 7); ctx.stroke();
+    for (let j = 0; j < 8; j++) { const a = j * Math.PI / 4, r = 30 + eo(k) * 130; ctx.fillStyle = `rgba(139,63,219,${1 - k})`; ctx.beginPath(); ctx.arc(taps[i].x + Math.cos(a) * r, taps[i].y + Math.sin(a) * r, 6 * (1 - k), 0, 7); ctx.fill(); }
+  }
+}
+
+// ---------- player ----------
+const exporting = new URLSearchParams(location.search).has('export');
+window.renderAt = t => { mx = my = 0; render(t); };
+const playBtn = document.getElementById('play'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
+let playing = !exporting, cur = 0, last = performance.now();
+if (exporting) document.body.classList.add('export');
+
+cv.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); tmx = ((e.clientX - r.left) / r.width - .5) * 2; tmy = ((e.clientY - r.top) / r.height - .5) * 2; });
+cv.addEventListener('pointerleave', () => { tmx = tmy = 0; });
+cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); taps.push({ x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H, at: performance.now() }); });
+playBtn.onclick = () => { playing = !playing; playBtn.textContent = playing ? 'Pausa' : 'Play'; };
+scrub.oninput = () => { cur = +scrub.value; };
+document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); playBtn.click(); } });
+
+function loop(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (playing) cur = (cur + dt) % DUR;
+  mx = lerp(mx, tmx, .08); my = lerp(my, tmy, .08);
+  render(cur);
+  scrub.value = cur; timeEl.textContent = `${cur.toFixed(1)}s / ${DUR}s`;
+  requestAnimationFrame(loop);
+}
+window.ready = document.fonts.load(`800 40px ${F}`).then(() => Promise.all([400, 600, 700].map(w => document.fonts.load(`${w} 40px ${F}`)))).catch(() => {}).then(() => {
+  if (exporting) render(0); else requestAnimationFrame(loop);
+  return true;
+});
+</script>
+</body>
+</html>

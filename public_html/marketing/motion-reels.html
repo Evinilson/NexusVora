@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusVora · Motion Design Instagram Reels Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --bg-card: #0e1526;
+      --border-glow: rgba(0, 212, 255, 0.2);
+      --primary: #00d4ff;
+      --secondary: #4a6cf7;
+      --accent: #8b3fdb;
+      --text: #f9fafb;
+      --text-dim: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    /* Ambient dynamic backdrop */
+    .ambient-glow {
+      position: fixed;
+      top: -20%;
+      left: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.12) 0%, transparent 70%);
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .ambient-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: 10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(139, 63, 219, 0.12) 0%, transparent 70%);
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Studio Header */
+    header {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px 16px;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-title h1 {
+      font-size: clamp(1.1rem, 1rem + 1vw, 1.35rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #00d4ff, #4a6cf7, #8b3fdb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-studio {
+      background: rgba(0, 212, 255, 0.12);
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      color: #00d4ff;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .format-label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      font-family: 'Space Grotesk', monospace;
+    }
+
+    @media (max-width: 640px) {
+      header {
+        justify-content: center;
+        text-align: center;
+      }
+      .brand-title {
+        justify-content: center;
+      }
+      .format-label {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    /* Workspace layout */
+    .studio-workspace {
+      width: 100%;
+      max-width: 1280px;
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .studio-workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Preview Canvas Container */
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 212, 255, 0.05);
+      position: relative;
+    }
+
+    /* Aspect ratio phone mock frame */
+    .phone-mockup-wrapper {
+      position: relative;
+      width: min(360px, 100%);
+      aspect-ratio: 9 / 16;
+      background: #000;
+      border-radius: 40px;
+      padding: 10px;
+      box-shadow: 0 0 0 2px #26334d, 0 25px 60px rgba(0,0,0,0.8);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @media (max-width: 420px) {
+      .preview-container {
+        padding: 16px;
+      }
+      .phone-mockup-wrapper {
+        border-radius: 28px;
+      }
+    }
+
+    .phone-notch {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 20px;
+      background: #000;
+      border-radius: 12px;
+      z-index: 10;
+    }
+
+    canvas#motionCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 30px;
+      display: block;
+      background: #0a0f1e;
+    }
+
+    /* Controls Bar */
+    .player-controls {
+      width: 100%;
+      max-width: 520px;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .timeline-bar-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .time-display {
+      font-size: 0.85rem;
+      font-family: 'Space Grotesk', monospace;
+      color: var(--text-dim);
+      min-width: 85px;
+    }
+
+    .timeline-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .timeline-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+      cursor: pointer;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    @media (max-width: 480px) {
+      .button-row {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00d4ff, #4a6cf7);
+      color: #060913;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(0, 212, 255, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .btn-record {
+      background: linear-gradient(135deg, #ff3366, #ff6b3d);
+      color: white;
+      box-shadow: 0 4px 18px rgba(255, 51, 102, 0.4);
+    }
+
+    .btn-record:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(255, 51, 102, 0.6);
+    }
+
+    .btn-record.recording {
+      animation: pulse-red 1s infinite alternate;
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 10px rgba(255, 51, 102, 0.4); }
+      100% { box-shadow: 0 0 30px rgba(255, 51, 102, 0.9); }
+    }
+
+    /* Scene Jumpers */
+    .scene-navigator {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-top: 4px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+    }
+
+    .scene-chip {
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-dim);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .scene-chip:hover {
+      border-color: rgba(0, 212, 255, 0.4);
+      color: #e5e7eb;
+    }
+
+    .scene-chip.active {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.25);
+    }
+
+    /* Sidebar info and instructions */
+    .studio-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #00d4ff, #4a6cf7, #8b3fdb);
+      opacity: 0.7;
+    }
+
+    .card:hover {
+      border-color: rgba(0, 212, 255, 0.25);
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+    }
+
+    .card p, .card li {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .copy-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.8rem;
+      color: #e5e7eb;
+      position: relative;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0, 212, 255, 0.2);
+      border: 1px solid rgba(0, 212, 255, 0.4);
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .copy-btn:hover {
+      background: rgba(0, 212, 255, 0.35);
+    }
+
+    .feature-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(74, 108, 247, 0.15);
+      color: #7b94ff;
+      font-size: 0.75rem;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .status-toast {
+      padding: 10px 14px;
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+  <div class="ambient-glow-2"></div>
+
+  <header>
+    <div class="brand-title">
+      <svg width="34" height="34" viewBox="0 0 60 60" fill="none">
+        <defs>
+          <linearGradient id="logoG" x1="0" y1="0" x2="60" y2="60">
+            <stop offset="0%" stop-color="#00D4FF"/>
+            <stop offset="50%" stop-color="#4A6CF7"/>
+            <stop offset="100%" stop-color="#8B3FDB"/>
+          </linearGradient>
+        </defs>
+        <circle cx="30" cy="30" r="7" stroke="url(#logoG)" stroke-width="3" fill="none"/>
+        <circle cx="30" cy="30" r="3.5" fill="url(#logoG)"/>
+        <line x1="30" y1="23" x2="30" y2="10" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="30" cy="8" r="3.5" fill="url(#logoG)"/>
+        <line x1="30" y1="37" x2="30" y2="50" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="30" cy="52" r="3.5" fill="url(#logoG)"/>
+        <line x1="23" y1="30" x2="10" y2="30" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="8" cy="30" r="3.5" fill="url(#logoG)"/>
+        <line x1="37" y1="30" x2="50" y2="30" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="52" cy="30" r="3.5" fill="url(#logoG)"/>
+        <line x1="25" y1="25" x2="16" y2="16" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="13.5" cy="13.5" r="3.5" fill="url(#logoG)"/>
+        <line x1="35" y1="35" x2="44" y2="44" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="46.5" cy="46.5" r="3.5" fill="url(#logoG)"/>
+        <line x1="35" y1="25" x2="44" y2="16" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="46.5" cy="13.5" r="3.5" fill="url(#logoG)"/>
+        <line x1="25" y1="35" x2="16" y2="44" stroke="url(#logoG)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="13.5" cy="46.5" r="3.5" fill="url(#logoG)"/>
+      </svg>
+      <h1>NexusVora Studio</h1>
+      <span class="badge-studio">Motion Design 9:16</span>
+    </div>
+    <div class="format-label">
+      Formato Instagram Reels / Stories (1080×1920)
+    </div>
+  </header>
+
+  <main class="studio-workspace">
+    <!-- Preview Area -->
+    <section class="preview-container">
+      <div class="phone-mockup-wrapper">
+        <div class="phone-notch"></div>
+        <!-- Canvas renders at native 1080x1920 for ultra high-res recording -->
+        <canvas id="motionCanvas" width="1080" height="1920"></canvas>
+      </div>
+
+      <!-- Controls -->
+      <div class="player-controls">
+        <div class="timeline-bar-wrapper">
+          <span class="time-display" id="timeDisplay">00:00 / 00:18</span>
+          <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="18" step="0.05" value="0">
+        </div>
+
+        <div class="button-row">
+          <button class="btn btn-secondary" id="btnRestart">↺ Início</button>
+          <button class="btn btn-primary" id="btnPlayPause">▶ Reproduzir</button>
+          <button class="btn btn-secondary" id="btnAudioToggle">🔊 Som: Ligado</button>
+          <button class="btn btn-record" id="btnRecord">⏺ Exportar Vídeo HD</button>
+        </div>
+
+        <div class="scene-navigator">
+          <span class="scene-chip active" data-scene="1">1. O Gancho (0s)</span>
+          <span class="scene-chip" data-scene="2">2. A Dor (3.5s)</span>
+          <span class="scene-chip" data-scene="3">3. A Solução (7.5s)</span>
+          <span class="scene-chip" data-scene="4">4. Vantagens (12s)</span>
+          <span class="scene-chip" data-scene="5">5. CTA (15.5s)</span>
+        </div>
+
+        <div class="status-toast" id="statusToast">
+          Gravação em curso... O vídeo será descarregado automaticamente no final!
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar with strategic instructions and copy -->
+    <aside class="studio-sidebar">
+      <div class="card">
+        <h2>🚀 Como Exportar e Usar</h2>
+        <ol style="padding-left: 18px; display: flex; flex-direction: column; gap: 8px;">
+          <li>Clica em <strong>"⏺ Exportar Vídeo HD"</strong>. O estúdio reproduzirá a animação a 60fps gravando em resolução total 1080x1920.</li>
+          <li>O ficheiro de vídeo <code>.webm</code> (compatível com CapCut, Premiere ou Instagram) descarrega automaticamente!</li>
+          <li>No Instagram Reels, adiciona um áudio tech/hype em alta (ou usa a trilha sintetizada) e cola a legenda abaixo.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>📝 Legenda Pronta para o Instagram</h2>
+        <p>Copia e cola este texto na tua publicação para maximizar comentários e pedidos de orçamento:</p>
+        <div class="copy-box" id="captionText">Se o teu negócio ainda não tem website em 2026, estás a entregar clientes de bandeja à concorrência todos os dias. 📉
+
+Mais de 80% das pessoas pesquisam no Google antes de comprar ou contratar qualquer serviço local. 
+
+Se eles pesquisam pela tua área e só encontram o teu concorrente com um site profissional, para onde achas que eles vão ligar?
+
+Ter só Instagram já não chega:
+❌ Dependes do algoritmo para seres visto
+❌ Não tens catálogo nem pedidos de orçamento automáticos
+❌ Transmites menor autoridade que uma empresa estruturada
+
+Com a @nexusvora, criamos uma presença digital de topo para o teu negócio:
+⚡ Sites ultra-rápidos e 100% responsivos (mobile first)
+🔍 Otimizados para aparecer no topo do Google (SEO)
+💬 Botão direto para o teu WhatsApp / Formulário de leads
+💎 Design exclusivo, moderno e com identidade premium
+
+👉 Queres saber onde o teu negócio está a perder clientes online?
+Comenta "SITE" abaixo ou envia-nos uma DM para receberes um diagnóstico gratuito e sem compromisso da tua presença digital! 🚀
+
+#criacaodesites #webdesignportugal #marketingdigitalportugal #pmeportugal #negociosportugal #empresasportugal #sitesprofissionais #nexusvora #porto #lisboa #empreendedorismoportugal</div>
+        <button class="copy-btn" id="btnCopyCaption">Copiar Legenda</button>
+      </div>
+
+      <div class="card">
+        <h2>🎯 Destaques do Motion Design</h2>
+        <div style="margin-top: 6px;">
+          <span class="feature-tag">1080x1920 Vertical 9:16</span>
+          <span class="feature-tag">60 FPS Suave</span>
+          <span class="feature-tag">Cores Oficiais NexusVora</span>
+          <span class="feature-tag">Mockup 3D Dinâmico</span>
+          <span class="feature-tag">Retenção nos Primeiros 3s</span>
+          <span class="feature-tag">CTA Direto para DM</span>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    // --- Canvas & Animation Engine ---
+    const canvas = document.getElementById('motionCanvas');
+    const ctx = canvas.getContext('2d');
+    const timelineSlider = document.getElementById('timelineSlider');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const btnRestart = document.getElementById('btnRestart');
+    const btnAudioToggle = document.getElementById('btnAudioToggle');
+    const btnRecord = document.getElementById('btnRecord');
+    const statusToast = document.getElementById('statusToast');
+    const sceneChips = document.querySelectorAll('.scene-chip');
+
+    const TOTAL_DURATION = 18.0; // 18 seconds
+    let currentTime = 0;
+    let isPlaying = false;
+    let isRecording = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let lastTimestamp = 0;
+    let soundEnabled = true;
+
+    // Web Audio Synthesizer & Video Audio Sync
+    let audioCtx = null;
+    let audioDest = null;
+    let nextBeatTime = 0;
+    let beatStep = 0;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioDest = audioCtx.createMediaStreamDestination();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function routeAudio(node) {
+      if (!audioCtx) return;
+      node.connect(audioCtx.destination);
+      if (audioDest) {
+        node.connect(audioDest);
+      }
+    }
+
+    function playTechClick(freq = 600, duration = 0.04) {
+      if (!soundEnabled || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + duration);
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      routeAudio(gain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playKick() {
+      if (!soundEnabled || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(140, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.18);
+      gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+      osc.connect(gain);
+      routeAudio(gain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.18);
+    }
+
+    function playHihat() {
+      if (!soundEnabled || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'highpass' in osc ? 'triangle' : 'square';
+      osc.frequency.setValueAtTime(8000, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+      osc.connect(gain);
+      routeAudio(gain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.04);
+    }
+
+    function playSynthArp(noteFreq) {
+      if (!soundEnabled || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+      osc.connect(gain);
+      routeAudio(gain);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    }
+
+    const bassScale = [220, 261.63, 293.66, 329.63, 392, 440, 523.25];
+    function tickSynthRhythm(t) {
+      if (!soundEnabled || !audioCtx || !isPlaying) return;
+      if (t >= nextBeatTime) {
+        // 128 BPM = ~0.234s per 8th note
+        nextBeatTime = t + 0.234;
+        beatStep++;
+
+        // Kick on every quarter note (step % 2 === 0)
+        if (beatStep % 2 === 0) {
+          playKick();
+        }
+        playHihat();
+
+        // Arp melodic pattern
+        const note = bassScale[beatStep % bassScale.length];
+        playSynthArp(note);
+      }
+    }
+
+    // Floating particles pool
+    const particles = [];
+    for (let i = 0; i < 45; i++) {
+      particles.push({
+        x: Math.random() * 1080,
+        y: Math.random() * 1920,
+        size: Math.random() * 3 + 1,
+        speedY: (Math.random() * 1.5 + 0.5) * -1,
+        speedX: (Math.random() - 0.5) * 0.8,
+        color: Math.random() > 0.5 ? '#00d4ff' : '#8b3fdb',
+        alpha: Math.random() * 0.6 + 0.2
+      });
+    }
+
+    // Helper functions for drawing
+    function drawParticles() {
+      particles.forEach(p => {
+        p.y += p.speedY;
+        p.x += p.speedX;
+        if (p.y < 0) p.y = 1920;
+        if (p.x < 0) p.x = 1080;
+        if (p.x > 1080) p.x = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1.0;
+      });
+    }
+
+    function drawGrid(offsetY) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.05)';
+      ctx.lineWidth = 1.5;
+      const step = 80;
+      for (let x = 0; x <= 1080; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 1920);
+        ctx.stroke();
+      }
+      const shiftedY = (offsetY * 60) % step;
+      for (let y = shiftedY; y <= 1920; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(1080, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawNexusLogo(cx, cy, scale = 1.0, glowIntensity = 25) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(scale, scale);
+
+      const grad = ctx.createLinearGradient(-30, -30, 30, 30);
+      grad.addColorStop(0, '#00D4FF');
+      grad.addColorStop(0.5, '#4A6CF7');
+      grad.addColorStop(1, '#8B3FDB');
+
+      ctx.shadowColor = '#00D4FF';
+      ctx.shadowBlur = glowIntensity;
+
+      // Central circles
+      ctx.beginPath();
+      ctx.arc(0, 0, 14, 0, Math.PI * 2);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(0, 0, 7, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Satellite Nodes & Connectors
+      const nodes = [
+        { x: 0, y: -44 },
+        { x: 0, y: 44 },
+        { x: -44, y: 0 },
+        { x: 44, y: 0 },
+        { x: -33, y: -33 },
+        { x: 33, y: 33 },
+        { x: 33, y: -33 },
+        { x: -33, y: 33 }
+      ];
+
+      nodes.forEach(n => {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(n.x, n.y);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 7, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      });
+
+      ctx.restore();
+    }
+
+    // Text helper with auto glow
+    function drawGlowText(text, x, y, font, fillStyle, glowColor, glowSize, align = 'center') {
+      ctx.save();
+      ctx.font = font;
+      ctx.textAlign = align;
+      ctx.textBaseline = 'middle';
+      if (glowSize > 0) {
+        ctx.shadowColor = glowColor;
+        ctx.shadowBlur = glowSize;
+      }
+      ctx.fillStyle = fillStyle;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    // Glass Card Component
+    function drawGlassCard(x, y, w, h, radius = 24, strokeColor = 'rgba(0, 212, 255, 0.3)', fillColor = 'rgba(14, 21, 38, 0.85)') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, radius);
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = strokeColor;
+      ctx.shadowBlur = 15;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Ease functions
+    function easeOutBack(x) {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+    function easeOutQuad(x) {
+      return 1 - (1 - x) * (1 - x);
+    }
+
+    // ==========================================
+    // RENDER FRAME LOGIC
+    // ==========================================
+    function render(t) {
+      // Background clean
+      ctx.fillStyle = '#070a14';
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Ambient radial gradients
+      const bgGrad = ctx.createRadialGradient(540, 960, 100, 540, 960, 900);
+      bgGrad.addColorStop(0, 'rgba(10, 25, 50, 0.8)');
+      bgGrad.addColorStop(0.6, 'rgba(7, 10, 20, 0.95)');
+      bgGrad.addColorStop(1, '#05070e');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      drawGrid(t);
+      drawParticles();
+
+      // Header Persistent Brand Bar (Top)
+      ctx.save();
+      drawNexusLogo(140, 120, 0.5, 15);
+      drawGlowText("NEXUSVORA", 290, 120, "800 36px 'Plus Jakarta Sans'", "#ffffff", "#00d4ff", 10, "left");
+      
+      // Top status badge
+      ctx.fillStyle = "rgba(0, 212, 255, 0.15)";
+      ctx.strokeStyle = "#00d4ff";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(750, 95, 230, 50, 25);
+      ctx.fill();
+      ctx.stroke();
+      drawGlowText("WEB DEVELOPMENT", 865, 120, "700 18px 'Space Grotesk'", "#00d4ff", "#00d4ff", 6);
+      ctx.restore();
+
+      // ==========================================
+      // SCENE 1: O GANCHO (0.0s - 3.5s)
+      // ==========================================
+      if (t < 3.5) {
+        const st = t; // local scene time
+        const enter = Math.min(st / 0.6, 1);
+        const animScale = easeOutBack(enter);
+
+        // Alert Tag
+        ctx.save();
+        const tagAlpha = Math.min(st / 0.3, 1);
+        ctx.globalAlpha = tagAlpha;
+        drawGlassCard(140, 280, 800, 70, 35, 'rgba(255, 60, 100, 0.5)', 'rgba(255, 30, 80, 0.12)');
+        drawGlowText("⚠️ ATENÇÃO: ERRO COMUM EM 2026", 540, 315, "800 24px 'Space Grotesk'", "#ff4d6d", "#ff4d6d", 12);
+        ctx.restore();
+
+        // Main Punchy Headline
+        ctx.save();
+        ctx.translate(540, 520);
+        ctx.scale(animScale, animScale);
+        drawGlowText("O TEU NEGÓCIO", 0, -40, "900 78px 'Plus Jakarta Sans'", "#ffffff", "#00d4ff", 15);
+        drawGlowText("AINDA NÃO TEM", 0, 50, "900 78px 'Plus Jakarta Sans'", "#ffffff", "#00d4ff", 15);
+        drawGlowText("WEBSITE?", 0, 150, "900 96px 'Plus Jakarta Sans'", "#00d4ff", "#00d4ff", 35);
+        ctx.restore();
+
+        // Animated Google Search Simulation Card
+        if (st > 0.8) {
+          const cardEnter = Math.min((st - 0.8) / 0.5, 1);
+          const cardY = 880 + (1 - easeOutQuad(cardEnter)) * 100;
+          ctx.save();
+          ctx.globalAlpha = cardEnter;
+          drawGlassCard(90, cardY, 900, 480, 30, 'rgba(0, 212, 255, 0.4)');
+
+          // Search bar
+          drawGlassCard(130, cardY + 40, 820, 80, 40, 'rgba(255, 255, 255, 0.15)', 'rgba(0, 0, 0, 0.5)');
+          drawGlowText("🔍 'melhor serviço na minha zona'", 170, cardY + 80, "600 28px 'Plus Jakarta Sans'", "#cbd5e1", "", 0, "left");
+
+          // Result 1: Competitor
+          drawGlassCard(130, cardY + 150, 820, 130, 20, 'rgba(0, 212, 255, 0.25)', 'rgba(0, 212, 255, 0.06)');
+          drawGlowText("⭐ Concorrente com Site Profissional", 160, cardY + 195, "700 30px 'Plus Jakarta Sans'", "#38bdf8", "", 0, "left");
+          drawGlowText("✓ 1º Lugar no Google · +140 Pedidos Recebidos", 160, cardY + 240, "600 22px 'Plus Jakarta Sans'", "#4ade80", "", 0, "left");
+
+          // Result 2: Missing business
+          drawGlassCard(130, cardY + 300, 820, 130, 20, 'rgba(255, 60, 100, 0.3)', 'rgba(255, 60, 100, 0.06)');
+          drawGlowText("❌ A Tua Empresa (Sem Website)", 160, cardY + 345, "700 30px 'Plus Jakarta Sans'", "#f87171", "", 0, "left");
+          drawGlowText("Invisível para milhares de clientes qualificados todos os meses", 160, cardY + 390, "600 20px 'Plus Jakarta Sans'", "#94a3b8", "", 0, "left");
+          ctx.restore();
+        }
+
+        // Bottom Hook
+        if (st > 1.8) {
+          const subAlpha = Math.min((st - 1.8) / 0.4, 1);
+          ctx.save();
+          ctx.globalAlpha = subAlpha;
+          drawGlowText("84% dos portugueses pesquisam no Google antes de comprar.", 540, 1580, "600 28px 'Plus Jakarta Sans'", "#e2e8f0", "#ffffff", 5);
+          drawGlowText("Se não estás lá, estás a perder dinheiro todos os dias.", 540, 1630, "700 30px 'Plus Jakarta Sans'", "#ff4d6d", "#ff4d6d", 15);
+          ctx.restore();
+        }
+      }
+
+      // ==========================================
+      // SCENE 2: A DOR & REALIDADE (3.5s - 7.5s)
+      // ==========================================
+      else if (t >= 3.5 && t < 7.5) {
+        const st = t - 3.5;
+        const enter = Math.min(st / 0.5, 1);
+
+        // Section Tag
+        ctx.save();
+        ctx.globalAlpha = enter;
+        drawGlassCard(220, 280, 640, 64, 32, 'rgba(255, 180, 0, 0.4)', 'rgba(255, 180, 0, 0.08)');
+        drawGlowText("⚡ A VERDADE DO MARKETING DIGITAL", 540, 312, "800 22px 'Space Grotesk'", "#fbbf24", "#fbbf24", 8);
+
+        // Main Title
+        drawGlowText("SÓ O INSTAGRAM", 540, 420, "900 68px 'Plus Jakarta Sans'", "#ffffff", "#00d4ff", 15);
+        drawGlowText("JÁ NÃO É SUFICIENTE.", 540, 500, "900 68px 'Plus Jakarta Sans'", "#fbbf24", "#fbbf24", 25);
+        ctx.restore();
+
+        // 3 Pain Point Cards
+        const pains = [
+          { icon: "📉", title: "Refém do Algoritmo", desc: "Se o Instagram mudar ou o alcance cair, as tuas vendas param imediatamente." },
+          { icon: "🚫", title: "Zero Conversões Automáticas", desc: "Sem página de captura ou formulário inteligente, ficas a responder DMs o dia todo." },
+          { icon: "🔎", title: "Invisível no Google", desc: "Quem procura comprar agora não pesquisa no feed: pesquisa diretamente no motor de busca." }
+        ];
+
+        pains.forEach((p, idx) => {
+          const delay = 0.5 + idx * 0.4;
+          if (st > delay) {
+            const cardProgress = Math.min((st - delay) / 0.4, 1);
+            const cardX = 90 + (1 - easeOutBack(cardProgress)) * (idx % 2 === 0 ? -60 : 60);
+            const cardY = 620 + idx * 220;
+
+            ctx.save();
+            ctx.globalAlpha = cardProgress;
+            drawGlassCard(cardX, cardY, 900, 180, 24, 'rgba(255, 255, 255, 0.1)', 'rgba(15, 23, 42, 0.9)');
+
+            // Icon
+            drawGlowText(p.icon, cardX + 70, cardY + 90, "50px sans-serif", "#fff", "", 0);
+
+            // Text
+            drawGlowText(p.title, cardX + 150, cardY + 65, "800 32px 'Plus Jakarta Sans'", "#f1f5f9", "#00d4ff", 5, "left");
+            drawGlowText(p.desc, cardX + 150, cardY + 115, "500 22px 'Plus Jakarta Sans'", "#94a3b8", "", 0, "left");
+            ctx.restore();
+          }
+        });
+
+        // Bottom takeaway badge
+        if (st > 2.2) {
+          const bAlpha = Math.min((st - 2.2) / 0.4, 1);
+          ctx.save();
+          ctx.globalAlpha = bAlpha;
+          drawGlassCard(120, 1420, 840, 180, 24, 'rgba(0, 212, 255, 0.4)', 'rgba(0, 212, 255, 0.1)');
+          drawGlowText("O teu website próprio é o teu único", 540, 1485, "700 28px 'Plus Jakarta Sans'", "#f8fafc", "", 0);
+          drawGlowText("TERRENO 100% TEU NA INTERNET.", 540, 1540, "900 34px 'Plus Jakarta Sans'", "#00d4ff", "#00d4ff", 20);
+          ctx.restore();
+        }
+      }
+
+      // ==========================================
+      // SCENE 3: A SOLUÇÃO NEXUSVORA (7.5s - 12.0s)
+      // ==========================================
+      else if (t >= 7.5 && t < 12.0) {
+        const st = t - 7.5;
+        const enter = Math.min(st / 0.5, 1);
+
+        // Section Tag
+        ctx.save();
+        ctx.globalAlpha = enter;
+        drawGlassCard(240, 260, 600, 64, 32, 'rgba(0, 212, 255, 0.5)', 'rgba(0, 212, 255, 0.12)');
+        drawGlowText("✨ A SOLUÇÃO DEFINITIVA", 540, 292, "800 22px 'Space Grotesk'", "#00d4ff", "#00d4ff", 10);
+
+        drawGlowText("WEBSITES DE ALTA", 540, 400, "900 70px 'Plus Jakarta Sans'", "#ffffff", "#4a6cf7", 20);
+        drawGlowText("PERFORMANCE & VENDAS", 540, 480, "900 66px 'Plus Jakarta Sans'", "#00d4ff", "#00d4ff", 30);
+        ctx.restore();
+
+        // 3D Isometric / Center Phone Mockup
+        const mockEnter = Math.min(st / 0.6, 1);
+        const mockScale = easeOutBack(mockEnter);
+        ctx.save();
+        ctx.translate(540, 1020);
+        ctx.scale(mockScale, mockScale);
+
+        // Outer glow behind mockup
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 360, 480, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 212, 255, 0.15)';
+        ctx.shadowColor = '#00d4ff';
+        ctx.shadowBlur = 60;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Phone container
+        drawGlassCard(-260, -420, 520, 840, 40, 'rgba(0, 212, 255, 0.6)', '#0b1120');
+
+        // Phone screen top
+        drawGlassCard(-230, -390, 460, 70, 16, 'rgba(255, 255, 255, 0.08)', '#070a14');
+        drawGlowText("🔒 nexusvora.com", -200, -355, "600 22px 'Space Grotesk'", "#38bdf8", "", 0, "left");
+
+        // Mini hero inside mockup
+        drawGlowText("Transformação Digital", 0, -250, "800 32px 'Plus Jakarta Sans'", "#ffffff", "#00d4ff", 8);
+        drawGlowText("Performance Máxima", 0, -200, "800 26px 'Plus Jakarta Sans'", "#4a6cf7", "", 0);
+
+        // CTA inside mock
+        drawGlassCard(-150, -140, 300, 60, 30, '#00d4ff', '#00d4ff');
+        drawGlowText("Pedir Orçamento", 0, -110, "800 20px 'Plus Jakarta Sans'", "#070a14", "", 0);
+
+        // Mockup screen features list
+        drawGlassCard(-220, -40, 440, 340, 20, 'rgba(255, 255, 255, 0.08)', 'rgba(0, 0, 0, 0.4)');
+        drawGlowText("⚡ 0.4s Ultra-rápido", -180, 20, "700 24px 'Plus Jakarta Sans'", "#4ade80", "", 0, "left");
+        drawGlowText("📱 100% Mobile First", -180, 90, "700 24px 'Plus Jakarta Sans'", "#38bdf8", "", 0, "left");
+        drawGlowText("🔍 Top 1 Google (SEO)", -180, 160, "700 24px 'Plus Jakarta Sans'", "#fbbf24", "", 0, "left");
+        drawGlowText("💬 WhatsApp Integrado", -180, 230, "700 24px 'Plus Jakarta Sans'", "#a855f7", "", 0, "left");
+        ctx.restore();
+
+        // 4 Floating Pill Badges around the mockup
+        const badges = [
+          { text: "⚡ Carregamento < 1s", x: 220, y: 720, angle: -0.05 },
+          { text: "📈 +340% Conversão", x: 860, y: 760, angle: 0.05 },
+          { text: "⭐ Design Exclusivo", x: 200, y: 1380, angle: 0.04 },
+          { text: "🛡️ SSL & Domínio Incluído", x: 860, y: 1340, angle: -0.04 }
+        ];
+
+        badges.forEach((b, i) => {
+          if (st > 0.6 + i * 0.25) {
+            const bProg = Math.min((st - (0.6 + i * 0.25)) / 0.3, 1);
+            ctx.save();
+            ctx.globalAlpha = bProg;
+            ctx.translate(b.x, b.y);
+            ctx.rotate(b.angle);
+            drawGlassCard(-170, -35, 340, 70, 35, 'rgba(0, 212, 255, 0.5)', 'rgba(14, 21, 38, 0.95)');
+            drawGlowText(b.text, 0, 2, "700 22px 'Space Grotesk'", "#ffffff", "#00d4ff", 12);
+            ctx.restore();
+          }
+        });
+
+        // Bottom tagline
+        if (st > 2.0) {
+          ctx.save();
+          drawGlowText("Criado à medida para a tua marca destacar e faturar.", 540, 1620, "700 30px 'Plus Jakarta Sans'", "#e2e8f0", "#00d4ff", 8);
+          ctx.restore();
+        }
+      }
+
+      // ==========================================
+      // SCENE 4: VANTAGENS & PACOTES (12.0s - 15.5s)
+      // ==========================================
+      else if (t >= 12.0 && t < 15.5) {
+        const st = t - 12.0;
+        const enter = Math.min(st / 0.5, 1);
+
+        // Section Tag
+        ctx.save();
+        ctx.globalAlpha = enter;
+        drawGlassCard(240, 260, 600, 64, 32, 'rgba(139, 63, 219, 0.5)', 'rgba(139, 63, 219, 0.15)');
+        drawGlowText("💎 SERVIÇO CHAVE NA MÃO", 540, 292, "800 22px 'Space Grotesk'", "#c084fc", "#c084fc", 10);
+
+        drawGlowText("O QUE ESTÁ INCLUÍDO", 540, 390, "900 68px 'Plus Jakarta Sans'", "#ffffff", "#8b3fdb", 20);
+        drawGlowText("NO TEU NOVO SITE?", 540, 470, "900 68px 'Plus Jakarta Sans'", "#00d4ff", "#00d4ff", 25);
+        ctx.restore();
+
+        // 4 Feature Pillars
+        const features = [
+          { num: "01", title: "Design 100% Personalizado", desc: "Criado do zero para a tua marca, sem temas pré-feitos ou genéricos." },
+          { num: "02", title: "SEO Técnico para o Google", desc: "Indexação estruturada para quem pesquisa os teus serviços encontrar a tua empresa." },
+          { num: "03", title: "Formulários & Botão WhatsApp", desc: "Facilidade máxima para o cliente pedir orçamento com 1 clique." },
+          { num: "04", title: "Alojamento + Domínio + Manutenção", desc: "Não precisas de te preocupar com parte técnica. Nós cuidamos de tudo." }
+        ];
+
+        features.forEach((feat, idx) => {
+          const delay = 0.4 + idx * 0.35;
+          if (st > delay) {
+            const pProg = Math.min((st - delay) / 0.35, 1);
+            const cardY = 590 + idx * 200;
+            ctx.save();
+            ctx.globalAlpha = pProg;
+            drawGlassCard(90, cardY, 900, 165, 24, 'rgba(74, 108, 247, 0.25)', 'rgba(14, 21, 38, 0.9)');
+
+            // Number badge
+            ctx.fillStyle = "rgba(0, 212, 255, 0.15)";
+            ctx.beginPath();
+            ctx.roundRect(130, cardY + 35, 80, 95, 16);
+            ctx.fill();
+            drawGlowText(feat.num, 170, cardY + 82, "900 36px 'Space Grotesk'", "#00d4ff", "#00d4ff", 8);
+
+            // Title & Description
+            drawGlowText(feat.title, 240, cardY + 65, "800 30px 'Plus Jakarta Sans'", "#ffffff", "", 0, "left");
+            drawGlowText(feat.desc, 240, cardY + 115, "500 22px 'Plus Jakarta Sans'", "#94a3b8", "", 0, "left");
+            ctx.restore();
+          }
+        });
+
+        // Price Callout Banner
+        if (st > 1.8) {
+          const prAlpha = Math.min((st - 1.8) / 0.4, 1);
+          ctx.save();
+          ctx.globalAlpha = prAlpha;
+          drawGlassCard(90, 1460, 900, 160, 24, '#00d4ff', 'rgba(0, 212, 255, 0.15)');
+          drawGlowText("PLANOS COMPLETOS A PARTIR DE 499€", 540, 1515, "900 34px 'Plus Jakarta Sans'", "#ffffff", "#00d4ff", 15);
+          drawGlowText("Com garantia de suporte e satisfação NexusVora", 540, 1570, "600 24px 'Plus Jakarta Sans'", "#cbd5e1", "", 0);
+          ctx.restore();
+        }
+      }
+
+      // ==========================================
+      // SCENE 5: CALL TO ACTION (15.5s - 18.0s)
+      // ==========================================
+      else if (t >= 15.5) {
+        const st = t - 15.5;
+        const enter = Math.min(st / 0.5, 1);
+        const animScale = easeOutBack(enter);
+
+        // Big Glowing Center Nexus Logo
+        ctx.save();
+        const pulse = 1.0 + Math.sin(st * 6) * 0.05;
+        drawNexusLogo(540, 480, 1.6 * pulse, 35);
+        ctx.restore();
+
+        // NexusVora Title
+        ctx.save();
+        drawGlowText("NEXUSVORA", 540, 680, "900 76px 'Plus Jakarta Sans'", "#ffffff", "#00d4ff", 25);
+        drawGlowText("TECNOLOGIA QUE CONVERTE · PRESENÇA QUE MARCA", 540, 750, "700 22px 'Space Grotesk'", "#38bdf8", "#38bdf8", 10);
+        ctx.restore();
+
+        // Call to action box
+        if (st > 0.4) {
+          const ctaEnter = Math.min((st - 0.4) / 0.4, 1);
+          ctx.save();
+          ctx.globalAlpha = ctaEnter;
+          ctx.translate(540, 1060);
+          ctx.scale(animScale, animScale);
+
+          // Card
+          drawGlassCard(-450, -180, 900, 360, 32, 'rgba(0, 212, 255, 0.6)', 'rgba(11, 17, 32, 0.95)');
+
+          drawGlowText("PRONTO PARA LEVAR O TEU NEGÓCIO", 0, -110, "800 32px 'Plus Jakarta Sans'", "#e2e8f0", "", 0);
+          drawGlowText("AO PRÓXIMO NÍVEL?", 0, -60, "900 40px 'Plus Jakarta Sans'", "#00d4ff", "#00d4ff", 20);
+
+          // High CTA Button
+          const btnPulse = 1.0 + Math.sin(st * 8) * 0.03;
+          ctx.save();
+          ctx.scale(btnPulse, btnPulse);
+          ctx.shadowColor = '#00d4ff';
+          ctx.shadowBlur = 35;
+          const btnGrad = ctx.createLinearGradient(-350, 0, 350, 0);
+          btnGrad.addColorStop(0, '#00d4ff');
+          btnGrad.addColorStop(0.5, '#4a6cf7');
+          btnGrad.addColorStop(1, '#8b3fdb');
+          ctx.fillStyle = btnGrad;
+          ctx.beginPath();
+          ctx.roundRect(-350, 20, 700, 100, 50);
+          ctx.fill();
+
+          drawGlowText("👉 COMENTA 'SITE' OU ENVIA DM", 0, 70, "900 30px 'Plus Jakarta Sans'", "#ffffff", "#ffffff", 10);
+          ctx.restore();
+
+          ctx.restore();
+        }
+
+        // Bottom links & guarantee
+        if (st > 0.8) {
+          ctx.save();
+          drawGlowText("🎁 Diagnóstico gratuito da tua presença digital", 540, 1420, "700 28px 'Plus Jakarta Sans'", "#4ade80", "#4ade80", 10);
+          drawGlowText("🌐 nexusvora.com  ·  📷 @nexusvora", 540, 1500, "700 26px 'Space Grotesk'", "#94a3b8", "", 0);
+          ctx.restore();
+        }
+      }
+
+      // Bottom Progress Line (Instagram Stories / Reels style bar)
+      ctx.save();
+      const progressWidth = (t / TOTAL_DURATION) * 1080;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.fillRect(0, 1910, 1080, 10);
+      const barGrad = ctx.createLinearGradient(0, 0, progressWidth, 0);
+      barGrad.addColorStop(0, '#00d4ff');
+      barGrad.addColorStop(0.5, '#4a6cf7');
+      barGrad.addColorStop(1, '#8b3fdb');
+      ctx.fillStyle = barGrad;
+      ctx.shadowColor = '#00d4ff';
+      ctx.shadowBlur = 10;
+      ctx.fillRect(0, 1910, progressWidth, 10);
+      ctx.restore();
+    }
+
+    // --- Animation Loop ---
+    let lastScene = 1;
+    function updateSceneChips(t) {
+      let activeScene = 1;
+      if (t >= 15.5) activeScene = 5;
+      else if (t >= 12.0) activeScene = 4;
+      else if (t >= 7.5) activeScene = 3;
+      else if (t >= 3.5) activeScene = 2;
+
+      if (activeScene !== lastScene) {
+        lastScene = activeScene;
+        playTechClick(800, 0.08);
+      }
+
+      sceneChips.forEach(chip => {
+        const s = parseInt(chip.getAttribute('data-scene'));
+        if (s === activeScene) chip.classList.add('active');
+        else chip.classList.remove('active');
+      });
+    }
+
+    function formatTime(sec) {
+      const s = Math.floor(sec);
+      const ms = Math.floor((sec % 1) * 10);
+      return `00:${s.toString().padStart(2, '0')}.${ms}`;
+    }
+
+    function loop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const delta = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      if (isPlaying) {
+        currentTime += delta;
+        tickSynthRhythm(currentTime);
+        if (currentTime >= TOTAL_DURATION) {
+          if (isRecording) {
+            stopRecording();
+          }
+          currentTime = 0; // loop
+        }
+        timelineSlider.value = currentTime;
+      }
+
+      updateSceneChips(currentTime);
+      timeDisplay.textContent = `${formatTime(currentTime)} / 00:18.0`;
+      render(currentTime);
+
+      requestAnimationFrame(loop);
+    }
+
+    // --- Controls Listeners ---
+    btnPlayPause.addEventListener('click', () => {
+      initAudio();
+      isPlaying = !isPlaying;
+      btnPlayPause.textContent = isPlaying ? "⏸ Pausar" : "▶ Reproduzir";
+    });
+
+    btnRestart.addEventListener('click', () => {
+      currentTime = 0;
+      timelineSlider.value = 0;
+      playTechClick(400);
+      render(0);
+    });
+
+    timelineSlider.addEventListener('input', (e) => {
+      currentTime = parseFloat(e.target.value);
+      render(currentTime);
+    });
+
+    btnAudioToggle.addEventListener('click', () => {
+      initAudio();
+      soundEnabled = !soundEnabled;
+      btnAudioToggle.textContent = soundEnabled ? "🔊 Som: Ligado" : "🔇 Som: Desligado";
+    });
+
+    sceneChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const s = parseInt(chip.getAttribute('data-scene'));
+        let targetTime = 0;
+        if (s === 1) targetTime = 0;
+        if (s === 2) targetTime = 3.5;
+        if (s === 3) targetTime = 7.5;
+        if (s === 4) targetTime = 12.0;
+        if (s === 5) targetTime = 15.5;
+
+        currentTime = targetTime;
+        timelineSlider.value = targetTime;
+        playTechClick(600);
+        render(currentTime);
+      });
+    });
+
+    // --- HD Video Recording Export (MediaRecorder API) ---
+    btnRecord.addEventListener('click', () => {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    });
+
+    function startRecording() {
+      initAudio();
+      currentTime = 0;
+      timelineSlider.value = 0;
+      isPlaying = true;
+      isRecording = true;
+      btnRecord.textContent = "⏹ Parar e Guardar";
+      btnRecord.classList.add('recording');
+      statusToast.style.display = 'block';
+      statusToast.textContent = "Gravando animação em 1080x1920 HD... Aguarda os 18 segundos.";
+
+      recordedChunks = [];
+      const stream = canvas.captureStream(60); // 60 FPS ultra smooth
+      if (soundEnabled && audioDest && audioDest.stream.getAudioTracks().length > 0) {
+        stream.addTrack(audioDest.stream.getAudioTracks()[0]);
+      }
+      
+      const mimeTypes = [
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4'
+      ];
+      let selectedMime = 'video/webm';
+      for (const m of mimeTypes) {
+        if (MediaRecorder.isTypeSupported(m)) {
+          selectedMime = m;
+          break;
+        }
+      }
+
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType: selectedMime,
+        videoBitsPerSecond: 12000000 // 12 Mbps crystal clear high bitrate
+      });
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: selectedMime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `nexusvora-reels-motion-${Date.now()}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        btnRecord.textContent = "⏺ Exportar Vídeo HD";
+        btnRecord.classList.remove('recording');
+        isRecording = false;
+        statusToast.textContent = "✅ Vídeo exportado com sucesso! Já podes usar nas tuas redes.";
+        setTimeout(() => {
+          statusToast.style.display = 'none';
+        }, 5000);
+      };
+
+      mediaRecorder.start();
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    }
+
+    // --- Copy Caption to Clipboard ---
+    document.getElementById('btnCopyCaption').addEventListener('click', () => {
+      const text = document.getElementById('captionText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btnCopyCaption');
+        btn.textContent = "Copiado!";
+        setTimeout(() => {
+          btn.textContent = "Copiar Legenda";
+        }, 2000);
+      });
+    });
+
+    // Start initial frame
+    render(0);
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

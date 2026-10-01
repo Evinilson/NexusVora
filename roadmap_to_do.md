@@ -44,6 +44,8 @@ report($e);
 
 ## Deploy
 
+- [ ] Planear a automatização do deploy através de GitHub Actions; ver [plano de deploy Laravel na Hostinger](docs/PLANO_GITHUB_ACTIONS_HOSTINGER.md).
+
 - [x] Antes de publicar, limpar caches locais:
 
 ```bash

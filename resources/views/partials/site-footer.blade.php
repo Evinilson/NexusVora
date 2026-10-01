@@ -42,6 +42,8 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+        margin: 0;
+        padding: 0;
         list-style: none;
     }
 
@@ -144,11 +146,11 @@
             <div class="footer-col">
                 <h2>Serviços</h2>
                 <ul>
-                    <li><a href="{{ $servicesUrl }}#web">Desenvolvimento Web</a></li>
-                    <li><a href="{{ $servicesUrl }}#social">Redes Sociais</a></li>
-                    <li><a href="{{ $servicesUrl }}#trafego">Tráfego &amp; Leads</a></li>
-                    <li><a href="{{ $servicesUrl }}#nexusai">NexusAI</a></li>
-                    <li><a href="{{ $servicesUrl }}#marca">Marca &amp; Estratégia</a></li>
+                    <li><a href="{{ route('service.websites') }}">Desenvolvimento Web</a></li>
+                    <li><a href="{{ route('service.social') }}">Redes Sociais</a></li>
+                    <li><a href="{{ route('service.trafego') }}">Tráfego &amp; Leads</a></li>
+                    <li><a href="{{ route('service.ai') }}">NexusAI</a></li>
+                    <li><a href="{{ route('service.branding') }}">Marca &amp; Estratégia</a></li>
                 </ul>
             </div>
 
@@ -169,8 +171,7 @@
                     <li><a href="{{ $contactUrl }}">Portugal</a></li>
                     <li><a href="mailto:geral@nexusvora.com">geral@nexusvora.com</a></li>
                     <li><a href="tel:+351932949284">+351 932 949 284</a></li>
-                    <li><a href="https://www.linkedin.com" target="_blank" rel="noreferrer">LinkedIn</a></li>
-                    <li><a href="https://www.instagram.com" target="_blank" rel="noreferrer">Instagram</a></li>
+                    <li><a href="https://www.instagram.com/nexus_vora" target="_blank" rel="noreferrer">Instagram</a></li>
                 </ul>
             </div>
         </div>

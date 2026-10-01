@@ -364,6 +364,7 @@
                 <a href="{{ route('admin.dashboard') }}" @class(['active' => request()->routeIs('admin.dashboard')])>Dashboard</a>
                 <a href="{{ route('admin.clients.index') }}" @class(['active' => request()->routeIs('admin.clients.*')])>Clientes</a>
                 <a href="{{ route('admin.projects.index') }}" @class(['active' => request()->routeIs('admin.projects.*')])>Projetos</a>
+                <a href="{{ route('admin.tasks.index') }}" @class(['active' => request()->routeIs('admin.tasks.*')])>Tarefas</a>
                 <a href="{{ route('admin.hour-packages.index') }}" @class(['active' => request()->routeIs('admin.hour-packages.*')])>Pacotes de Horas</a>
                 <a href="{{ route('admin.secure-shares.index') }}" @class(['active' => request()->routeIs('admin.secure-shares.*')])>Partilhas seguras</a>
                 <a href="#">Servicos</a>

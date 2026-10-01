@@ -45,6 +45,16 @@ O objetivo é criar uma lista pequena, qualificada e útil para a NexusVora ofer
 - abordagem sugerida em uma frase, específica ao setor;
 - prioridade A, B ou C.
 
+## Índice consolidado por proximidade
+
+Depois de criar ou atualizar o lote diário, atualizar também `leads/indice-por-proximidade-santo-ovidio.md`.
+
+- O índice deve conter todos os leads únicos já existentes em `leads/`, incluindo lotes históricos.
+- Ordenar pela distância aproximada em linha reta à Rotunda de Santo Ovídio, Vila Nova de Gaia (41.099670, -8.602549), usando as coordenadas do link Google Maps quando disponíveis.
+- Indicar o ficheiro de origem e manter no fim uma secção de coordenadas pendentes para links Maps sem latitude/longitude; não estimar distâncias sem coordenadas verificáveis.
+- Não criar cópias dos leads: o índice é apenas uma lista de consulta que aponta para os relatórios de origem.
+- Incluir a coluna `Estado` em todos os leads do índice. Novos leads começam em `Por analisar`; preservar os estados que o utilizador já tiver preenchido (`Visto`, `Contactado`, `Sem interesse` ou `Cliente`) ao reorganizar o ficheiro.
+
 ## Modelo de resposta diária
 
 ```md
@@ -81,4 +91,3 @@ Nunca prometer resultados, nem afirmar que a empresa não tem website sem valida
 - Todos têm link de origem e contacto empresarial público.
 - Nenhum lead é duplicado do ficheiro de prospeção existente.
 - Cada lead tem uma razão comercial clara para a NexusVora o contactar.
-

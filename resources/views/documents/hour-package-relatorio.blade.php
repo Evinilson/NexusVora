@@ -42,6 +42,13 @@
     table.entries td { padding:9px 12px; border-bottom:1px solid #eee; vertical-align:top; }
     table.entries tr:nth-child(even) td { background:#f9f9f9; }
     table.entries .entry-desc { font-size:11px; color:#666; margin-top:2px; }
+    .tasks-row td { padding:0 12px 10px; background:#f9f9f9; }
+    .task-list { width:100%; border-collapse:collapse; }
+    .task-list td { padding:8px 0; border-top:1px solid #e5e7eb; vertical-align:top; background:transparent; }
+    .task-list tr:first-child td { border-top:0; }
+    .task-title { width:31%; padding-right:12px !important; font-size:11px; font-weight:700; color:#0d1b4b; }
+    .task-desc { width:59%; font-size:10px; color:#666; line-height:1.45; }
+    .task-status { display:inline-block; margin-top:5px; padding:2px 6px; border-radius:8px; font-size:8px; font-weight:700; text-transform:uppercase; color:#fff; }
     table.entries tfoot td { background:#f0f4ff; font-weight:700; border-top:2px solid #0d1b4b; }
 
     .badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:700; text-transform:uppercase; color:#fff; }
@@ -149,8 +156,8 @@
             <thead>
                 <tr>
                     <th style="width:12%">Data</th>
-                    <th style="width:42%">Trabalho Realizado</th>
-                    <th style="width:10%; text-align:right">Horas</th>
+                    <th style="width:65%">Trabalho Realizado</th>
+                    <th style="width:11%; text-align:right">Horas</th>
                     <th style="width:12%; text-align:right">Acum.</th>
                 </tr>
             </thead>
@@ -169,6 +176,24 @@
                     <td style="text-align:right; font-weight:700; color:#f59e0b">{{ number_format($entry->hours, 1) }}h</td>
                     <td style="text-align:right; color:#6b7280">{{ number_format($acum, 1) }}h</td>
                 </tr>
+                @if($entry->tasks->isNotEmpty())
+                <tr class="tasks-row">
+                    <td></td>
+                    <td colspan="3">
+                        <table class="task-list">
+                            @foreach($entry->tasks as $task)
+                            <tr>
+                                <td class="task-title">
+                                    {{ $task->title }}<br>
+                                    <span class="task-status" style="background:{{ $task->statusColor() }}">{{ $task->statusLabel() }}</span>
+                                </td>
+                                <td class="task-desc">{{ $task->description ?: 'Sem descrição.' }}</td>
+                            </tr>
+                            @endforeach
+                        </table>
+                    </td>
+                </tr>
+                @endif
                 @endforeach
             </tbody>
             <tfoot>

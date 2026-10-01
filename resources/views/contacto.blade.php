@@ -640,8 +640,7 @@
         <div class="info-card">
           <div class="info-card-title">Redes Sociais</div>
           <div class="social-links">
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" class="social-link">LinkedIn</a>
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer" class="social-link">Instagram</a>
+            <a href="https://www.instagram.com/nexus_vora" target="_blank" rel="noreferrer" class="social-link">Instagram</a>
             <a href="https://www.facebook.com" target="_blank" rel="noreferrer" class="social-link">Facebook</a>
           </div>
         </div>

@@ -36,7 +36,7 @@
     ];
 
     $routeName = request()->route()?->getName();
-    $pageSeo = $seo[$routeName] ?? $seo['home'];
+    $pageSeo = isset($service['seo']) ? $service['seo'] : ($seo[$routeName] ?? $seo['home']);
     $description = $pageSeo['description'];
     $pageTitle = $pageSeo['title'];
     $schema = [

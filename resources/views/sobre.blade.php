@@ -570,7 +570,7 @@
       <p class="section-desc">Cada serviço foi pensado para funcionar em conjunto — porque o crescimento real acontece quando todos os canais trabalham como um só.</p>
     </div>
     <div class="services-cards">
-      <a href="{{ route('services') }}#web" class="srv-card reveal delay-1">
+      <a href="{{ route('service.websites') }}" class="srv-card reveal delay-1">
         <div class="srv-card-icon" style="background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.2);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
         </div>
@@ -578,7 +578,7 @@
         <p>Sites, lojas online e plataformas que convertem visitantes em clientes 24/7.</p>
         <span class="srv-link">Saber mais →</span>
       </a>
-      <a href="{{ route('services') }}#social" class="srv-card reveal delay-2">
+      <a href="{{ route('service.social') }}" class="srv-card reveal delay-2">
         <div class="srv-card-icon" style="background:rgba(74,108,247,0.1);border-color:rgba(74,108,247,0.2);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="13" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="13" width="9" height="9" rx="1.5"/><rect x="13" y="13" width="9" height="9" rx="1.5"/></svg>
         </div>
@@ -586,7 +586,7 @@
         <p>Conteúdo estratégico e gestão diária que constrói comunidade e gera negócio.</p>
         <span class="srv-link">Saber mais →</span>
       </a>
-      <a href="{{ route('services') }}#trafego" class="srv-card reveal delay-3">
+      <a href="{{ route('service.trafego') }}" class="srv-card reveal delay-3">
         <div class="srv-card-icon" style="background:rgba(139,63,219,0.1);border-color:rgba(139,63,219,0.2);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B3FDB" stroke-width="1.8" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
@@ -594,7 +594,7 @@
         <p>Google Ads, Meta Ads e SEO integrados numa estratégia que nunca para.</p>
         <span class="srv-link">Saber mais →</span>
       </a>
-      <a href="{{ route('services') }}#nexusai" class="srv-card reveal delay-1">
+      <a href="{{ route('service.ai') }}" class="srv-card reveal delay-1">
         <div class="srv-card-icon" style="background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.25);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="19" cy="5" r="3" fill="#F5A623" opacity=".3"/><circle cx="19" cy="5" r="1.5" fill="#F5A623"/></svg>
         </div>
@@ -602,7 +602,7 @@
         <p>Automação inteligente e IA aplicada para o negócio trabalhar enquanto dorme.</p>
         <span class="srv-link" style="color:var(--cyan);">Saber mais →</span>
       </a>
-      <a href="{{ route('services') }}#marca" class="srv-card reveal delay-2">
+      <a href="{{ route('service.branding') }}" class="srv-card reveal delay-2">
         <div class="srv-card-icon" style="background:rgba(74,108,247,0.1);border-color:rgba(74,108,247,0.2);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A6CF7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>

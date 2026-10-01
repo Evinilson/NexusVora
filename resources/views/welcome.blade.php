@@ -1187,7 +1187,7 @@
                     </div>
                     <h3>Desenvolvimento Web</h3>
                     <p>Sites, lojas online e plataformas profissionais — rápidos, seguros e otimizados para converter visitantes em clientes.</p>
-                    <a href="{{ route('services') }}#web" class="service-link">Ver serviço
+                    <a href="{{ route('service.websites') }}" class="service-link">Ver serviço
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -1206,7 +1206,7 @@
                     </div>
                     <h3>Gestão de Redes Sociais</h3>
                     <p>Estratégia editorial, criativos de alto nível e gestão diária para marcas que querem crescer no digital.</p>
-                    <a href="{{ route('services') }}#social" class="service-link">Ver serviço
+                    <a href="{{ route('service.social') }}" class="service-link">Ver serviço
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -1222,7 +1222,7 @@
                     </div>
                     <h3>Tráfego, Leads & Conversões</h3>
                     <p>Google Ads, Meta Ads e SEO — os três pilares do tráfego pago e orgânico, integrados numa estratégia única.</p>
-                    <a href="{{ route('services') }}#trafego" class="service-link">Ver serviço
+                    <a href="{{ route('service.trafego') }}" class="service-link">Ver serviço
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -1246,7 +1246,7 @@
                         <span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; color: var(--text-muted);">Automação</span>
                         <span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; color: var(--text-muted);">Integrações</span>
                     </div>
-                    <a href="{{ route('services') }}#nexusai" class="service-link" style="margin-top: 16px;">Descobrir NexusAI
+                    <a href="{{ route('service.ai') }}" class="service-link" style="margin-top: 16px;">Descobrir NexusAI
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -1262,7 +1262,7 @@
                     </div>
                     <h3>Marca & Estratégia Digital</h3>
                     <p>Identidade visual, posicionamento e estratégia integrada — cada canal a potenciar o outro para resultados consistentes.</p>
-                    <a href="{{ route('services') }}#marca" class="service-link">Ver serviço
+                    <a href="{{ route('service.branding') }}" class="service-link">Ver serviço
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="#00D4FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>

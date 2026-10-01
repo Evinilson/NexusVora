@@ -62,13 +62,22 @@
             <h3 style="font-size:15px; font-weight:700; margin:0 0 8px;">Tarefas do pacote</h3>
             <p style="font-size:12px; color:var(--muted); margin:0 0 16px;">Cria tarefas sem teres de criar um projeto.</p>
             @forelse($package->tasks->whereNull('parent_task_id') as $task)
+            @php $hasDetails = $task->description || $task->subtasks->isNotEmpty(); @endphp
             <div style="padding:9px 0; border-bottom:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
-                <div>
+                @if($hasDetails)
+                <button type="button" class="task-toggle" aria-expanded="false" aria-controls="task-body-{{ $task->id }}">
+                    <span class="task-chevron">▸</span>
+                    <span style="font-size:13px; font-weight:600;">{{ $task->title }}</span>
+                    @if($task->due_date)<span style="font-size:11px; color:var(--muted);">{{ $task->due_date->format('d/m/Y') }}</span>@endif
+                    @if($task->subtasks->isNotEmpty())<span style="font-size:11px; color:var(--cyan);">· {{ $task->subtasks->count() }} {{ $task->subtasks->count() === 1 ? 'subtarefa' : 'subtarefas' }}</span>@endif
+                </button>
+                @else
+                <div style="min-width:0; padding-left:18px;">
                     <span style="font-size:13px; font-weight:600;">{{ $task->title }}</span>@if($task->due_date)<span style="font-size:11px; color:var(--muted); margin-left:8px;">{{ $task->due_date->format('d/m/Y') }}</span>@endif
-                    @if($task->description)<div style="font-size:12px; color:var(--muted); line-height:1.45; margin-top:3px;">{{ $task->description }}</div>@endif
                 </div>
-                <div style="display:flex; align-items:center; gap:10px;">
+                @endif
+                <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
                     <span style="font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; background:{{ $task->statusColor() }}22; color:{{ $task->statusColor() }};">{{ $task->statusLabel() }}</span>
                     <button type="button" class="edit-package-task"
                         data-url="{{ route('admin.hour-packages.tasks.update', [$package, $task]) }}"
@@ -77,30 +86,46 @@
                         data-status="{{ $task->status }}"
                         data-due-date="{{ $task->due_date?->format('Y-m-d') }}"
                         data-can-move="{{ $task->status !== 'concluido' ? '1' : '0' }}"
+                        data-task-id="{{ $task->id }}"
+                        data-parent-id=""
+                        data-has-subtasks="{{ $task->subtasks->isNotEmpty() ? '1' : '0' }}"
                         style="background:none; border:none; color:var(--cyan); cursor:pointer; font-size:12px; padding:2px 0;">Editar</button>
                     <button type="button" class="add-package-subtask" data-parent-id="{{ $task->id }}" data-parent-title="{{ $task->title }}"
-                        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; padding:2px 0;">+ Subtarefa</button>
+                        style="background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; padding:2px 0; white-space:nowrap;">+ Subtarefa</button>
                     <form method="POST" action="{{ route('admin.hour-packages.tasks.destroy', [$package, $task]) }}" onsubmit="return confirm('Eliminar esta tarefa e todas as respetivas subtarefas?')">
                         @csrf @method('DELETE')
                         <button type="submit" style="background:none; border:none; color:#fb7185; cursor:pointer; font-size:12px; padding:2px 0;">Eliminar</button>
                     </form>
                 </div>
                 </div>
+                @if($hasDetails)
+                <div id="task-body-{{ $task->id }}" hidden>
+                @if($task->description)<div style="font-size:12px; color:var(--muted); line-height:1.45; margin:6px 0 0 18px;">{{ $task->description }}</div>@endif
                 @if($task->subtasks->isNotEmpty())
                 <div style="margin:10px 0 0 18px; padding-left:14px; border-left:2px solid rgba(0,212,255,.3);">
                     @foreach($task->subtasks as $subtask)
-                    <div style="display:flex; justify-content:space-between; gap:12px; padding:7px 0; align-items:center;">
-                        <div>
+                    <div style="padding:7px 0;">
+                    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                        @if($subtask->description)
+                        <button type="button" class="task-toggle" aria-expanded="false" aria-controls="task-body-{{ $subtask->id }}">
+                            <span class="task-chevron">▸</span>
                             <span style="font-size:12px; font-weight:600; color:var(--text);">{{ $subtask->title }}</span>
-                            @if($subtask->description)<div style="font-size:11px; color:var(--muted); line-height:1.4; margin-top:2px;">{{ $subtask->description }}</div>@endif
+                        </button>
+                        @else
+                        <div style="min-width:0; padding-left:18px;">
+                            <span style="font-size:12px; font-weight:600; color:var(--text);">{{ $subtask->title }}</span>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
+                        @endif
+                        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
                             <span style="font-size:9px; font-weight:700; padding:3px 7px; border-radius:10px; background:{{ $subtask->statusColor() }}22; color:{{ $subtask->statusColor() }}; white-space:nowrap;">{{ $subtask->statusLabel() }}</span>
                             <button type="button" class="edit-package-task"
                                 data-url="{{ route('admin.hour-packages.tasks.update', [$package, $subtask]) }}"
                                 data-title="{{ $subtask->title }}" data-description="{{ $subtask->description }}"
                                 data-status="{{ $subtask->status }}" data-due-date="{{ $subtask->due_date?->format('Y-m-d') }}"
                                 data-can-move="{{ $subtask->status !== 'concluido' ? '1' : '0' }}"
+                                data-task-id="{{ $subtask->id }}"
+                                data-parent-id="{{ $subtask->parent_task_id }}"
+                                data-has-subtasks="0"
                                 style="background:none; border:none; color:var(--cyan); cursor:pointer; font-size:11px; padding:2px 0;">Editar</button>
                             <form method="POST" action="{{ route('admin.hour-packages.tasks.destroy', [$package, $subtask]) }}" onsubmit="return confirm('Eliminar esta subtarefa?')">
                                 @csrf @method('DELETE')
@@ -108,7 +133,13 @@
                             </form>
                         </div>
                     </div>
+                    @if($subtask->description)
+                    <div id="task-body-{{ $subtask->id }}" hidden style="font-size:11px; color:var(--muted); line-height:1.4; margin:4px 0 0 18px;">{{ $subtask->description }}</div>
+                    @endif
+                    </div>
                     @endforeach
+                </div>
+                @endif
                 </div>
                 @endif
             </div>
@@ -177,6 +208,9 @@
                     <label style="display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text); margin:6px 0; cursor:pointer;">
                         <input type="checkbox" name="project_task_ids[]" value="{{ $task->id }}">
                         <span style="flex:1; {{ $task->parent_task_id ? 'color:var(--muted); padding-left:18px;' : '' }}">{{ $task->parent_task_id ? '↳ ' : '' }}{{ $task->project ? $task->project->title . ' — ' : '' }}{{ $task->title }}</span>
+                        @if($task->status === 'concluido' && $task->completed_at)
+                        <span style="font-size:11px; color:var(--muted); white-space:nowrap;" title="Data de conclusão">{{ $task->completed_at->format('d/m/Y') }}</span>
+                        @endif
                         <span style="font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; background:{{ $task->statusColor() }}22; color:{{ $task->statusColor() }}; white-space:nowrap;">{{ $task->statusLabel() }}</span>
                     </label>
                     @endforeach
@@ -303,6 +337,16 @@
                     <select id="package-task-status" name="status" style="background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; font-size:13px;"><option value="a_fazer">A Fazer</option><option value="em_progresso">Em Progresso</option><option value="bloqueado">Bloqueado</option><option value="concluido">Concluído</option></select>
                     <input id="package-task-due-date" type="date" name="due_date" style="background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; font-size:13px;">
                 </div>
+                <div>
+                    <label for="package-task-parent" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;">Tarefa principal</label>
+                    <select id="package-task-parent" name="parent_task_id" style="width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; font-size:13px;">
+                        <option value="">Nenhuma (é uma tarefa principal)</option>
+                        @foreach($package->tasks->whereNull('parent_task_id') as $parentOption)
+                        <option value="{{ $parentOption->id }}">{{ $parentOption->title }}</option>
+                        @endforeach
+                    </select>
+                    <p id="package-task-parent-note" style="font-size:11px; color:var(--muted); margin:5px 0 0;">Escolhe uma tarefa para transformar esta numa subtarefa.</p>
+                </div>
                 <div id="package-task-move-wrap">
                     <label for="package-task-target-package" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px;">Mover para outro pacote</label>
                     <select id="package-task-target-package" name="target_hour_package_id" style="width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; font-size:13px;">
@@ -372,7 +416,23 @@
     </div>
 </div>
 
+<style>
+    .task-toggle { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 8px; flex:1; min-width:0; background:none; border:none; padding:0; color:var(--text); text-align:left; cursor:pointer; font:inherit; }
+    .task-toggle:hover > span:nth-child(2) { color:var(--cyan); }
+    .task-chevron { width:10px; flex-shrink:0; font-size:11px; color:var(--muted); transition:transform .15s; }
+    .task-toggle[aria-expanded="true"] .task-chevron { transform:rotate(90deg); }
+</style>
+
 <script>
+    document.querySelectorAll('.task-toggle').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var body = document.getElementById(button.getAttribute('aria-controls'));
+            var open = button.getAttribute('aria-expanded') !== 'true';
+            button.setAttribute('aria-expanded', open ? 'true' : 'false');
+            body.hidden = !open;
+        });
+    });
+
     (function () {
         var modal = document.getElementById('edit-package-task-modal');
         var form = document.getElementById('edit-package-task-form');
@@ -383,6 +443,8 @@
         var dueDate = document.getElementById('package-task-due-date');
         var targetPackage = document.getElementById('package-task-target-package');
         var moveNote = document.getElementById('package-task-move-note');
+        var parent = document.getElementById('package-task-parent');
+        var parentNote = document.getElementById('package-task-parent-note');
 
         document.querySelectorAll('.edit-package-task').forEach(function (button) {
             button.addEventListener('click', function () {
@@ -396,6 +458,14 @@
                 moveNote.textContent = targetPackage.disabled
                     ? 'Uma tarefa concluída não pode ser movida para outro pacote.'
                     : 'Só é possível mover tarefas ainda não concluídas.';
+                Array.prototype.forEach.call(parent.options, function (option) {
+                    option.hidden = option.disabled = option.value !== '' && option.value === button.dataset.taskId;
+                });
+                parent.value = button.dataset.parentId || '';
+                parent.disabled = button.dataset.hasSubtasks === '1';
+                parentNote.textContent = parent.disabled
+                    ? 'Esta tarefa tem subtarefas, por isso não pode passar a subtarefa.'
+                    : 'Escolhe uma tarefa para transformar esta numa subtarefa.';
                 modal.style.display = 'flex';
                 modal.setAttribute('aria-hidden', 'false');
                 name.focus();

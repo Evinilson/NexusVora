@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sites desde 499€</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#05081c; --muted:#98A3C2; --cyan:#00D4FF; --blue:#4A6CF7; --purple:#8B3FDB; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; }
+  body { background:var(--bg); color:#fff; font-family:'Plus Jakarta Sans',sans-serif;
+         display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:16px; overflow:hidden; }
+  #stage { height:min(84vh, calc((100vw - 32px) * 16 / 9)); aspect-ratio:9/16; position:relative; }
+  canvas { width:100%; height:100%; display:block; border-radius:18px; box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06); cursor:crosshair; }
+  #ui { display:flex; align-items:center; gap:10px; width:min(100%, 520px); font-size:13px; color:var(--muted); }
+  #ui button { background:linear-gradient(135deg,var(--cyan),var(--blue),var(--purple)); color:#fff; border:0; border-radius:999px;
+               padding:8px 16px; font:700 13px 'Plus Jakarta Sans',sans-serif; cursor:pointer; }
+  #ui input { flex:1; accent-color:var(--blue); }
+  #time { font-variant-numeric:tabular-nums; min-width:70px; text-align:right; }
+  body.export { padding:0; background:#000; }
+  body.export #ui { display:none; }
+  body.export #stage { height:auto; }
+  body.export canvas { border-radius:0; box-shadow:none; }
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<div id="ui">
+  <button id="play">Pausa</button>
+  <input id="scrub" type="range" min="0" max="15" step="0.01" value="0">
+  <span id="time">0.0s / 15s</span>
+</div>
+<script>
+const W = 1080, H = 1920, DUR = 15;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const C = { navy:'#0A0F2E', card:'#111936', cyan:'#00D4FF', blue:'#4A6CF7', purple:'#8B3FDB', muted:'#98A3C2', green:'#22E3A0' };
+const F = "'Plus Jakarta Sans', sans-serif";
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const P = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eback = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const eexpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+
+function grad(x0, y0, x1, y1, a = 1) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  g.addColorStop(0, `rgba(0,212,255,${a})`);
+  g.addColorStop(.5, `rgba(74,108,247,${a})`);
+  g.addColorStop(1, `rgba(139,63,219,${a})`);
+  return g;
+}
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, Math.max(0, w), Math.max(0, h), Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2)); }
+function glow(x, y, r, rgb, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+}
+function font(weight, size) { ctx.font = `${weight} ${size}px ${F}`; }
+
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const parts = Array.from({ length: 70 }, () => ({ x: rnd() * W, y: rnd() * H, r: 1 + rnd() * 2.6, s: 20 + rnd() * 70, ph: rnd() * 6.28, c: rnd() }));
+const streaks = Array.from({ length: 46 }, () => ({ a: rnd() * Math.PI * 2, d: .7 + rnd() * .5, o: rnd() * .25 }));
+
+// Parallax + taps (preview only — never used during export)
+let mx = 0, my = 0, tmx = 0, tmy = 0; const taps = [];
+
+// ---------- background ----------
+function background(t) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#060A22'); g.addColorStop(1, C.navy);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  glow(540 + Math.sin(t * .6) * 280 + mx * 70, 520 + Math.cos(t * .5) * 180 + my * 50, 720, '0,212,255', .20);
+  glow(540 + Math.cos(t * .45) * 300 - mx * 70, 1460 + Math.sin(t * .7) * 200 - my * 50, 820, '139,63,219', .26);
+  glow(540 + Math.sin(t * .3 + 2) * 200, 980, 560, '74,108,247', .12);
+
+  // drifting dot grid
+  ctx.fillStyle = 'rgba(152,163,194,.10)';
+  const off = (t * 22) % 60;
+  for (let y = -60; y < H + 60; y += 60)
+    for (let x = 30; x < W; x += 60) ctx.fillRect(x + mx * 12 - 1.5, y + off + my * 12 - 1.5, 3, 3);
+
+  // particles
+  for (const p of parts) {
+    const y = ((p.y - t * p.s) % H + H) % H;
+    const x = p.x + Math.sin(t * .8 + p.ph) * 22 + mx * p.r * 10;
+    ctx.fillStyle = p.c > .5 ? `rgba(0,212,255,${.18 + .4 * Math.sin(t * 2 + p.ph) ** 2})` : `rgba(139,63,219,${.2 + .4 * Math.cos(t * 1.7 + p.ph) ** 2})`;
+    ctx.beginPath(); ctx.arc(x, y, p.r, 0, 7); ctx.fill();
+  }
+}
+
+// ---------- brand ----------
+const ANG = [-90, 90, 180, 0, -135, 45, -45, 135].map(a => a * Math.PI / 180);
+function drawLogo(cx, cy, s, k, a = 1) {
+  if (k <= 0 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(cx, cy);
+  const g = grad(-30 * s, -30 * s, 30 * s, 30 * s);
+  ctx.strokeStyle = g; ctx.fillStyle = g; ctx.lineCap = 'round';
+  ctx.shadowColor = 'rgba(74,108,247,.9)'; ctx.shadowBlur = 4 * s;
+  const kc = eback(P(k, 0, .3));
+  ctx.lineWidth = 2.5 * s;
+  ctx.beginPath(); ctx.arc(0, 0, 7 * s * Math.max(kc, .01), -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * eo(P(k, 0, .35))); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 3 * s * Math.max(kc, 0), 0, 7); ctx.fill();
+  ANG.forEach((an, i) => {
+    const kk = P(k, .2 + i * .05, .6 + i * .05); if (kk <= 0) return;
+    const l = eo(kk), cs = Math.cos(an), sn = Math.sin(an);
+    ctx.lineWidth = 2 * s;
+    ctx.beginPath(); ctx.moveTo(cs * 7 * s, sn * 7 * s); ctx.lineTo(cs * lerp(7, 20, l) * s, sn * lerp(7, 20, l) * s); ctx.stroke();
+    const kn = eback(P(kk, .55, 1));
+    if (kn > 0) { ctx.beginPath(); ctx.arc(cs * 22.5 * s, sn * 22.5 * s, 3 * s * kn, 0, 7); ctx.fill(); }
+  });
+  ctx.restore();
+}
+function wordmark(cx, y, size, k, a = 1) {
+  if (k <= 0 || a <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; font(800, size); ctx.textBaseline = 'alphabetic';
+  const txt = 'NexusVora', total = ctx.measureText(txt).width, x0 = cx - total / 2;
+  const w1 = ctx.measureText('Nexus').width, g = grad(x0 + w1, 0, x0 + total, 0);
+  ctx.beginPath(); ctx.rect(x0 - 20, y - size * 1.05, total + 40, size * 1.35); ctx.clip();
+  for (let i = 0; i < txt.length; i++) {
+    const kk = eo(P(k, i * .06, i * .06 + .45));
+    ctx.fillStyle = i < 5 ? '#fff' : g;
+    ctx.fillText(txt[i], x0 + ctx.measureText(txt.slice(0, i)).width, y + (1 - kk) * size * 1.1);
+  }
+  ctx.restore();
+}
+function maskText(s, x, y, weight, size, fill, k, align = 'left') {
+  if (k <= 0) return;
+  ctx.save(); font(weight, size); ctx.textAlign = align;
+  const w = ctx.measureText(s).width, left = align === 'center' ? x - w / 2 : x;
+  ctx.beginPath(); ctx.rect(left - 20, y - size * 1.05, w + 40, size * 1.4); ctx.clip();
+  ctx.fillStyle = fill; ctx.fillText(s, x, y + (1 - k) * size * 1.3);
+  ctx.restore();
+}
+
+// Section header shared by the three service scenes
+function title(num, l1, l2, t, t0, t1) {
+  const ko = eio(P(t, t1 - .45, t1)); if (t < t0 || ko >= 1) return;
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(0, -70 * ko);
+  const y0 = 300, kc = eo(P(t, t0, t0 + .6));
+  // number chip + growing line
+  ctx.globalAlpha *= kc; font(700, 28); ctx.fillStyle = C.cyan; ctx.fillText(num, 90, y0 + 10);
+  ctx.fillStyle = grad(140, 0, 400, 0); ctx.fillRect(140, y0, 240 * kc, 3);
+  font(600, 24); ctx.fillStyle = C.muted; ctx.globalAlpha = (1 - ko) * P(t, t0 + .3, t0 + .8);
+  ctx.fillText('O QUE FAZEMOS', 400, y0 + 9);
+  ctx.globalAlpha = 1 - ko;
+  maskText(l1, 90, y0 + 110, 600, 60, '#fff', eo(P(t, t0 + .1, t0 + .7)));
+  font(800, 124); const fit = Math.min(124, 900 / ctx.measureText(l2).width * 124);
+  maskText(l2, 90, y0 + 110 + fit * 1.05, 800, fit, grad(90, 0, 990, 0), eo(P(t, t0 + .2, t0 + .85)));
+  ctx.restore();
+}
+function panel(w, h) {
+  ctx.save(); ctx.shadowColor = 'rgba(74,108,247,.35)'; ctx.shadowBlur = 60;
+  rr(0, 0, w, h, 32); ctx.fillStyle = 'rgba(17,25,54,.92)'; ctx.fill(); ctx.restore();
+  rr(0, 0, w, h, 32); ctx.lineWidth = 2; ctx.strokeStyle = grad(0, 0, w, h, .45); ctx.stroke();
+}
+function bar(x, y, w, h, a = .12) { rr(x, y, w, h, h / 2); ctx.fillStyle = `rgba(255,255,255,${a})`; ctx.fill(); }
+function cursor(x, y, press) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(1.6 - press * .2, 1.6 - press * .2);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 26); ctx.lineTo(7, 20); ctx.lineTo(12, 31); ctx.lineTo(17, 29); ctx.lineTo(12, 18); ctx.lineTo(21, 18); ctx.closePath();
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = C.navy; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10; ctx.fill(); ctx.shadowBlur = 0; ctx.stroke();
+  ctx.restore();
+}
+function check(x, y, s, k, color = C.green) {
+  if (k <= 0) return;
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = s * .18; ctx.lineCap = ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(x - s * .35, y); ctx.lineTo(x - s * .1, y + s * .25 * Math.min(1, k * 2));
+  if (k > .5) ctx.lineTo(lerp(x - s * .1, x + s * .38, (k - .5) * 2), lerp(y + s * .25, y - s * .28, (k - .5) * 2));
+  ctx.stroke(); ctx.restore();
+}
+
+// ---------- transitions: light sweep ----------
+function sweep(t, ts) {
+  const k = P(t, ts - .3, ts + .35); if (k <= 0 || k >= 1) return;
+  ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(-.35);
+  const x = lerp(-1300, 1300, eio(k));
+  const g = ctx.createLinearGradient(x - 220, 0, x + 220, 0);
+  g.addColorStop(0, 'rgba(0,212,255,0)'); g.addColorStop(.45, 'rgba(0,212,255,.35)');
+  g.addColorStop(.5, 'rgba(255,255,255,.55)'); g.addColorStop(.55, 'rgba(139,63,219,.35)'); g.addColorStop(1, 'rgba(139,63,219,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - 220, -1500, 440, 3000);
+  ctx.restore();
+  ctx.fillStyle = `rgba(255,255,255,${.06 * Math.sin(k * Math.PI)})`; ctx.fillRect(0, 0, W, H);
+}
+
+// ================= STORY: SITES DESDE 499€ =================
+const RED = '#FF4D6D', GOLD = '#FFC857';
+
+// camera shake: every "impact" moment kicks the whole frame
+const HITS = [[.08, 22], [.3, 16], [.55, 30], [3.25, 34], [11.45, 40], [6.95, 6], [7.5, 6], [8.05, 6], [8.6, 6], [9.15, 6]];
+function shake(t) {
+  let a = 0; for (const [ts, amp] of HITS) { const d = t - ts; if (d >= 0 && d < .45) a += amp * Math.pow(1 - d / .45, 2); }
+  return { x: Math.sin(t * 91) * a, y: Math.cos(t * 77) * a * .7 };
+}
+function fit(s, weight, size, maxW) { font(weight, size); const w = ctx.measureText(s).width; return w > maxW ? size * maxW / w : size; }
+function slam(s, x, y, weight, size, fill, k, align = 'center') { // text punches in from big + blurred-ish
+  if (k <= 0) return;
+  const e = eo(k), sc = lerp(2.4, 1, e);
+  ctx.save(); ctx.globalAlpha *= clamp(k * 3); ctx.translate(x, y); ctx.scale(sc, sc);
+  font(weight, size); ctx.textAlign = align; ctx.fillStyle = fill; ctx.fillText(s, 0, 0); ctx.restore();
+}
+function heading(l1, l2, t, t0, t1, y0 = 330) {
+  const ko = eio(P(t, t1 - .4, t1)); if (t < t0 || ko >= 1) return;
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(0, -60 * ko);
+  const s1 = fit(l1, 700, 62, 900), s2 = fit(l2, 800, 104, 900);
+  maskText(l1, 540, y0, 700, s1, '#fff', eo(P(t, t0, t0 + .45)), 'center');
+  maskText(l2, 540, y0 + s2 * 1.1, 800, s2, grad(90, 0, 990, 0), eo(P(t, t0 + .1, t0 + .6)), 'center');
+  ctx.restore();
+}
+function ico(type, x, y, s = 1, color = '#fff') {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3.5; ctx.lineJoin = ctx.lineCap = 'round';
+  switch (type) {
+    case 'mail': rr(-16, -12, 32, 24, 4); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-16, -10); ctx.lineTo(0, 3); ctx.lineTo(16, -10); ctx.stroke(); break;
+    case 'chat': rr(-17, -14, 34, 24, 8); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-8, 10); ctx.lineTo(-12, 18); ctx.lineTo(0, 10); ctx.stroke(); break;
+    case 'phone': ctx.beginPath(); ctx.moveTo(-12, -16); ctx.quadraticCurveTo(-18, 10, 12, 16); ctx.lineTo(16, 8); ctx.lineTo(6, 2); ctx.lineTo(2, 7); ctx.quadraticCurveTo(-6, 2, -8, -6); ctx.lineTo(-3, -9); ctx.lineTo(-7, -18); ctx.closePath(); ctx.stroke(); break;
+    case 'brush': ctx.beginPath(); ctx.moveTo(14, -16); ctx.lineTo(-4, 4); ctx.stroke(); ctx.beginPath(); ctx.arc(-9, 10, 7, 0, 7); ctx.fill(); break;
+    case 'mobile': rr(-11, -18, 22, 36, 5); ctx.stroke(); ctx.beginPath(); ctx.arc(0, 12, 2, 0, 7); ctx.fill(); break;
+    case 'search': ctx.beginPath(); ctx.arc(-4, -4, 11, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(4, 4); ctx.lineTo(15, 15); ctx.stroke(); break;
+    case 'globe': ctx.beginPath(); ctx.arc(0, 0, 16, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.ellipse(0, 0, 7, 16, 0, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(16, 0); ctx.stroke(); break;
+    case 'sliders': [-9, 0, 9].forEach((yy, i) => { ctx.beginPath(); ctx.moveTo(-15, yy); ctx.lineTo(15, yy); ctx.stroke(); ctx.beginPath(); ctx.arc([-6, 8, -2][i], yy, 4.5, 0, 7); ctx.fill(); }); break;
+    case 'lock': rr(-12, -2, 24, 18, 4); ctx.fill(); ctx.beginPath(); ctx.arc(0, -4, 8, Math.PI, 0); ctx.stroke(); break;
+  }
+  ctx.restore();
+}
+function stars(x, y, s, n, k) {
+  for (let i = 0; i < 5; i++) {
+    const kk = eback(P(k, i * .12, i * .12 + .4)); if (kk <= 0) continue;
+    ctx.save(); ctx.translate(x + i * s * 2.3, y); ctx.scale(kk, kk); ctx.fillStyle = i < n ? GOLD : 'rgba(255,255,255,.2)';
+    ctx.beginPath(); for (let j = 0; j < 10; j++) { const r = j % 2 ? s * .45 : s, a = j * Math.PI / 5 - Math.PI / 2; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill(); ctx.restore();
+  }
+}
+
+// ---------- 1 · HOOK (0 – 1.6s) : pattern interrupt ----------
+function sHook(t) {
+  if (t > 1.75) return;
+  const ko = eio(P(t, 1.3, 1.7));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(540, 900); ctx.scale(1 + ko * .5, 1 + ko * .5); ctx.translate(-540, -900);
+  glow(540, 900, 700, '255,77,109', .22 * (1 - P(t, 0, 1.4)) + .08);
+  // warning chip
+  const kc = eback(P(t, 0, .25));
+  if (kc > 0) {
+    ctx.save(); ctx.translate(540, 560); ctx.scale(kc, kc);
+    rr(-150, -36, 300, 72, 36); ctx.fillStyle = 'rgba(255,77,109,.16)'; ctx.fill(); ctx.strokeStyle = RED; ctx.lineWidth = 2; ctx.stroke();
+    font(800, 28); ctx.fillStyle = RED; ctx.textAlign = 'center'; ctx.fillText('⚠  ATENÇÃO', 0, 10); ctx.restore();
+  }
+  slam('O TEU NEGÓCIO', 540, 780, 800, fit('O TEU NEGÓCIO', 800, 110, 920), '#fff', P(t, .05, .3));
+  slam('AINDA NÃO', 540, 910, 800, fit('AINDA NÃO', 800, 110, 920), '#fff', P(t, .27, .52));
+  const s3 = fit('TEM SITE?', 800, 190, 940);
+  // glitchy RGB split on the key line
+  const kq = P(t, .52, .8);
+  if (kq > 0) {
+    const j = (1 - P(t, .8, 1.3)) * 10 * Math.sin(t * 60);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    slam('TEM SITE?', 540 - j, 1110, 800, s3, 'rgba(0,212,255,.55)', kq);
+    slam('TEM SITE?', 540 + j, 1110, 800, s3, 'rgba(255,77,109,.7)', kq);
+    ctx.restore();
+    slam('TEM SITE?', 540, 1110, 800, s3, '#fff', kq);
+  }
+  maskText('Então lê isto até ao fim 👇', 540, 1260, 600, 38, C.muted, eo(P(t, .85, 1.2)), 'center');
+  ctx.restore();
+}
+
+// ---------- 2 · PROBLEM (1.5 – 4.5s) : clients search, find competitors ----------
+const RES = [['Concorrente A', 4.9], ['Concorrente B', 4.8], ['Concorrente C', 4.7]];
+function sProblem(t) {
+  const t0 = 1.5, t1 = 4.5; if (t < t0 || t > t1) return;
+  heading('Os teus clientes procuram', 'no Google…', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(-ko * 200, 0);
+  // search bar
+  const kb = eback(P(lt, .15, .5));
+  if (kb > 0) {
+    ctx.save(); ctx.translate(540, 560); ctx.scale(kb, kb);
+    ctx.shadowColor = 'rgba(0,212,255,.45)'; ctx.shadowBlur = 40;
+    rr(-450, -55, 900, 110, 55); ctx.fillStyle = '#fff'; ctx.fill(); ctx.shadowBlur = 0;
+    ico('search', -385, 0, 1.2, C.blue);
+    const q = 'site profissional perto de mim', n = Math.floor(q.length * P(lt, .4, 1.1));
+    font(600, 38); ctx.fillStyle = C.navy; ctx.fillText(q.slice(0, n), -335, 13);
+    if (lt < 1.3 && Math.floor(lt * 5) % 2 === 0) ctx.fillRect(-335 + ctx.measureText(q.slice(0, n)).width + 4, -22, 3, 44);
+    ctx.restore();
+  }
+  // competitor results
+  RES.forEach(([name, r], i) => {
+    const k = eo(P(lt, 1.15 + i * .12, 1.5 + i * .12)); if (k <= 0) return;
+    const y = 690 + i * 170 + (1 - k) * 60;
+    ctx.save(); ctx.globalAlpha *= k;
+    rr(90, y, 900, 145, 26); ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 2; ctx.stroke();
+    font(700, 26); ctx.fillStyle = C.muted; ctx.fillText(`${i + 1}.`, 120, y + 60);
+    font(800, 36); ctx.fillStyle = '#fff'; ctx.fillText(name, 170, y + 62);
+    stars(180, y + 102, 14, 5, P(lt, 1.3 + i * .12, 2 + i * .12));
+    font(700, 24); ctx.fillStyle = C.muted; ctx.fillText(r.toFixed(1), 350, y + 111);
+    rr(790, y + 45, 160, 54, 27); ctx.fillStyle = 'rgba(34,227,160,.15)'; ctx.fill();
+    font(800, 24); ctx.fillStyle = C.green; ctx.textAlign = 'center'; ctx.fillText('✓ Site', 870, y + 81);
+    ctx.restore();
+  });
+  // "your business" — missing
+  const km = eo(P(lt, 1.55, 1.85));
+  if (km > 0) {
+    const y = 1200;
+    ctx.save(); ctx.globalAlpha *= km * .8;
+    rr(90, y, 900, 145, 26); ctx.setLineDash([12, 10]); ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 3; ctx.stroke(); ctx.setLineDash([]);
+    font(800, 36); ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillText('O teu negócio', 170, y + 84);
+    ctx.restore();
+    const ks = P(lt, 1.6, 1.75); // red stamp lands at t = 3.15
+    if (ks > 0) {
+      ctx.save(); ctx.translate(700, y + 72); ctx.rotate(-.12); const sc = lerp(2.2, 1, eo(ks)); ctx.scale(sc, sc); ctx.globalAlpha = clamp(ks * 2) * (1 - ko);
+      rr(-190, -42, 380, 84, 12); ctx.strokeStyle = RED; ctx.lineWidth = 6; ctx.stroke(); ctx.fillStyle = 'rgba(255,77,109,.18)'; ctx.fill();
+      font(800, 36); ctx.fillStyle = RED; ctx.textAlign = 'center'; ctx.fillText('NÃO APARECE', 0, 13); ctx.restore();
+    }
+  }
+  maskText('…e encontram a concorrência.', 540, 1460, 800, 50, RED, eo(P(lt, 1.95, 2.35)), 'center');
+  ctx.restore();
+}
+
+// ---------- 3 · TURN (4.3 – 6.6s) : you become #1, leads pour in ----------
+const NOTIFS = [['mail', 'Novo pedido de orçamento', 'Formulário do site'], ['chat', 'Nova mensagem', 'WhatsApp · agora'], ['phone', 'Chamada recebida', 'Cliente novo']];
+function sTurn(t) {
+  const t0 = 4.3, t1 = 6.6; if (t < t0 || t > t1) return;
+  heading('E se fosses tu', 'o primeiro?', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(0, ko * 120);
+  // your card rising to #1
+  const kr = eback(P(lt, .25, .75)), y = lerp(1000, 580, eo(P(lt, .25, .75)));
+  if (kr > 0) {
+    ctx.save(); ctx.translate(540, y + 80); ctx.scale(lerp(.8, 1, clamp(kr)), lerp(.8, 1, clamp(kr)));
+    const pulse = .5 + .5 * Math.sin(lt * 8);
+    ctx.shadowColor = `rgba(0,212,255,${.5 + .3 * pulse})`; ctx.shadowBlur = 60;
+    rr(-450, -80, 900, 160, 30); ctx.fillStyle = 'rgba(17,25,54,.98)'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 4; ctx.strokeStyle = grad(-450, 0, 450, 0); ctx.stroke();
+    rr(-420, -45, 90, 90, 22); ctx.fillStyle = grad(-420, -45, -330, 45); ctx.fill();
+    font(800, 44); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('1º', -375, 15); ctx.textAlign = 'left';
+    font(800, 40); ctx.fillText('O teu negócio', -300, -8);
+    stars(-290, 38, 15, 5, P(lt, .6, 1.2));
+    font(700, 24); ctx.fillStyle = GOLD; ctx.fillText('5.0', -110, 47);
+    rr(250, -28, 170, 56, 28); ctx.fillStyle = 'rgba(34,227,160,.18)'; ctx.fill();
+    font(800, 24); ctx.fillStyle = C.green; ctx.textAlign = 'center'; ctx.fillText('✓ Site', 335, 9);
+    ctx.restore();
+  }
+  // notifications stacking in
+  NOTIFS.forEach(([ic, a, b], i) => {
+    const k = eback(P(lt, .8 + i * .28, 1.1 + i * .28)); if (k <= 0) return;
+    const yy = 820 + i * 170, vib = Math.sin(lt * 70) * 6 * (1 - P(lt, .9 + i * .28, 1.2 + i * .28));
+    ctx.save(); ctx.translate(540 + (1 - clamp(k)) * 500 + vib, yy + 70); ctx.scale(clamp(k, 0, 1.2), clamp(k, 0, 1.2));
+    rr(-420, -65, 840, 130, 32); ctx.fillStyle = 'rgba(255,255,255,.96)'; ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 30; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = [C.blue, C.green, C.purple][i]; ctx.beginPath(); ctx.arc(-340, 0, 40, 0, 7); ctx.fill(); ico(ic, -340, 0, 1.1);
+    font(800, 32); ctx.fillStyle = C.navy; ctx.fillText(a, -275, -6);
+    font(600, 24); ctx.fillStyle = '#5B6485'; ctx.fillText(b, -275, 30);
+    font(600, 22); ctx.fillText('agora', 320, -20);
+    ctx.restore();
+  });
+  const kc = eback(P(lt, 1.75, 2.0));
+  if (kc > 0) { ctx.save(); ctx.translate(540, 1400); ctx.scale(kc, kc); font(800, 46); ctx.textAlign = 'center'; ctx.fillStyle = grad(-300, 0, 300, 0); ctx.fillText('Mais visibilidade = mais clientes', 0, 0); ctx.restore(); }
+  ctx.restore();
+}
+
+// ---------- 4 · BENEFITS (6.4 – 10.1s) ----------
+const BEN = [
+  ['brush', 'Design à tua medida', 'Até 5 páginas personalizadas'],
+  ['mobile', 'Perfeito no telemóvel', 'Mobile, tablet e computador'],
+  ['search', 'Pronto para o Google', 'SEO técnico + certificado SSL'],
+  ['globe', 'Domínio + alojamento', 'Incluídos no 1.º ano'],
+  ['sliders', 'Tu controlas o site', 'Painel fácil + 1h de formação'],
+];
+function sBenefits(t) {
+  const t0 = 6.4, t1 = 10.1; if (t < t0 || t > t1) return;
+  heading('Um site profissional', 'com tudo incluído', t, t0, t1);
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko;
+  BEN.forEach(([ic, a, b], i) => {
+    const ts = .55 + i * .55, k = eo(P(lt, ts - .1, ts + .3)); if (k <= 0) return;
+    const y = 590 + i * 170, dir = i % 2 ? 1 : -1;
+    const hot = Math.max(0, 1 - Math.abs(lt - ts - .15) / .35); // highlight when it lands
+    ctx.save(); ctx.globalAlpha *= k; ctx.translate(dir * (1 - k) * 600 - ko * dir * 300 * (i / 4), 0);
+    if (hot > 0) { ctx.shadowColor = 'rgba(0,212,255,.6)'; ctx.shadowBlur = 50 * hot; }
+    rr(90, y, 900, 145, 30); ctx.fillStyle = `rgba(17,25,54,${.9})`; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.lineWidth = 2.5; ctx.strokeStyle = hot > 0 ? grad(90, 0, 990, 0, .4 + .6 * hot) : 'rgba(255,255,255,.1)'; ctx.stroke();
+    ctx.fillStyle = grad(120, y + 25, 215, y + 120); ctx.beginPath(); ctx.arc(168, y + 72, 46, 0, 7); ctx.fill(); ico(ic, 168, y + 72, 1.25);
+    font(800, 38); ctx.fillStyle = '#fff'; ctx.fillText(a, 245, y + 66);
+    font(600, 26); ctx.fillStyle = C.muted; ctx.fillText(b, 245, y + 106);
+    ctx.fillStyle = 'rgba(34,227,160,.15)'; ctx.beginPath(); ctx.arc(930, y + 72, 30, 0, 7); ctx.fill(); check(930, y + 72, 38, P(lt, ts + .1, ts + .4));
+    ctx.restore();
+  });
+  ctx.restore();
+}
+
+// ---------- 5 · PRICE REVEAL (10.0 – 12.7s) ----------
+const CONF = Array.from({ length: 70 }, () => ({ a: rnd() * Math.PI * 2, v: 500 + rnd() * 900, r: 5 + rnd() * 8, c: [C.cyan, C.blue, C.purple, GOLD, '#fff'][Math.floor(rnd() * 5)], sp: rnd() * 10 }));
+function digitCol(x, y, from, to, spins, k, size) {
+  const pos = lerp(from, to + 10 * spins, eo(k)), lh = size * 1.02, base = Math.floor(pos);
+  ctx.save(); ctx.beginPath(); ctx.rect(x - size * .31, y - size * .8, size * .62, size * .86); ctx.clip();
+  for (let d = base - 1; d <= base + 1; d++) ctx.fillText(String(((d % 10) + 10) % 10), x, y + (pos - d) * lh);
+  ctx.restore();
+}
+function sPrice(t) {
+  const t0 = 10.0, t1 = 12.7; if (t < t0 || t > t1) return;
+  const lt = t - t0, ko = eio(P(t, t1 - .4, t1));
+  ctx.save(); ctx.globalAlpha = 1 - ko; ctx.translate(540, 960); ctx.scale(1 + ko * .3, 1 + ko * .3); ctx.translate(-540, -960);
+  maskText('Tudo isto por apenas', 540, 470, 700, 62, '#fff', eo(P(lt, 0, .4)), 'center');
+  // old price crossed out
+  const kp = eo(P(lt, .2, .5));
+  if (kp > 0) {
+    ctx.save(); ctx.globalAlpha *= kp; font(800, 96); ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(152,163,194,.8)'; ctx.fillText('699€', 540, 640);
+    const ks = eio(P(lt, .55, .8)); ctx.strokeStyle = RED; ctx.lineWidth = 10; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(420, 610); ctx.lineTo(lerp(420, 660, ks), lerp(610, 585, ks)); ctx.stroke(); ctx.restore();
+  }
+  // slot-machine price, lands at t = 11.45
+  const kn = P(lt, .75, 1.45);
+  if (kn > 0) {
+    const land = P(lt, 1.45, 1.8), punch = 1 + .12 * Math.sin(Math.PI * land);
+    glow(540, 1000, 520, '74,108,247', .45 * P(lt, .8, 1.5));
+    ctx.save(); ctx.translate(540, 1080); ctx.scale(punch, punch);
+    font(800, 330); ctx.textAlign = 'center'; ctx.fillStyle = grad(-380, 0, 380, 0);
+    ctx.shadowColor = 'rgba(0,212,255,.6)'; ctx.shadowBlur = 50 * land;
+    const dw = 200;
+    digitCol(-dw * 1.15, 0, 6, 4, 2, kn, 330); digitCol(-dw * .15, 0, 9, 9, 3, P(lt, .75, 1.35), 330); digitCol(dw * .85, 0, 9, 9, 4, P(lt, .75, 1.25), 330);
+    font(800, 150); ctx.fillText('€', dw * 1.75, -120);
+    ctx.restore();
+  }
+  // shockwave + confetti
+  const kw = P(lt, 1.45, 2.2);
+  if (kw > 0 && kw < 1) { ctx.strokeStyle = `rgba(255,255,255,${.7 * (1 - kw)})`; ctx.lineWidth = 8 * (1 - kw); ctx.beginPath(); ctx.arc(540, 980, 100 + eo(kw) * 700, 0, 7); ctx.stroke(); }
+  const dc = lt - 1.45;
+  if (dc > 0) for (const c of CONF) {
+    const x = 540 + Math.cos(c.a) * c.v * dc, y = 980 + Math.sin(c.a) * c.v * dc + 900 * dc * dc;
+    ctx.save(); ctx.globalAlpha *= clamp(1.3 - dc); ctx.translate(x, y); ctx.rotate(c.sp * dc); ctx.fillStyle = c.c; ctx.fillRect(-c.r, -c.r / 2, c.r * 2, c.r); ctx.restore();
+  }
+  // discount stamp
+  const kd = P(lt, 1.55, 1.75);
+  if (kd > 0) {
+    ctx.save(); ctx.translate(890, 700); ctx.rotate(.22); const sc = lerp(2, 1, eo(kd)); ctx.scale(sc, sc); ctx.globalAlpha *= clamp(kd * 2);
+    ctx.fillStyle = RED; ctx.beginPath(); for (let j = 0; j < 24; j++) { const r = j % 2 ? 78 : 92, a = j * Math.PI / 12; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill();
+    font(800, 44); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('-29%', 0, 15); ctx.restore();
+  }
+  // included chips
+  ['Hosting + domínio 1.º ano', 'Entrega em 30 dias'].forEach((s, i) => {
+    const k = eback(P(lt, 1.8 + i * .15, 2.1 + i * .15)); if (k <= 0) return;
+    ctx.save(); ctx.translate(540, 1270 + i * 95); ctx.scale(k, k);
+    font(700, 32); const w = ctx.measureText(s).width + 110;
+    rr(-w / 2, -38, w, 76, 38); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 2; ctx.stroke();
+    check(-w / 2 + 45, 0, 30, 1); ctx.fillStyle = '#fff'; ctx.fillText(s, -w / 2 + 80, 11); ctx.restore();
+  });
+  ctx.restore();
+}
+
+// ---------- 6 · CTA (12.5 – 15s) ----------
+function sCTA(t) {
+  const t0 = 12.5; if (t < t0) return;
+  const lt = t - t0;
+  drawLogo(540, 400, 3.6, P(lt, 0, .9));
+  wordmark(540, 560, 64, P(lt, .2, .8));
+  maskText('Queres o teu site', 540, 720, 800, 84, '#fff', eo(P(lt, .3, .7)), 'center');
+  maskText('a trazer clientes?', 540, 820, 800, 84, grad(140, 0, 940, 0), eo(P(lt, .4, .8)), 'center');
+  // main button with shimmer + breathing
+  const kb = eback(P(lt, .7, 1.1));
+  if (kb > 0) {
+    const br = 1 + .03 * Math.sin(lt * 7);
+    ctx.save(); ctx.translate(540, 990); ctx.scale(kb * br, kb * br);
+    ctx.shadowColor = 'rgba(74,108,247,.9)'; ctx.shadowBlur = 60;
+    rr(-400, -68, 800, 136, 68); ctx.fillStyle = grad(-400, 0, 400, 0); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.save(); rr(-400, -68, 800, 136, 68); ctx.clip();
+    const sx = lerp(-600, 600, ((lt - .9) * .8) % 1), sg = ctx.createLinearGradient(sx - 90, 0, sx + 90, 0);
+    sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.5, 'rgba(255,255,255,.5)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sg; ctx.fillRect(sx - 90, -70, 180, 140); ctx.restore();
+    font(800, 46); ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('Pede o teu orçamento', 0, 16);
+    ctx.restore();
+  }
+  maskText('ou responde “SITE” a este story', 540, 1130, 600, 36, C.muted, eo(P(lt, 1.0, 1.4)), 'center');
+  // arrow pointing at the link-sticker zone
+  const ka = eo(P(lt, 1.2, 1.5));
+  if (ka > 0) {
+    const bob = Math.abs(Math.sin(lt * 5)) * 26;
+    ctx.save(); ctx.globalAlpha *= ka;
+    font(800, 40); ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.fillText('Toca no link', 540, 1260);
+    ctx.strokeStyle = C.cyan; ctx.lineWidth = 9; ctx.lineCap = ctx.lineJoin = 'round'; ctx.shadowColor = C.cyan; ctx.shadowBlur = 20;
+    for (let j = 0; j < 2; j++) { const yy = 1300 + bob + j * 38; ctx.globalAlpha = ka * (1 - j * .45); ctx.beginPath(); ctx.moveTo(505, yy); ctx.lineTo(540, yy + 30); ctx.lineTo(575, yy); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+
+// ---------- compose ----------
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  background(t);
+  const s = shake(t); ctx.translate(s.x, s.y);
+  sHook(t); sProblem(t); sTurn(t); sBenefits(t); sPrice(t); sCTA(t);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  [1.55, 4.4, 6.5, 10.05, 12.6].forEach(ts => sweep(t, ts));
+  // red flash on the "não aparece" stamp, white flash on the price
+  const fr = P(t, 3.25, 3.6); if (fr > 0 && fr < 1) { ctx.fillStyle = `rgba(255,77,109,${.18 * (1 - fr)})`; ctx.fillRect(0, 0, W, H); }
+  const fp = P(t, 11.45, 11.8); if (fp > 0 && fp < 1) { ctx.fillStyle = `rgba(255,255,255,${.25 * (1 - fp)})`; ctx.fillRect(0, 0, W, H); }
+  for (let i = taps.length - 1; i >= 0; i--) {
+    const k = (performance.now() - taps[i].at) / 700; if (k >= 1) { taps.splice(i, 1); continue; }
+    ctx.strokeStyle = `rgba(0,212,255,${1 - k})`; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(taps[i].x, taps[i].y, 20 + eo(k) * 160, 0, 7); ctx.stroke();
+    for (let j = 0; j < 8; j++) { const a = j * Math.PI / 4, r = 30 + eo(k) * 130; ctx.fillStyle = `rgba(139,63,219,${1 - k})`; ctx.beginPath(); ctx.arc(taps[i].x + Math.cos(a) * r, taps[i].y + Math.sin(a) * r, 6 * (1 - k), 0, 7); ctx.fill(); }
+  }
+}
+
+// ---------- player ----------
+const exporting = new URLSearchParams(location.search).has('export');
+window.renderAt = t => { mx = my = 0; render(t); };
+const playBtn = document.getElementById('play'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
+let playing = !exporting, cur = 0, last = performance.now();
+if (exporting) document.body.classList.add('export');
+
+cv.addEventListener('pointermove', e => { const r = cv.getBoundingClientRect(); tmx = ((e.clientX - r.left) / r.width - .5) * 2; tmy = ((e.clientY - r.top) / r.height - .5) * 2; });
+cv.addEventListener('pointerleave', () => { tmx = tmy = 0; });
+cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); taps.push({ x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H, at: performance.now() }); });
+playBtn.onclick = () => { playing = !playing; playBtn.textContent = playing ? 'Pausa' : 'Play'; };
+scrub.oninput = () => { cur = +scrub.value; };
+document.addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); playBtn.click(); } });
+
+function loop(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  if (playing) cur = (cur + dt) % DUR;
+  mx = lerp(mx, tmx, .08); my = lerp(my, tmy, .08);
+  render(cur);
+  scrub.value = cur; timeEl.textContent = `${cur.toFixed(1)}s / ${DUR}s`;
+  requestAnimationFrame(loop);
+}
+window.ready = document.fonts.load(`800 40px ${F}`).then(() => Promise.all([400, 600, 700].map(w => document.fonts.load(`${w} 40px ${F}`)))).catch(() => {}).then(() => {
+  if (exporting) render(0); else requestAnimationFrame(loop);
+  return true;
+});
+</script>
+</body>
+</html>

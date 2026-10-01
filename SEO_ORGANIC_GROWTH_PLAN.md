@@ -149,7 +149,7 @@ Eliminar sinais técnicos contraditórios e preparar o domínio para receber nov
 ### 4.2 Sitemap e robots
 
 - [ ] Manter apenas `https://nexusvora.com/sitemap.xml` no `robots.txt`.
-- [ ] Gerar sitemap a partir das rotas públicas/publicadas, para que novas páginas e artigos sejam incluídos automaticamente.
+- [x] Incluir automaticamente as páginas de serviço configuradas no sitemap dinâmico. Implementado em 31/07/2026; confirmar após publicação que o sitemap de produção contém as novas URLs.
 - [ ] Usar `lastmod` somente quando o conteúdo principal realmente muda.
 - [ ] Depois de cada grupo de páginas publicado, reenviar o sitemap no Search Console e inspecionar uma URL exemplar.
 - [ ] Não incluir administração, URLs privadas, partilhas seguras, resultados de formulários ou páginas com `noindex`.
@@ -199,28 +199,42 @@ Não criar automaticamente clones para Porto, Gaia e Maia. Uma página “SEO Po
 
 ### 5.2 Nova arquitetura recomendada
 
-- [ ] `/criacao-sites-porto` — página de websites profissionais que captam contactos.
-- [ ] `/software-a-medida` — página para sistemas, integrações e operações específicas.
-- [ ] `/automacao-ia-empresas` — página para automação de processos e IA aplicada.
-- [ ] `/seo-porto` — página de serviço SEO local e orgânico.
-- [ ] `/google-ads-porto` — página de aquisição paga e gestão Google Ads.
-- [ ] `/gestao-redes-sociais-porto` — página de social media.
-- [ ] `/ecommerce-operacoes` — página vertical para e-commerce, stock, encomendas e integrações, após reunir prova e autorização.
+- [x] `/criacao-sites-porto` — página de websites profissionais que captam contactos. Implementada em 31/07/2026.
+- [x] `/software-a-medida` — página para sistemas, integrações e operações específicas. Implementada em 31/07/2026.
+- [x] `/integracoes-sistemas` — página para ligar CRM, ERP, e-commerce, APIs e ferramentas internas. Implementada em 31/07/2026.
+- [x] `/automacao-ia-empresas` — página para automação de processos e IA aplicada. Implementada em 31/07/2026.
+- [x] `/seo-porto` — página de serviço SEO local e orgânico. Implementada em 31/07/2026.
+- [x] `/google-ads-porto` — página de aquisição paga e gestão Google Ads. Implementada em 31/07/2026.
+- [x] `/ecommerce-operacoes` — página vertical para e-commerce, stock, encomendas e integrações. Implementada em 31/07/2026; reforçar com casos autorizados numa fase seguinte.
 - [ ] `/casos-de-estudo` — índice de provas reais.
 - [ ] `/blog` ou `/recursos` — índice editorial.
 
+### 5.2.1 Mapa de intenção e palavras-chave das páginas de serviço
+
+As palavras-chave orientam o conteúdo, title, H1, FAQs e futuras ligações internas. Não são para serem repetidas mecanicamente: cada página deve responder à necessidade que está por trás da pesquisa.
+
+| Página | Intenção comercial principal | Variações úteis integradas | O que a pessoa quer resolver | Estado |
+|---|---|---|---|---|
+| `/criacao-sites-porto` | criação de sites no Porto | sites profissionais, web design, website institucional, landing page, loja online | Ter presença credível, receber contactos e aparecer no Google | [x] Aprofundada em 31/07/2026 |
+| `/software-a-medida` | desenvolvimento de software à medida | software de gestão, sistemas internos, aplicações web, CRM, ERP, backoffice | Organizar processos que ferramentas genéricas já não resolvem | [x] Aprofundada em 31/07/2026 |
+| `/integracoes-sistemas` | integração de sistemas e APIs | integração CRM ERP, PrestaShop, sincronização de stock, integração e-commerce | Deixar de copiar dados e manter sistemas fiáveis | [x] Aprofundada em 31/07/2026 |
+| `/automacao-ia-empresas` | automação de processos com IA | IA para empresas, automatização de tarefas, processamento de documentos, integração de ferramentas | Reduzir tarefas repetitivas com controlo humano | [x] Aprofundada em 31/07/2026 |
+| `/ecommerce-operacoes` | gestão de stock e encomendas | e-commerce, integração PrestaShop, processamento de encomendas, sistema de stock | Vender online sem perder controlo de stock, catálogo e operação | [x] Aprofundada em 31/07/2026 |
+| `/seo-porto` | SEO local no Porto | auditoria SEO, SEO técnico, SEO on-page, aparecer no Google | Gerar visibilidade orgânica para serviços e área de atuação | [x] Aprofundada em 31/07/2026 |
+| `/google-ads-porto` | gestão de Google Ads no Porto | campanhas de pesquisa, landing page, conversões, leads qualificados | Transformar pesquisas pagas em contactos comerciais mensuráveis | [x] Aprofundada em 31/07/2026 |
+
 ### 5.3 O que cada página comercial tem obrigatoriamente
 
-- [ ] URL curta, legível e estável.
-- [ ] Title único com serviço + localização quando fizer sentido.
-- [ ] Meta description específica, orientada à proposta de valor e não apenas a keywords.
-- [ ] Um H1 que responde claramente à pesquisa.
-- [ ] Introdução que explica para quem é o serviço e o resultado esperado.
-- [ ] Processo de trabalho em etapas reais.
-- [ ] Entregáveis concretos, limites e o que diferencia a NexusVora.
-- [ ] FAQs baseadas em perguntas que clientes realmente fazem.
+- [x] URL curta, legível e estável. Implementado nas 7 páginas em 31/07/2026.
+- [x] Title único com serviço + localização quando fizer sentido. Implementado nas 7 páginas em 31/07/2026.
+- [x] Meta description específica, orientada à proposta de valor e não apenas a keywords. Implementado nas 7 páginas em 31/07/2026.
+- [x] Um H1 que responde claramente à pesquisa. Implementado nas 7 páginas em 31/07/2026.
+- [x] Introdução que explica para quem é o serviço e o resultado esperado. Implementado nas 7 páginas em 31/07/2026.
+- [x] Processo de trabalho em etapas reais. Implementado nas 7 páginas em 31/07/2026.
+- [x] Entregáveis concretos, limites e o que diferencia a NexusVora. Implementado nas 7 páginas em 31/07/2026.
+- [x] FAQs baseadas em perguntas que clientes realmente fazem. Implementado nas 7 páginas em 31/07/2026.
 - [ ] Ligações para preços, contacto, casos de estudo e artigos relacionados.
-- [ ] CTA contextual para diagnóstico, proposta ou contacto.
+- [x] CTA contextual para diagnóstico, proposta ou contacto. Implementado nas 7 páginas em 31/07/2026.
 - [ ] Schema `Service`; `FAQPage` apenas se as perguntas estiverem visíveis na página.
 - [ ] Autor/revisor e data de atualização quando a natureza do conteúdo o justificar.
 
@@ -235,8 +249,8 @@ Não criar automaticamente clones para Porto, Gaia e Maia. Uma página “SEO Po
 
 ### Critério de conclusão da fase 1
 
-- [ ] Homepage reposicionada e ligada às páginas pilar.
-- [ ] Pelo menos as quatro páginas do Cluster A publicadas e incluídas no sitemap.
+- [x] Homepage reposicionada e página `/servicos` convertida num hub com cards animados e links para as páginas de serviço. Implementado em 31/07/2026.
+- [ ] Publicar as páginas do Cluster A e confirmar a sua presença no sitemap de produção.
 - [ ] Cada página validada manualmente em telemóvel, com title, meta, H1, canonical e CTA confirmados.
 - [ ] URLs inspecionadas no Search Console após publicação.
 
