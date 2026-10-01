@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class HourPackage extends Model
 {
@@ -38,6 +39,18 @@ class HourPackage extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(ProjectTask::class)->orderBy('due_date');
+    }
+
+    // Âmbito em Markdown convertido para HTML seguro (HTML em bruto é removido)
+    public function descriptionHtml(): string
+    {
+        if (! $this->description) return '';
+
+        return Str::markdown($this->description, [
+            'html_input'         => 'strip',
+            'allow_unsafe_links' => false,
+            'renderer'           => ['soft_break' => "<br>\n"],
+        ]);
     }
 
     // Horas já utilizadas

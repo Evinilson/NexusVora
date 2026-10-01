@@ -85,9 +85,25 @@
         </div>
 
         <div>
-            <label style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Âmbito / Serviços Incluídos</label>
-            <textarea name="description" rows="4" placeholder="Descreve os serviços cobertos por este pacote de horas..." style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; font-size:14px; resize:vertical;">{{ old('description', $package->description) }}</textarea>
+            <label for="description-input" style="display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600;">Âmbito / Serviços Incluídos</label>
+            <div id="md-toolbar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                <button type="button" data-md="bold" title="Negrito (Ctrl/⌘+B)" class="md-btn" style="font-weight:800;">B</button>
+                <button type="button" data-md="italic" title="Itálico (Ctrl/⌘+I)" class="md-btn" style="font-style:italic;">I</button>
+                <button type="button" data-md="heading" title="Título" class="md-btn">Título</button>
+                <button type="button" data-md="ul" title="Lista com marcadores" class="md-btn">• Lista</button>
+                <button type="button" data-md="ol" title="Lista numerada" class="md-btn">1. Lista</button>
+            </div>
+            <textarea id="description-input" name="description" rows="12" placeholder="Descreve os serviços cobertos por este pacote de horas..." style="width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:10px 14px; border-radius:8px; font-size:14px; line-height:1.5; resize:vertical;">{{ old('description', $package->description) }}</textarea>
+            <p style="font-size:11px; color:var(--muted); margin:6px 0 0;">
+                Suporta formatação: <code>**negrito**</code>, <code>*itálico*</code>, <code>## Título</code>, listas com <code>- </code> ou <code>1. </code>.
+                <strong>Tab</strong> / <strong>Shift+Tab</strong> indentam e desindentam (sub-itens), <strong>Enter</strong> continua a lista e <strong>Ctrl/⌘+Z</strong> desfaz.
+                Para sair do campo com o teclado, usa o rato ou <strong>Esc</strong> seguido de Tab.
+            </p>
         </div>
+        <style>
+            .md-btn { background:var(--surface); border:1px solid var(--border); color:var(--text); font-size:12px; padding:5px 10px; border-radius:6px; cursor:pointer; min-width:30px; }
+            .md-btn:hover { border-color:var(--cyan); color:var(--cyan); }
+        </style>
 
         <div style="display:flex; gap:12px; padding-top:8px;">
             <button id="submit-btn" type="submit"
@@ -148,6 +164,141 @@
 
         // Calcular ao carregar a página (apenas no criar)
         if (!isEdit) calcPrice();
+
+        // --- Barra de formatação Markdown do âmbito ---
+        var desc   = document.getElementById('description-input');
+        var INDENT = '   '; // 3 espaços = sub-item de lista em Markdown
+        var LIST_RE = /^(\s*)([-*]|\d+\.)(\s+)/;
+
+        // Substitui texto via execCommand para manter o histórico nativo (Ctrl/⌘+Z e Ctrl/⌘+Shift+Z)
+        function replaceRange(start, end, text) {
+            desc.focus();
+            desc.setSelectionRange(start, end);
+            var ok = text === '' ? document.execCommand('delete') : document.execCommand('insertText', false, text);
+            if (!ok) {
+                desc.setRangeText(text, start, end, 'end');
+                desc.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }
+
+        // Linhas abrangidas pela seleção atual
+        function lineBlock() {
+            var value = desc.value, s = desc.selectionStart, e = desc.selectionEnd;
+            if (e > s && value[e - 1] === '\n') e--;
+            var start = value.lastIndexOf('\n', s - 1) + 1;
+            var end = value.indexOf('\n', e);
+            return { start: start, end: end === -1 ? value.length : end };
+        }
+
+        function transformLines(fn) {
+            var caret = desc.selectionStart, collapsed = caret === desc.selectionEnd;
+            var block = lineBlock();
+            var lines = desc.value.slice(block.start, block.end).split('\n');
+            var updated = lines.map(fn);
+            var text = updated.join('\n');
+            if (text === lines.join('\n')) return;
+            replaceRange(block.start, block.end, text);
+            if (collapsed) {
+                var pos = Math.max(block.start, caret + updated[0].length - lines[0].length);
+                desc.setSelectionRange(pos, pos);
+            } else {
+                desc.setSelectionRange(block.start, block.start + text.length);
+            }
+        }
+
+        function wrapSelection(marker, placeholder) {
+            var start = desc.selectionStart, end = desc.selectionEnd;
+            var selected = desc.value.slice(start, end) || placeholder;
+            replaceRange(start, end, marker + selected + marker);
+            desc.setSelectionRange(start + marker.length, start + marker.length + selected.length);
+        }
+
+        // Insere o prefixo depois da indentação existente (e substitui um marcador de lista já presente)
+        function setPrefix(prefixFor) {
+            transformLines(function (line, i) {
+                var indent = line.match(/^\s*/)[0];
+                var rest = line.slice(indent.length).replace(/^([-*]|\d+\.|#{1,6})\s+/, '');
+                return indent + prefixFor(i) + rest;
+            });
+        }
+
+        // Ao indentar, um item numerado passa a sub-lista e recomeça em 1.
+        function indentLines() { transformLines(function (line) { return INDENT + line.replace(/^(\s*)\d+\.(?=\s)/, '$11.'); }); }
+        function outdentLines() { transformLines(function (line) { return line.replace(/^(\t| {1,3})/, ''); }); }
+
+        function applyFormat(type) {
+            if (type === 'bold') wrapSelection('**', 'texto');
+            else if (type === 'italic') wrapSelection('*', 'texto');
+            else if (type === 'heading') setPrefix(function () { return '## '; });
+            else if (type === 'ul') setPrefix(function () { return '- '; });
+            else if (type === 'ol') setPrefix(function (i) { return (i + 1) + '. '; });
+        }
+
+        // Enter dentro de uma lista continua a lista; Enter num item vazio termina-a
+        function continueList() {
+            var pos = desc.selectionStart;
+            if (pos !== desc.selectionEnd) return false;
+            var value = desc.value;
+            var lineStart = value.lastIndexOf('\n', pos - 1) + 1;
+            var lineEnd = value.indexOf('\n', pos);
+            if (lineEnd === -1) lineEnd = value.length;
+            var line = value.slice(lineStart, lineEnd);
+            var m = line.match(LIST_RE);
+            if (!m || pos < lineStart + m[0].length) return false;
+
+            // Linha em branco depois da lista, senão o Markdown junta o texto seguinte ao último item
+            if (line.slice(m[0].length).trim() === '') {
+                replaceRange(lineStart, lineEnd, '\n');
+                return true;
+            }
+            var marker = /^\d+\.$/.test(m[2]) ? (parseInt(m[2], 10) + 1) + '.' : m[2];
+            replaceRange(pos, pos, '\n' + m[1] + marker + m[3]);
+            return true;
+        }
+
+        document.querySelectorAll('#md-toolbar [data-md]').forEach(function (button) {
+            button.addEventListener('click', function () { applyFormat(button.dataset.md); });
+        });
+
+        // Esc liberta o próximo Tab para sair do campo (acessibilidade por teclado)
+        var releaseTab = false;
+        desc.addEventListener('blur', function () { releaseTab = false; });
+
+        desc.addEventListener('keydown', function (e) {
+            if (e.isComposing) return;
+
+            if (e.key === 'Escape') { releaseTab = true; return; }
+            if (e.key === 'Tab' && releaseTab) { releaseTab = false; return; }
+            if (e.key !== 'Shift') releaseTab = false;
+
+            if (e.key === 'Tab' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    outdentLines();
+                } else if (desc.selectionStart === desc.selectionEnd && !LIST_RE.test(desc.value.slice(lineBlock().start, lineBlock().end))) {
+                    replaceRange(desc.selectionStart, desc.selectionEnd, INDENT);
+                } else {
+                    indentLines();
+                }
+                return;
+            }
+
+            if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                if (continueList()) e.preventDefault();
+                return;
+            }
+
+            if (e.metaKey || e.ctrlKey) {
+                var key = e.key.toLowerCase();
+                if (key === 'b' || key === 'i') {
+                    e.preventDefault();
+                    applyFormat(key === 'b' ? 'bold' : 'italic');
+                } else if (e.key === ']' || e.key === '[') {
+                    e.preventDefault();
+                    e.key === ']' ? indentLines() : outdentLines();
+                }
+            }
+        });
 
         // --- Deteção de alterações (apenas no editar) ---
         // Captura estado inicial depois do DOM estar pronto

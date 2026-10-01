@@ -263,7 +263,7 @@
                 @endif
                 @if($package->description)
                 <div><dt style="font-size:11px; color:var(--muted); margin-bottom:4px;">Âmbito</dt>
-                    <dd style="font-size:12px; margin:0; color:var(--muted); line-height:1.5;">{{ $package->description }}</dd></div>
+                    <dd class="rich-text" style="font-size:12px; margin:0; color:var(--muted); line-height:1.5;">{!! $package->descriptionHtml() !!}</dd></div>
                 @endif
             </dl>
         </div>
@@ -421,6 +421,15 @@
     .task-toggle:hover > span:nth-child(2) { color:var(--cyan); }
     .task-chevron { width:10px; flex-shrink:0; font-size:11px; color:var(--muted); transition:transform .15s; }
     .task-toggle[aria-expanded="true"] .task-chevron { transform:rotate(90deg); }
+    .rich-text > :first-child { margin-top:0; }
+    .rich-text > :last-child { margin-bottom:0; }
+    .rich-text p, .rich-text ul, .rich-text ol { margin:0 0 8px; }
+    .rich-text ul, .rich-text ol { padding-left:18px; }
+    .rich-text li > p { margin:0 0 2px; }
+    .rich-text ul ul, .rich-text ol ul, .rich-text ol ol { margin:2px 0 4px; }
+    .rich-text strong, .rich-text h1, .rich-text h2, .rich-text h3 { color:var(--text); }
+    .rich-text h1, .rich-text h2, .rich-text h3 { font-size:13px; margin:12px 0 6px; }
+    .rich-text a { color:var(--cyan); }
 </style>
 
 <script>

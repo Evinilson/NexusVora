@@ -41,6 +41,12 @@
 
     .highlight-box { background:#f0f7ff; border-left:3px solid #00aacc; padding:14px 18px; border-radius:0 6px 6px 0; }
     .highlight-box p { font-size:12px; line-height:1.7; color:#333; }
+    .rich-text { font-size:12px; line-height:1.7; color:#333; }
+    .rich-text p, .rich-text ul, .rich-text ol { margin:0 0 8px; }
+    .rich-text ul, .rich-text ol { padding-left:20px; }
+    .rich-text li > p { margin:0; }
+    .rich-text ul ul, .rich-text ol ul, .rich-text ol ol { margin:2px 0 6px; }
+    .rich-text h1, .rich-text h2, .rich-text h3 { font-size:13px; color:#0d1b4b; margin:10px 0 6px; }
 
     .badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:700; text-transform:uppercase; color:#fff; }
 
@@ -186,8 +192,8 @@
     @if($package->description)
     <div class="section">
         <div class="section-title">Âmbito e Serviços Incluídos</div>
-        <div class="highlight-box">
-            <p>{{ $package->description }}</p>
+        <div class="highlight-box rich-text">
+            {!! $package->descriptionHtml() !!}
         </div>
     </div>
     @endif
